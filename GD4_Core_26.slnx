@@ -3,11 +3,11 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="Client/Client.vcxproj">
+  <Project Path="Client/Client.vcxproj" Id="2a514f1a-75d6-4477-aeba-b342e2726cd4">
     <BuildDependency Project="GD4_Core_26/GD4_Core_26.vcxproj" />
   </Project>
-  <Project Path="GD4_Core_26/GD4_Core_26.vcxproj" />
-  <Project Path="Server/Server.vcxproj">
+  <Project Path="GD4_Core_26/GD4_Core_26.vcxproj" Id="70a0fecb-e975-4bf0-b77e-4e84bdd7d4b2" />
+  <Project Path="Server/Server.vcxproj" Id="0f073b25-b348-4e2a-8942-d2463e748306">
     <BuildDependency Project="GD4_Core_26/GD4_Core_26.vcxproj" />
   </Project>
 </Solution>

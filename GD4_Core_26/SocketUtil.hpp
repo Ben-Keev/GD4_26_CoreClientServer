@@ -13,6 +13,7 @@ public:
 
 	static void			ReportError( const char* inOperationDesc );
 	static int			GetLastError();
+	static uint32_t		ConvertIPStringToInt(std::string ip);
 
 	
 

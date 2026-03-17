@@ -57,6 +57,38 @@ int SocketUtil::GetLastError()
 	
 }
 
+uint32_t SocketUtil::ConvertIPStringToInt(std::string ip_string)
+{
+	//e.g 127.0.0.1
+	//1. Tokenise to find each byte value
+	//2. Shift 127 to the left by 24
+	//3. Shift next 0 to the left by 16
+	//4. Shift second 0 to the left by 8
+	//5. Add to get integer representation of "127.0.0.1"
+	int int_ip = 0;
+	for (int i = 0; i < ip_string.length(); ++i)
+	{
+		if (ip_string[i] == '.')
+		{
+			ip_string[i] = ' ';
+		}
+	}
+	vector<int> array_tokens;
+	std::stringstream ss(ip_string);
+	int temp;
+	while (ss >> temp)
+	{
+		array_tokens.emplace_back(temp);
+	}
+
+	for (int i = 0; i < array_tokens.size(); ++i)
+	{
+		int_ip += (array_tokens[i] << (3 - i) * 8);
+	}
+
+	return int_ip;
+}
+
 UDPSocketPtr SocketUtil::CreateUDPSocket( SocketAddressFamily inFamily )
 {
 	SOCKET s = socket( inFamily, SOCK_DGRAM, IPPROTO_UDP );

@@ -102,7 +102,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <PrecompiledHeader>Create</PrecompiledHeader>
@@ -130,15 +130,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\GD4_Core_26\Server.hpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\GD4_Core_26\Server.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GD4_Core_26\GD4_Core_26.vcxproj">
       <Project>{70a0fecb-e975-4bf0-b77e-4e84bdd7d4b2}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\GD4_Core_26\Server.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

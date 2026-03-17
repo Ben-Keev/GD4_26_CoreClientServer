@@ -135,6 +135,11 @@
   <ItemGroup>
     <ClCompile Include="..\GD4_Core_26\Client.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GD4_Core_26\GD4_Core_26.vcxproj">
+      <Project>{70a0fecb-e975-4bf0-b77e-4e84bdd7d4b2}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

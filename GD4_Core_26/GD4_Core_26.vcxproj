@@ -102,7 +102,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <PrecompiledHeader>Create</PrecompiledHeader>
@@ -129,6 +129,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Server.cpp" />
     <ClCompile Include="SocketAddress.cpp" />
     <ClCompile Include="SocketAddressFactory.cpp" />
     <ClCompile Include="SocketUtil.cpp" />
@@ -137,6 +138,9 @@
     <ClCompile Include="UDPSocket.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="choice.hpp" />
+    <ClInclude Include="constants.hpp" />
+    <ClInclude Include="Server.hpp" />
     <ClInclude Include="SocketAddress.hpp" />
     <ClInclude Include="SocketAddressFactory.hpp" />
     <ClInclude Include="SocketUtil.hpp" />
