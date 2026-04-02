@@ -1,7 +1,7 @@
 #pragma once
 #include <functional>
 #include "receiver_categories.hpp"
-#include <SFML/System.hpp>
+#include <SFML/System/Time.hpp>
 
 class SceneNode;
 
@@ -24,4 +24,3 @@ DerivedAction(Function fn)
 			fn(static_cast<GameObject&>(node), dt);
 		};
 }
-
