@@ -1,3 +1,4 @@
+#include "SocketWrapperPCH.hpp"
 #include "command_queue.hpp"
 #include "statestack.hpp"
 

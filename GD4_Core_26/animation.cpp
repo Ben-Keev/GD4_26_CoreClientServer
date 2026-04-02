@@ -1,3 +1,4 @@
+#include "SocketWrapperPCH.hpp"
 #include "animation.hpp"
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>

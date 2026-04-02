@@ -1,5 +1,5 @@
 #include "SocketWrapperPCH.hpp"
-
+#include "TCPSocket.hpp"
 
 int TCPSocket::Connect( const SocketAddress& inAddress )
 {

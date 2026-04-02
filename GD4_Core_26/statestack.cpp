@@ -1,3 +1,4 @@
+#include "SocketWrapperPCH.hpp"
 #include "Statestack.hpp"
 
 StateStack::PendingChange::PendingChange(StackActions action, StateID state_id) : action(action), state_id(state_id)

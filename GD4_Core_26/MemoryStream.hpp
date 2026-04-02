@@ -1,12 +1,19 @@
+#pragma once
+
 #define STREAM_ENDIANNESS 0
 #define PLATFORM_ENDIANNESS 0
 #include <iostream>
+#include "Math.hpp"
+#include "ByteSwap.hpp"
 
 class OutputMemoryStream
 {
 public:
 	OutputMemoryStream()
 	{
+		mHead = 0;
+		mCapacity = 0;
+		mBuffer = nullptr;
 		ReallocBuffer(32);
 	}
 
@@ -161,6 +168,7 @@ private:
 	/*LinkingContext* mLinkingContext;*/
 };
 
+#pragma once
 
 
 

@@ -1,3 +1,4 @@
+#include "SocketWrapperPCH.hpp"
 #include "Component.hpp"
 
 gui::Component::Component() : m_is_selected(false), m_is_active(false)

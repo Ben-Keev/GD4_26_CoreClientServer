@@ -1,3 +1,4 @@
+#include "SocketWrapperPCH.hpp"
 #include "emitter_node.hpp"
 
 EmitterNode::EmitterNode(ParticleType type)

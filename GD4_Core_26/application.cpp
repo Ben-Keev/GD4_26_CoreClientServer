@@ -7,6 +7,7 @@
 #include "pause_state.hpp"
 #include "settings_state.hpp"
 #include "game_over_state.hpp"
+#include "SocketWrapperPCH.hpp"
 
 /// <summary>
 /// Modified: Ben Mc Keever D00254413

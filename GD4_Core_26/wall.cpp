@@ -1,3 +1,4 @@
+#include "SocketWrapperPCH.hpp"
 #include "wall.hpp"
 #include "texture_id.hpp"
 #include "utility.hpp"

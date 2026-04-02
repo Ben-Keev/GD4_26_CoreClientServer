@@ -1,3 +1,5 @@
+#pragma once
+
 class TCPSocket
 {
 public:
@@ -14,3 +16,5 @@ private:
 	SOCKET		mSocket;
 };
 typedef shared_ptr< TCPSocket > TCPSocketPtr;
+
+#pragma once

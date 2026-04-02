@@ -1,3 +1,5 @@
+#pragma once
+
 class Vector3
 {
 public:
@@ -204,5 +206,6 @@ namespace Colors
 	static const Vector3 LightGreen(0.56f, 0.93f, 0.56f);
 }
 
+#pragma once
 
 

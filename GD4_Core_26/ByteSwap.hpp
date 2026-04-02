@@ -1,3 +1,5 @@
+#pragma once
+
 inline uint16_t ByteSwap2(uint16_t inData)
 {
 	return (inData >> 8) | (inData << 8);
@@ -110,4 +112,4 @@ inline void TestByteSwap()
 	printf("swapped 0x%x is 0x%x\n", TypeAliaser< float, uint32_t >(floatTest).Get(), TypeAliaser< float, uint32_t >(ByteSwap(floatTest)).Get());
 }
 
-
+#pragma once

@@ -1,3 +1,5 @@
+#pragma once
+
 class SocketAddress
 {
 public:
@@ -69,3 +71,5 @@ namespace std
 		}
 	};
 }
+
+#pragma once

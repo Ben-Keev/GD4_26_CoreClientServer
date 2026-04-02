@@ -1,4 +1,4 @@
-
+#pragma once
 
 class UDPSocket
 {
@@ -25,3 +25,5 @@ private:
 };
 
 typedef shared_ptr< UDPSocket >	UDPSocketPtr;
+
+#pragma once

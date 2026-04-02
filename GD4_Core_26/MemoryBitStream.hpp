@@ -1,4 +1,4 @@
-
+#pragma once
 class GameObject;
 
 inline uint32_t ConvertToFixed(float inNumber, float inMin, float inPrecision)
@@ -181,5 +181,5 @@ private:
 
 };
 
-
+#pragma once
 

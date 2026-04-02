@@ -1,3 +1,4 @@
+#include "SocketWrapperPCH.hpp"
 #include "texture_holder.hpp"
 
 void TextureHolder::Load(const TextureID id, const std::string& filename)

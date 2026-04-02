@@ -3,6 +3,7 @@
 #include "utility.hpp"
 #include "SFML/Graphics/Rect.hpp"
 #include "texture_id.hpp"
+#include "SocketWrapperPCH.hpp"
 
 gui::Button::Button(State::Context context)
     : m_sprite(context.textures->Get(TextureID::kButtons))
