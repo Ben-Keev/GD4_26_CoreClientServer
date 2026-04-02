@@ -11,13 +11,14 @@ Take input from the user, send it to the server and listen and display the resul
 
 int main()
 {
+	std::cout << "YOU IN THE CLIENT BOAH" << std::endl;
 	Player* new_player = new Player();
 	std::cout << "Size of a player is: " << sizeof(new_player) << std::endl;
 	SocketUtil::StaticInit();
 	UDPSocketPtr client_socket = SocketUtil::CreateUDPSocket(INET);
 	client_socket->SetNonBlockingMode(false);
 	Client client = Client(client_socket, "127.0.0.1");
-	//client.DoServiceLoop();
+	client.DoServiceLoop();
 	client.SendPlayerOutputBitStream(client_socket, new_player);
 	SocketUtil::CleanUp();
 }

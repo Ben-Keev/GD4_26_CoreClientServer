@@ -3,11 +3,13 @@
 
 int main()
 {
+	std::cout << "YOU IN THE SERVER BOAH" << std::endl;
+
 	SocketUtil::StaticInit();
 	UDPSocketPtr server_socket = SocketUtil::CreateUDPSocket(INET);
 	server_socket->SetNonBlockingMode(false);
 	Server server = Server(server_socket, "127.0.0.1");
-	//server.DoServiceLoop();
+	server.DoServiceLoop();
 	server.ReceivePlayerInputBitStream(server_socket);
 }
 
