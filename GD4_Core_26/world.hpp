@@ -71,8 +71,8 @@ private:
 	sf::Vector2f m_red_position;
 	sf::Vector2f m_blue_position;
 	float m_scroll_speed;
-	Tank* m_red_tank;
-	Tank* m_blue_tank;
+	
+	std::array<Tank*, kMaxPlayers> m_tanks;
 
 	CommandQueue m_command_queue;
 

@@ -33,8 +33,7 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	, m_blue_position(m_center.x + 280, m_center.y - 120)
 	// Set scroll speed to 0 as a temporary solution to removing scrolling
 	, m_scroll_speed(0.f)
-	, m_red_tank(nullptr)
-	, m_blue_tank(nullptr)
+	, m_tanks()
 {
 	m_scene_texture.resize({ m_target.getSize().x, m_target.getSize().y });
 	LoadTextures();
@@ -54,10 +53,13 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 /// <param name="dt"></param>
 void World::Update(sf::Time dt)
 {
-	if (m_red_tank && m_blue_tank)
+
+	for (Tank* tank : m_tanks)
 	{
-		m_red_tank->SetVelocity(0.f, 0.f);
-		m_blue_tank->SetVelocity(0.f, 0.f);
+		if (tank)  // check that the pointer is valid
+		{
+			tank->SetVelocity(0.f, 0.f);
+		}
 	}
 
 	DestroyEntitiesOutsideView();
@@ -68,13 +70,13 @@ void World::Update(sf::Time dt)
 		m_scene_graph.OnCommand(m_command_queue.Pop(), dt);
 	}
 
-	if (m_red_tank && m_blue_tank)
+	for (Tank* tank : m_tanks)
 	{
-		m_red_tank->AdaptVelocity();
-		m_blue_tank->AdaptVelocity();
+		if (tank)  // check that the pointer is valid
+		{
+			tank->AdaptVelocity();
+		}
 	}
-
-
 
 	HandleCollisions();
 	m_scene_graph.RemoveWrecks();
@@ -171,9 +173,7 @@ void World::BuildScene()
 
 	for (int i = 0; i <= static_cast<int>(TankType::kTanTank); ++i)
 	{
-		auto& tank = data[i];
-
-		SpawnTank(static_cast<TankType>(i));
+		m_tanks[i] = SpawnTank(static_cast<TankType>(i));
 	}
 
 	//m_red_tank = SpawnTank(TankType::kRedTank);
