@@ -35,6 +35,8 @@ private:
 	void AddWalls();
 	void SpawnWall(WallType type, float x, float y, float rotation);
 
+	Tank* SpawnTank(TankType type);
+
 	sf::FloatRect GetViewBounds() const;
 	sf::FloatRect GetBattleFieldBounds() const;
 

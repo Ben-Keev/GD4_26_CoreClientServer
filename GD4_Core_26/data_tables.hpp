@@ -2,6 +2,7 @@
 #include "texture_id.hpp"
 #include <SFML/System/Time.hpp>
 #include "tank.hpp"
+#include <SFML/System/Vector2.hpp>
 
 /// <summary>
 /// Modified: Kaylon Riordan D00255039
@@ -61,6 +62,8 @@ struct ParticleData
 /// Modified: Kaylon Riordan D00255039
 /// Initialized wall and turret data
 /// </summary>
+
+std::vector<sf::Vector2f> InitializeTankPositions();
 std::vector<TankData> InitializeTankData();
 std::vector<TurretData> InitializeTurretData();
 std::vector<ProjectileData> InitializeProjectileData();

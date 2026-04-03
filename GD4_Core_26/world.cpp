@@ -6,6 +6,12 @@
 #include "sound_node.hpp"
 #include "particle_node.hpp"
 #include "particle_type.hpp"
+#include "data_tables.hpp"
+
+namespace
+{
+	const std::vector<sf::Vector2f> spawnpoints = InitializeTankPositions();
+}
 
 /// <summary>
 /// Modified: Ben Mc Keever D00254413
@@ -34,6 +40,11 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	LoadTextures();
 	BuildScene();
 	m_camera.setCenter(m_center);
+
+	std::cout << "Center: " << m_center.x << ", " << m_center.y << std::endl;
+
+	std::cout << "Blue spawn: " << m_blue_position.x << ", " << m_blue_position.y << std::endl;
+	std::cout << "Camera size: " << m_camera.getSize().x << ", " << m_camera.getSize().y << std::endl;
 }
 
 /// <summary>
@@ -43,8 +54,11 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 /// <param name="dt"></param>
 void World::Update(sf::Time dt)
 {
-	m_red_tank->SetVelocity(0.f, 0.f);
-	m_blue_tank->SetVelocity(0.f, 0.f);
+	if (m_red_tank && m_blue_tank)
+	{
+		m_red_tank->SetVelocity(0.f, 0.f);
+		m_blue_tank->SetVelocity(0.f, 0.f);
+	}
 
 	DestroyEntitiesOutsideView();
 
@@ -54,8 +68,13 @@ void World::Update(sf::Time dt)
 		m_scene_graph.OnCommand(m_command_queue.Pop(), dt);
 	}
 
-	m_red_tank->AdaptVelocity();
-	m_blue_tank->AdaptVelocity();
+	if (m_red_tank && m_blue_tank)
+	{
+		m_red_tank->AdaptVelocity();
+		m_blue_tank->AdaptVelocity();
+	}
+
+
 
 	HandleCollisions();
 	m_scene_graph.RemoveWrecks();
@@ -93,8 +112,10 @@ CommandQueue& World::GetCommandQueue()
 bool World::AllPlayersAlive() const
 {
 	// Check tanks still exist and if they do, whether they're marked for removal
-	return (m_red_tank && !m_red_tank->IsMarkedForRemoval())
-		&& (m_blue_tank && !m_blue_tank->IsMarkedForRemoval());
+	//return (m_red_tank && !m_red_tank->IsMarkedForRemoval())
+	//	&& (m_blue_tank && !m_blue_tank->IsMarkedForRemoval());
+
+	return true;
 }
 
 /// <summary>
@@ -105,10 +126,12 @@ bool World::AllPlayersAlive() const
 /// <returns>Whether a given player has died</returns>
 bool World::HasPlayerDied(int player) const
 {
-	if (player == 0)
-		return m_red_tank->IsDestroyed();
-	if (player == 1)
-		return m_blue_tank->IsDestroyed();
+	//if (player == 0)
+	//	return m_red_tank->IsDestroyed();
+	//if (player == 1)
+	//	return m_blue_tank->IsDestroyed();
+
+	return false;
 }
 
 void World::LoadTextures()
@@ -144,21 +167,17 @@ void World::BuildScene()
 	//Add the walls
 	AddWalls();
 
-	// Red Tank
-	std::unique_ptr<Tank> red(new Tank(TankType::kRedTank, m_textures, m_fonts));
-	m_red_tank = red.get();
-	m_red_tank->setPosition(m_red_position);
-	m_red_tank->setRotation(sf::degrees(-90.f));
-	m_red_tank->SetVelocity(40.f, 0.f);
-	m_scene_layers[static_cast<int>(SceneLayers::kTanks)]->AttachChild(std::move(red));
+	std::vector<TankData> data(static_cast<int>(TankType::kTankCount));
 
-	// Blue Tank
-	std::unique_ptr<Tank> blue(new Tank(TankType::kBlueTank, m_textures, m_fonts));
-	m_blue_tank = blue.get();
-	m_blue_tank->setPosition(m_blue_position);
-	m_blue_tank->setRotation(sf::degrees(90.f));
-	m_blue_tank->SetVelocity(40.f, 0.f);
-	m_scene_layers[static_cast<int>(SceneLayers::kTanks)]->AttachChild(std::move(blue));
+	for (int i = 0; i <= static_cast<int>(TankType::kTanTank); ++i)
+	{
+		auto& tank = data[i];
+
+		SpawnTank(static_cast<TankType>(i));
+	}
+
+	//m_red_tank = SpawnTank(TankType::kRedTank);
+	//m_blue_tank = SpawnTank(TankType::kBlueTank);
 
 	//Add sound effect node
 	std::unique_ptr<SoundNode> soundNode(new SoundNode(m_sounds));
@@ -170,6 +189,20 @@ void World::BuildScene()
 
 	std::unique_ptr<ParticleNode> propellantNode(new ParticleNode(ParticleType::kPropellant, m_textures));
 	m_scene_layers[static_cast<int>(SceneLayers::kParticles)]->AttachChild(std::move(propellantNode));
+}
+
+Tank* World::SpawnTank(TankType type) 
+{
+	Tank* tank_ptr;
+
+	std::unique_ptr<Tank> tank(new Tank(type, m_textures, m_fonts));
+	tank_ptr = tank.get();
+	tank_ptr->setPosition(spawnpoints[static_cast<int>(type)]);
+	tank_ptr->setRotation(sf::degrees(-90.f));
+	tank_ptr->SetVelocity(40.f, 0.f);
+	m_scene_layers[static_cast<int>(SceneLayers::kTanks)]->AttachChild(std::move(tank));
+
+	return tank_ptr;
 }
 
 /// <summary>

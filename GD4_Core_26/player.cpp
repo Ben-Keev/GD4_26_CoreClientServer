@@ -160,17 +160,27 @@ struct TurretRotator
 /// </summary>
 /// <param name="player_number"></param>
 Player::Player(int player_number) :
-    rotation_(0, 0, 0, 1)
+    rotation_(0, 0, 0, 1),
+    player_number(player_number)
 {
-	this->player_number = player_number;
-
     // Default binding: A button fires (GPT)
     m_joystick_binding[XboxLayout::RB] = Action::kBulletFire;
 
     InitialiseActions();
 
-    tankCategory = static_cast<ReceiverCategories>(player_number);
-    turretCategory = static_cast<ReceiverCategories>(player_number);
+    if (player_number >= 0 && player_number < 16)
+    {
+        // Compute tank and turret category directly
+        tankCategory = static_cast<ReceiverCategories>(1ULL << (12 + player_number));
+        turretCategory = static_cast<ReceiverCategories>(1ULL << (28 + player_number));
+    }
+    else
+    {
+		std::cout << "Warning: Player number " << player_number << " is out of range. Defaulting to Red Tank and Turret categories." << std::endl;
+        // Fallback
+        tankCategory = ReceiverCategories::kRedTank;
+        turretCategory = ReceiverCategories::kRedTurret;
+    }
 
     // Apply tank category to all action bindings (GPT)
     for (auto& pair : m_action_binding)

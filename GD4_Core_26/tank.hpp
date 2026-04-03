@@ -2,7 +2,6 @@
 #include "entity.hpp"
 #include "tank_type.hpp"
 #include "resource_identifiers.hpp"
-#include "text_node.hpp"
 #include "projectile_type.hpp"
 #include "command_queue.hpp"
 #include "turret.hpp"

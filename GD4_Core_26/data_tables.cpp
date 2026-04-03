@@ -7,6 +7,28 @@
 #include "SFML/Graphics/Rect.hpp"
 #include "particle_type.hpp"
 
+
+std::vector<sf::Vector2f> InitializeTankPositions() 
+{
+	std::vector<sf::Vector2f>;
+
+	std::vector<sf::Vector2f> data = {
+		// Row 1
+		{312.f, 2512.f}, {445.f, 2512.f}, {578.f, 2512.f}, {712.f, 2512.f},
+
+		// Row 2
+		{312.f, 2645.f}, {445.f, 2645.f}, {578.f, 2645.f}, {712.f, 2645.f},
+
+		// Row 3
+		{312.f, 2778.f}, {445.f, 2778.f}, {578.f, 2778.f}, {712.f, 2778.f},
+
+		// Row 4
+		{312.f, 2912.f}, {445.f, 2912.f}, {578.f, 2912.f}, {712.f, 2912.f}
+	};
+
+	return data;
+}
+
 /// <summary>
 /// Modified: Ben Mc Keever D00254413
 /// 
@@ -63,18 +85,19 @@ std::vector<TurretData> InitializeTurretData()
 std::vector<ProjectileData> InitializeProjectileData()
 {
 	std::vector<ProjectileData> data(static_cast<int>(ProjectileType::kProjectileCount));
-	data[static_cast<int>(ProjectileType::kRedBullet)].m_damage = 10;
-	data[static_cast<int>(ProjectileType::kRedBullet)].m_speed = 300;
-	data[static_cast<int>(ProjectileType::kRedBullet)].m_max_bounces = 2;
-	data[static_cast<int>(ProjectileType::kRedBullet)].m_texture = TextureID::kEntities;
-	data[static_cast<int>(ProjectileType::kRedBullet)].m_texture_rect = sf::IntRect({ 96, 176 }, { 8, 14 });
 
-	data[static_cast<int>(ProjectileType::kBlueBullet)].m_damage = 10;
-	data[static_cast<int>(ProjectileType::kBlueBullet)].m_speed = 300;
-	data[static_cast<int>(ProjectileType::kBlueBullet)].m_max_bounces = 2;
-	data[static_cast<int>(ProjectileType::kBlueBullet)].m_texture = TextureID::kEntities;
-	data[static_cast<int>(ProjectileType::kBlueBullet)].m_texture_rect = sf::IntRect({ 181, 106 }, { 8, 14 });
+	for (int i = 0; i < static_cast<int>(ProjectileType::kBlueBullet); ++i)
+	{
+		auto& bullet = data[i];
 
+		bullet.m_damage = 10;
+		bullet.m_speed = 300;
+		bullet.m_max_bounces = 2;
+		bullet.m_texture = TextureID::kEntities;
+		// All bullets appear red for now
+		bullet.m_texture_rect = sf::IntRect({ 96, 176 }, { 8, 14 });
+	}
+	
 	return data;
 }
 
