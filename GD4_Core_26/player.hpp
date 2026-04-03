@@ -25,7 +25,7 @@ class Player
 		void ToString() const;
 	
 		sf::Angle CalculateRotation(float x, float y);
-		Player(int joystick_number);
+		Player(int player_number);
 		void HandleEvent(const sf::Event& event, CommandQueue& command_queue);
 		void HandleRealTimeInput(CommandQueue& command_queue);
 
@@ -53,7 +53,7 @@ class Player
 		std::map<XboxLayout, Action> m_joystick_binding;
 		std::map<Action, Command> m_action_binding;
 		MissionStatus m_current_mission_status;
-		int joystick_number;
+		int player_number;
 		ReceiverCategories tankCategory;
 		ReceiverCategories turretCategory;
 };

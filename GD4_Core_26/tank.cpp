@@ -53,6 +53,9 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 		{
 			CreateBullet(node, textures);
 		};
+
+
+
 	/// <summary>
 	// Modified: Kaylon Riordan D00255039
 	// Create a pointer to a turret and set the type of turrent, based off type of tank, then attach to tank as child

@@ -158,27 +158,19 @@ struct TurretRotator
 /// Now takes joystick number to support multiple players with separate controls. (Copilot)
 /// Constructs a Player and binds default controls for a specific joystick. (GPT)
 /// </summary>
-/// <param name="joystick_number"></param>
-Player::Player(int joystick_number) :
+/// <param name="player_number"></param>
+Player::Player(int player_number) :
     rotation_(0, 0, 0, 1)
 {
-    this->joystick_number = joystick_number;
+	this->player_number = player_number;
 
     // Default binding: A button fires (GPT)
     m_joystick_binding[XboxLayout::RB] = Action::kBulletFire;
 
     InitialiseActions();
 
-    // Assign categories based on which joystick/player this is (GPT)
-    if (joystick_number == 0) {
-        tankCategory = ReceiverCategories::kRedTank;
-        turretCategory = ReceiverCategories::kRedTurret;
-    }
-
-    if (joystick_number == 1) {
-        tankCategory = ReceiverCategories::kBlueTank;
-        turretCategory = ReceiverCategories::kBlueTurret;
-    }
+    tankCategory = static_cast<ReceiverCategories>(player_number);
+    turretCategory = static_cast<ReceiverCategories>(player_number);
 
     // Apply tank category to all action bindings (GPT)
     for (auto& pair : m_action_binding)
@@ -220,12 +212,12 @@ void Player::HandleRealTimeInput(CommandQueue& command_queue)
 {
 
     // Axes of left thumbstick
-    float x = sf::Joystick::getAxisPosition(joystick_number, sf::Joystick::Axis::X);
-    float y = sf::Joystick::getAxisPosition(joystick_number, sf::Joystick::Axis::Y);
+    float x = sf::Joystick::getAxisPosition(player_number, sf::Joystick::Axis::X);
+    float y = sf::Joystick::getAxisPosition(player_number, sf::Joystick::Axis::Y);
 
     // Axes of right stick
-    float u = sf::Joystick::getAxisPosition(joystick_number, sf::Joystick::Axis::U);
-    float v = sf::Joystick::getAxisPosition(joystick_number, sf::Joystick::Axis::V);
+    float u = sf::Joystick::getAxisPosition(player_number, sf::Joystick::Axis::U);
+    float v = sf::Joystick::getAxisPosition(player_number, sf::Joystick::Axis::V);
 
     // Deadzone for analogue sticks
     const float deadZone = 15.f;
@@ -245,7 +237,7 @@ void Player::HandleRealTimeInput(CommandQueue& command_queue)
     // Buttons (real-time)
     for (auto pair : m_joystick_binding)
     {
-        if (sf::Joystick::isButtonPressed(joystick_number,
+        if (sf::Joystick::isButtonPressed(player_number,
             static_cast<unsigned int>(pair.first)) &&
             IsRealTimeAction(pair.second))
         {
@@ -405,5 +397,5 @@ bool Player::IsRealTimeAction(Action action)
 /// </summary>
 Player::~Player()
 {
-    std::cout << "Destroyed player " << joystick_number << std::endl;
+    std::cout << "Destroyed player " << player_number << std::endl;
 }

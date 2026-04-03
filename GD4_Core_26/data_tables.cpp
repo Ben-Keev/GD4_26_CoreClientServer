@@ -19,15 +19,17 @@ std::vector<TankData> InitializeTankData()
 {
 	std::vector<TankData> data(static_cast<int>(TankType::kTankCount));
 
-	data[static_cast<int>(TankType::kRedTank)].m_hitpoints = 10;
-	data[static_cast<int>(TankType::kRedTank)].m_fire_interval = sf::seconds(2.5);
-	data[static_cast<int>(TankType::kRedTank)].m_texture = TextureID::kEntities;
-	data[static_cast<int>(TankType::kRedTank)].m_texture_rect = sf::IntRect({ 260, 80 }, { 38, 40 });
+	for (int i = 0; i <= static_cast<int>(TankType::kTanTank); ++i)
+	{
+		auto& tank = data[i];
 
-	data[static_cast<int>(TankType::kBlueTank)].m_hitpoints = 10;
-	data[static_cast<int>(TankType::kBlueTank)].m_fire_interval = sf::seconds(2.5);
-	data[static_cast<int>(TankType::kBlueTank)].m_texture = TextureID::kEntities;
-	data[static_cast<int>(TankType::kBlueTank)].m_texture_rect = sf::IntRect({ 216, 0 }, { 42, 42 });
+		tank.m_hitpoints = 10;
+		tank.m_fire_interval = sf::seconds(2.5);
+		tank.m_texture = TextureID::kEntities;
+
+		// All tanks are red for now
+		tank.m_texture_rect = sf::IntRect({ 260, 80 }, { 38, 40 });
+	}
 
 	return data;
 }
@@ -40,10 +42,15 @@ std::vector<TurretData> InitializeTurretData()
 {
 	std::vector<TurretData> data(static_cast<int>(TurretType::kTurretCount));
 
-	data[static_cast<int>(TurretType::kRedTurret)].m_texture = TextureID::kEntities;
-	data[static_cast<int>(TurretType::kRedTurret)].m_texture_rect = sf::IntRect({ 343, 108 }, { 16, 50 });
-	data[static_cast<int>(TurretType::kBlueTurret)].m_texture = TextureID::kEntities;
-	data[static_cast<int>(TurretType::kBlueTurret)].m_texture_rect = sf::IntRect({ 360, 138 }, { 12, 50 });
+	for (int i = 0; i < static_cast<int>(TurretType::kTanTurret); ++i)
+	{
+		auto& turret = data[i];
+
+		turret.m_texture = TextureID::kEntities;
+
+		// All turrets appear red for now
+		turret.m_texture_rect = sf::IntRect({ 343, 108 }, { 16, 50 });
+	}
 
 	return data;
 }
