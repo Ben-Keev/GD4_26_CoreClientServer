@@ -1,5 +1,6 @@
 #include "SocketWrapperPCH.hpp"
 #include "Client.hpp"
+#include "application.hpp"
 
 /* Client should offer the user a menu where they can select
 1. Echo
@@ -12,12 +13,47 @@ Take input from the user, send it to the server and listen and display the resul
 int main()
 {
 	std::cout << "YOU IN THE CLIENT BOAH" << std::endl;
+
 	Player* new_player = new Player();
+
 	std::cout << "Size of a player is: " << sizeof(new_player) << std::endl;
+
 	SocketUtil::StaticInit();
+
 	UDPSocketPtr client_socket = SocketUtil::CreateUDPSocket(INET);
+
 	client_socket->SetNonBlockingMode(false);
 	Client client = Client(client_socket, "127.0.0.1");
+
+	// RUN THE CA1 GAME ====================================================================
+
+	sf::Joystick::update();
+
+	for (unsigned int i = 0; i < sf::Joystick::Count; ++i)
+	{
+		if (sf::Joystick::isConnected(i))
+		{
+			auto identification = sf::Joystick::getIdentification(i);
+
+			std::cout << "Joystick " << i << " is connected\n";
+			std::cout << "Name: " << identification.name.toAnsiString() << "\n";
+			std::cout << "Vendor ID: " << identification.vendorId << "\n";
+			std::cout << "Product ID: " << identification.productId << "\n\n";
+		}
+	}
+
+	try
+	{
+		Application app;
+		app.Run();
+	}
+	catch (std::runtime_error& e)
+	{
+		std::cout << e.what() << std::endl;
+	}
+
+	// RUN THE CA1 GAME ====================================================================
+
 	client.DoServiceLoop();
 	client.SendPlayerOutputBitStream(client_socket, new_player);
 	SocketUtil::CleanUp();
