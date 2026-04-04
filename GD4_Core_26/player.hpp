@@ -9,7 +9,6 @@
 #include "MemoryStream.hpp"
 #include "MemoryBitStream.hpp"
 #include <vector>
-#include <string>
 #include "Math.hpp"
 #include "key_binding.hpp"
 
@@ -17,6 +16,7 @@ class Player
 {
 	public:
 		Player();
+		
 		uint32_t GetHealth() const;
 		uint32_t GetAmmo() const;
 		void Write(OutputMemoryStream& out_stream) const;
@@ -26,8 +26,11 @@ class Player
 		void ToString() const;
 	
 		sf::Angle CalculateRotation(float x, float y);
-		Player(int player_number);
+
+		Player(uint8_t identifier, const KeyBinding* binding);
+		Player(int player_number, int throwaway);
 		void HandleEvent(const sf::Event& event, CommandQueue& command_queue);
+		bool IsLocal() const;
 		void HandleRealTimeInput(CommandQueue& command_queue);
 
 		Command AnalogueMovement(float x, float y);

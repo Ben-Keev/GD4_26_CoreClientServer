@@ -1,3 +1,4 @@
+#include "SocketWrapperPCH.hpp"
 #include "key_binding.hpp"
 #include <string>
 #include <algorithm>

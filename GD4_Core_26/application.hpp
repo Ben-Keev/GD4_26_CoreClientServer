@@ -28,9 +28,12 @@ private:
 
 	TextureHolder m_textures;
 	FontHolder m_fonts;
+
 	MusicPlayer m_music;
 	SoundPlayer m_sound;
 
 	StateStack m_stack;
+
+	KeyBinding m_key_binding;
 };
 

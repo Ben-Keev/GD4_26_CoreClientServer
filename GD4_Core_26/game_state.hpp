@@ -12,6 +12,6 @@ public:
 
 private:
 	World m_world;
-	Player& m_red_player;
+	Player m_local_player;
 };
 

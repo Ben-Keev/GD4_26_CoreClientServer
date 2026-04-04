@@ -173,9 +173,6 @@ void World::BuildScene()
 	//	m_player_tanks[i] = SpawnTank(static_cast<TankType>(i));
 	//}
 
-	//m_red_tank = SpawnTank(TankType::kRedTank);
-	//m_blue_tank = SpawnTank(TankType::kBlueTank);
-
 	//Add sound effect node
 	std::unique_ptr<SoundNode> soundNode(new SoundNode(m_sounds));
 	m_scene_graph.AttachChild(std::move(soundNode));

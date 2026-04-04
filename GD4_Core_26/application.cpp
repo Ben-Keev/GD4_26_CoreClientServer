@@ -8,6 +8,7 @@
 #include "settings_state.hpp"
 #include "game_over_state.hpp"
 #include "SocketWrapperPCH.hpp"
+#include "state.hpp"
 
 bool Application::m_joystick = sf::Joystick::isConnected(0);
 
@@ -23,10 +24,10 @@ void Application::isJoystickConnected()
 /// Modified: Kaylon Riordan D00255039
 /// Adjusted window size to fit new assets
 /// </summary>
-Application::Application() 
+Application::Application()
 	: m_window(sf::VideoMode({ 1024, 576 }), "States", sf::Style::Close)
-	, m_local_player(0)
-	, m_stack(State::Context(m_window, m_textures, m_fonts, m_local_player, m_music, m_sound))
+	, m_key_binding(1)
+	, m_stack(State::Context(m_window, m_textures, m_fonts, m_music, m_sound, m_key_binding))
 {
 	m_window.setKeyRepeatEnabled(false);
 	m_fonts.Load(FontID::kMain, "Media/Fonts/Sansation.ttf");

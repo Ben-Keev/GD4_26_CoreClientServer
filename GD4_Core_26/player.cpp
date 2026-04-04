@@ -157,14 +157,32 @@ struct TurretRotator
     /// </summary>
     void operator()(Turret& turret, sf::Time) const
     {
-        sf::Angle angle = CalculateRotation(axis.x, axis.y);
 
-        turret.setRotation(angle - turret.GetParent()->GetWorldRotation());
+        if (turret.GetIdentifier() == turret_id)
+        {
+            sf::Angle angle = CalculateRotation(axis.x, axis.y);
+
+            turret.setRotation(angle - turret.GetParent()->GetWorldRotation());
+        }
+
     }
 
     sf::Vector2f axis; // Raw joystick axis values for aiming (GPT)
 	int turret_id;     // Identifier for the turret (GPT)
 };
+
+Player::Player(uint8_t identifier, const KeyBinding* binding)
+    : rotation_(0, 0, 0, 1)
+    , m_identifier(identifier)
+{
+    InitialiseActions();
+
+    // Set all commands to affect player aircraft category
+    for (auto& pair : m_action_binding)
+    {
+        pair.second.category = static_cast<unsigned int>(ReceiverCategories::kRedTank);
+    }
+}
 
 /// <summary>
 /// Modified: Ben Mc Keever D00254413
@@ -172,10 +190,12 @@ struct TurretRotator
 /// Constructs a Player and binds default controls for a specific joystick. (GPT)
 /// </summary>
 /// <param name="player_number"></param>
-Player::Player(int player_number) :
+Player::Player(int player_number, int throwaway) :
     rotation_(0, 0, 0, 1),
     player_number(player_number)
 {
+	std::cout << "Constructing Player with joystick number: " << player_number << std::endl;
+
     // Default binding: A button fires (GPT)
     m_joystick_binding[XboxLayout::RB] = Action::kBulletFire;
 
@@ -226,6 +246,13 @@ void Player::HandleEvent(const sf::Event& event, CommandQueue& command_queue)
     }
 }
 
+// Returns true if this player is controlled locally
+bool Player::IsLocal() const
+{
+    // No key binding means this player is remote
+    return m_key_binding != nullptr;
+}
+
 /// <summary>
 /// Modified: Ben Mc Keever D00254413
 /// Now processes analogue stick input for movement and aiming, as well as held buttons. (Copilot)
@@ -234,6 +261,14 @@ void Player::HandleEvent(const sf::Event& event, CommandQueue& command_queue)
 /// <param name="command_queue"></param>
 void Player::HandleRealTimeInput(CommandQueue& command_queue)
 {
+
+    // Get all currently held realtime keys
+    std::vector<Action> activeActions = m_key_binding->GetRealtimeActions();
+
+    // Push movement commands
+    for (Action action : activeActions)
+        command_queue.Push(m_action_binding[action]);
+
     if (Application::m_joystick) {
         // Axes of left thumbstick
         float x = sf::Joystick::getAxisPosition(player_number, sf::Joystick::Axis::X);
@@ -296,6 +331,7 @@ Command Player::AnalogueMovement(float x, float y)
             y,
             kPlayerSpeed * (x / 100.f),
             kPlayerSpeed * (y / 100.f),
+            m_identifier
             })
             );
 
@@ -318,7 +354,7 @@ Command Player::AnalogueAiming(float u, float v)
     rotate.category = static_cast<unsigned int>(turretCategory);
 
     rotate.action = DerivedAction<Turret>(
-        TurretRotator({ u, v })
+        TurretRotator({ u, v , m_identifier})
     );
 
     return rotate;
@@ -410,13 +446,13 @@ struct TankFireTrigger
 void Player::InitialiseActions()
 {
     // Movement
-    m_action_binding[Action::kMoveLeft].action = DerivedAction<Aircraft>(AircraftMover(-1, 0.f, m_identifier));
-    m_action_binding[Action::kMoveRight].action = DerivedAction<Aircraft>(AircraftMover(+1, 0.f, m_identifier));
-    m_action_binding[Action::kMoveUp].action = DerivedAction<Aircraft>(AircraftMover(0.f, -1, m_identifier));
-    m_action_binding[Action::kMoveDown].action = DerivedAction<Aircraft>(AircraftMover(0.f, 1, m_identifier));
+    m_action_binding[Action::kMoveLeft].action = DerivedAction<Tank>(TankMover(-1, 0.f, kPlayerSpeed * (-1 / 100.f), kPlayerSpeed * (0.f / 100.f), m_identifier));
+    m_action_binding[Action::kMoveRight].action = DerivedAction<Tank>(TankMover(+1, 0.f, kPlayerSpeed * (+1 / 100.f), kPlayerSpeed * (0.f / 100.f), m_identifier));
+    m_action_binding[Action::kMoveUp].action = DerivedAction<Tank>(TankMover(0.f, -1, kPlayerSpeed * (0.f / 100.f), kPlayerSpeed * (-1 / 100.f), m_identifier));
+    m_action_binding[Action::kMoveDown].action = DerivedAction<Tank>(TankMover(0.f, 1, kPlayerSpeed * (0.f / 100.f), kPlayerSpeed * (1 / 100.f), m_identifier));
 
     // Weapons
-    m_action_binding[Action::kBulletFire].action = DerivedAction<Aircraft>(TankFireTrigger(m_identifier));
+    m_action_binding[Action::kBulletFire].action = DerivedAction<Tank>(TankFireTrigger(m_identifier));
 }
 
 /// <summary>

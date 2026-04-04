@@ -88,16 +88,16 @@ bool SettingsState::HandleEvent(const sf::Event& event)
                 // Check if joystick button was released for correct player (GPT)
                 if (joy_released && joy_released->joystickId == player)
                 {
-                    Player* target = (player == 0) ? GetContext().local_player : GetContext().local_player;
+                    //Player* target = (player == 0) ? GetContext().local_player : GetContext().local_player;
 
-                    // Assign released button to selected action (GPT)
-                    target->AssignKey(
-                        static_cast<Action>(action),
-                        static_cast<XboxLayout>(joy_released->button)
-                    );
+                    //// Assign released button to selected action (GPT)
+                    //target->AssignKey(
+                    //    static_cast<Action>(action),
+                    //    static_cast<XboxLayout>(joy_released->button)
+                    //);
 
-                    // Stop listening for input (GPT)
-                    button->Deactivate();
+                    //// Stop listening for input (GPT)
+                    //button->Deactivate();
                 }
 
                 break;
@@ -127,24 +127,24 @@ bool SettingsState::HandleEvent(const sf::Event& event)
 /// </summary>
 void SettingsState::UpdateLabels()
 {
-    Player& local_player = *GetContext().local_player;
+    //Player& local_player = *GetContext().local_player;
 
     // Loop through both players (GPT)
-    for (int player = 0; player < 2; ++player)
-    {
-        Player& target = (player == 0) ? local_player : local_player;
+    //for (int player = 0; player < 2; ++player)
+    //{
+    //    Player& target = (player == 0) ? local_player : local_player;
 
-        // Loop through bindable actions (GPT)
-        for (std::size_t i = 4; i < static_cast<int>(Action::kActionCount); ++i)
-        {
-            int assigned = target.GetAssignedKey(static_cast<Action>(i));
-            std::string text = ButtonIntegerToXboxString(assigned);
+    //    // Loop through bindable actions (GPT)
+    //    for (std::size_t i = 4; i < static_cast<int>(Action::kActionCount); ++i)
+    //    {
+    //        int assigned = target.GetAssignedKey(static_cast<Action>(i));
+    //        std::string text = ButtonIntegerToXboxString(assigned);
 
-            // Update label text if label exists (GPT)
-            if (m_binding_labels[player][i])
-                m_binding_labels[player][i]->SetText(text);
-        }
-    }
+    //        // Update label text if label exists (GPT)
+    //        if (m_binding_labels[player][i])
+    //            m_binding_labels[player][i]->SetText(text);
+    //    }
+    //}
 }
 
 // Convert an integer from XBOX button into string for display
