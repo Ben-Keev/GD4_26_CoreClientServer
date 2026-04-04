@@ -10,21 +10,20 @@ public:
 	sf::Vector2f GetVelocity() const;
 	void Accelerate(sf::Vector2f velocity);
 	void Accelerate(float vx, float vy);
-	sf::Vector2f GetPreviousPosition() const;
-	sf::Angle GetPreviousRotation() const;
 
 	int GetHitPoints() const;
+	void SetHitpoints(int points);
 	void Repair(int points);
 	void Damage(int points);
 	void Destroy();
 	virtual bool IsDestroyed() const override;
+	virtual void Remove();
 
 protected:
 	virtual void UpdateCurrent(sf::Time dt, CommandQueue& commands) override;
 
 private:
 	sf::Vector2f m_velocity;
-	sf::Vector2f m_previous_position;
-	sf::Angle m_previous_rotation;
 	int m_hitpoints;
 };
+

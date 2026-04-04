@@ -6,6 +6,7 @@
 #include "tank.hpp"
 #include "SFML/Graphics/Rect.hpp"
 #include "particle_type.hpp"
+#include "turret_type.hpp"
 
 
 std::vector<sf::Vector2f> InitializeTankPositions() 

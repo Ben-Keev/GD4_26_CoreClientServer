@@ -515,9 +515,6 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 
 		float current_view_position = m_world.GetViewBounds().position.y + m_world.GetViewBounds().size.y;
 
-		//Set the world's scroll compensation according to whether the view is behind or ahead
-		m_world.SetWorldScrollCompensation(current_view_position / current_world_position);
-
 		for (uint8_t i = 0; i < aircraft_count; ++i)
 		{
 			sf::Vector2f aircraft_position;

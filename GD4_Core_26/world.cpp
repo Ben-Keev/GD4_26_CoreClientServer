@@ -34,11 +34,6 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	m_camera.setCenter(m_spawn_position);
 }
 
-void World::SetWorldScrollCompensation(float compensation)
-{
-	m_scrollspeed_compensation = compensation;
-}
-
 void World::Update(sf::Time dt)
 {
 	for (Tank* t : m_player_tank)

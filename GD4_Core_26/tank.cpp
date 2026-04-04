@@ -6,89 +6,171 @@
 #include "constants.hpp"
 #include "projectile.hpp"
 #include "projectile_type.hpp"
+#include <iostream>
 #include "sound_node.hpp"
+#include "network_node.hpp"
+#include "tank_type.hpp"
 
-/// <summary>
-/// Modified: Ben Mc Keever D00254413
-/// Comments wrote by Chat-GPT marked with (GPT)
-/// Modified: Kaylon Riordan D00255039
-/// </summary>
 
 namespace
 {
-	// Static lookup table containing configuration data for every tank type (GPT)
 	const std::vector<TankData> Table = InitializeTankData();
 }
 
-/// <summary>
-/// Constructs a Tank object and initializes all gameplay-related components
-/// including sprite, turret, commands, explosion animation, and UI text. (GPT)
-/// </summary>
+TextureID ToTextureID(TankType type)
+{
+	return TextureID::kEntities;
+}
+
 Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts)
 	: Entity(Table[static_cast<int>(type)].m_hitpoints)
 	, m_type(type)
 	, m_sprite(textures.Get(Table[static_cast<int>(type)].m_texture), Table[static_cast<int>(type)].m_texture_rect)
+	, m_health_display(nullptr)
+	, m_missile_display(nullptr)
 	, m_distance_travelled(0.f)
 	, m_directions_index(0)
 	, m_fire_rate(1)
 	, m_spread_level(1)
 	, m_is_firing(false)
+	, m_is_launching_missile(false)
 	, m_fire_countdown(sf::Time::Zero)
+	, m_missile_ammo(2)
 	, m_is_marked_for_removal(false)
+	, m_spawned_pickup(false)
 	, m_show_explosion(true)
 	, m_explosion(textures.Get(TextureID::kExplosion))
 	, m_explosion_began(false)
+	, m_pickups_enabled(true)
 	, m_identifier(0)
 {
-	m_explosion.SetFrameSize(sf::Vector2i(200, 200));
-	m_explosion.SetNumFrames(9);
-	m_explosion.SetDuration(sf::seconds(0.5));
-
-	// Center sprite origins for correct rotation/positioning (GPT)
+	m_explosion.SetFrameSize(sf::Vector2i(256, 256));
+	m_explosion.SetNumFrames(16);
+	m_explosion.SetDuration(sf::seconds(1));
 	Utility::CentreOrigin(m_sprite);
 	Utility::CentreOrigin(m_explosion);
 
-	// Setup command for firing bullets via command queue (GPT)
 	m_fire_command.category = static_cast<int>(ReceiverCategories::kScene);
 	m_fire_command.action = [this, &textures](SceneNode& node, sf::Time dt)
 		{
 			CreateBullet(node, textures);
 		};
 
+	//m_missile_command.category = static_cast<int>(ReceiverCategories::kScene);
+	//m_missile_command.action = [this, &textures](SceneNode& node, sf::Time dt)
+	//	{
+	//		CreateProjectile(node, ProjectileType::kMissile, 0.f, 0.5f, textures);
+	//	};
+	//m_drop_pickup_command.category = static_cast<int>(ReceiverCategories::kScene);
+	//m_drop_pickup_command.action = [this, &textures](SceneNode& node, sf::Time dt)
+	//	{
+	//		CreatePickup(node, textures);
+	//	};
 
+	std::string* health = new std::string("");
+	std::unique_ptr<TextNode> health_display(new TextNode(fonts, *health));
+	m_health_display = health_display.get();
+	AttachChild(std::move(health_display));
 
-	/// <summary>
-	// Modified: Kaylon Riordan D00255039
-	// Create a pointer to a turret and set the type of turrent, based off type of tank, then attach to tank as child
-	/// <summary>
-	std::unique_ptr<Turret> turret;
-	if (type == TankType::kRedTank)
+	if (Tank::GetCategory() == static_cast<int>(ReceiverCategories::kRedTank))
 	{
-		turret = std::unique_ptr<Turret>(new Turret(TurretType::kRedTurret, textures));
+		std::string* missile_ammo = new std::string("");
+		std::unique_ptr<TextNode> missile_display(new TextNode(fonts, *missile_ammo));
+		missile_display->setPosition(sf::Vector2f(0.f, 70.f));
+		m_missile_display = missile_display.get();
+		AttachChild(std::move(missile_display));
+	}
+	UpdateTexts();
+}
+
+uint8_t	Tank::GetIdentifier()
+{
+	return m_identifier;
+}
+
+void Tank::SetIdentifier(uint8_t identifier)
+{
+	m_identifier = identifier;
+}
+
+unsigned int Tank::GetCategory() const
+{
+	return static_cast<unsigned int>(ReceiverCategories::kRedTank);
+}
+
+void Tank::IncreaseFireRate()
+{
+	if (m_fire_rate < 3)
+	{
+		++m_fire_rate;
+	}
+}
+
+void Tank::IncreaseFireSpread()
+{
+	if (m_spread_level < 3)
+	{
+		++m_spread_level;
+	}
+}
+
+void Tank::UpdateTexts()
+{
+	if (IsDestroyed())
+	{
+		m_health_display->SetString("");
 	}
 	else
 	{
-		turret = std::unique_ptr<Turret>(new Turret(TurretType::kBlueTurret, textures));
+		m_health_display->SetString(std::to_string(GetHitPoints()) + "HP");
 	}
-	m_turret = turret.get();
-	AttachChild(std::move(turret));
-}
+	m_health_display->setPosition(sf::Vector2f(0.f, 50.f));
+	m_health_display->setRotation(-getRotation());
 
-/// <summary>
-/// Returns the category used by the command system for filtering. (GPT)
-/// </summary>
-unsigned int Tank::GetCategory() const
-{
-	if (IsAllied())
+	if (m_missile_display)
 	{
-		return static_cast<unsigned int>(ReceiverCategories::kRedTank);
+		if (m_missile_ammo == 0)
+		{
+			m_missile_display->SetString("");
+		}
+		else
+		{
+			m_missile_display->SetString("M: " + std::to_string(m_missile_ammo));
+		}
 	}
-	return static_cast<unsigned int>(ReceiverCategories::kBlueTank);
 }
 
-/// <summary>
-/// Enables firing state if tank has a valid fire interval. (GPT)
-/// </summary>
+void Tank::UpdateMovementPattern(sf::Time dt)
+{
+	////Enemy AI
+	//const std::vector<Direction>& directions = Table[static_cast<int>(m_type)].m_directions;
+	//if (!directions.empty())
+	//{
+	//	//Move along the current direction for distance and then change direction
+	//	if (m_distance_travelled > directions[m_directions_index].m_distance)
+	//	{
+	//		m_directions_index = (m_directions_index + 1) % directions.size();
+	//		m_distance_travelled = 0;
+	//	}
+
+	//	//Compute the velocity
+	//	//Add 90 to move down the screen, 0 degrees is to the right
+	//	double radians = Utility::ToRadians(directions[m_directions_index].m_angle + 90.f);
+	//	float vx = GetMaxSpeed() * std::cos(radians);
+	//	float vy = GetMaxSpeed() * std::sin(radians);
+
+	//	SetVelocity(sf::Vector2f(vx, vy));
+	//	m_distance_travelled += GetMaxSpeed() * dt.asSeconds();
+	//}
+}
+
+float Tank::GetMaxSpeed() const
+{
+	return 100.f;
+		
+		//Table[static_cast<int>(m_type)].m_speed;
+}
+
 void Tank::Fire()
 {
 	if (Table[static_cast<int>(m_type)].m_fire_interval != sf::Time::Zero)
@@ -97,162 +179,48 @@ void Tank::Fire()
 	}
 }
 
-/// <summary>
-/// Creates bullets depending on the current spread level. (GPT)
-/// </summary>
-void Tank::CreateBullet(SceneNode& node, const TextureHolder& textures)
+void Tank::CreateBullet(SceneNode& node, const TextureHolder& textures) const
 {
-	// It may be an enemy bullet or an allied bullet.
-	ProjectileType type = IsAllied() ? ProjectileType::kRedBullet : ProjectileType::kBlueBullet;
-
-	// How many bullets are fired based on the level accquired
+	ProjectileType type = IsAllied() ? ProjectileType::kRedBullet : ProjectileType::kRedBullet;
 	switch (m_spread_level)
 	{
 	case 1:
-		if (m_is_firing)
-		{
-			CreateProjectile(node, type, 0.0f, 0.0f, textures);
-			m_is_firing = false;
-		}
+		CreateProjectile(node, type, 0.0f, 0.5f, textures);
 		break;
 	case 2:
-		if (m_is_firing)
-		{
-			CreateProjectile(node, type, -0.5f, 0.5f, textures);
-			CreateProjectile(node, type, 0.5f, 0.5f, textures);
-			m_is_firing = false;
-			break;
-		}
+		CreateProjectile(node, type, -0.5f, 0.5f, textures);
+		CreateProjectile(node, type, 0.5f, 0.5f, textures);
+		break;
 	case 3:
-		if (m_is_firing)
-		{
-			CreateProjectile(node, type, 0.0f, 0.5f, textures);
-			CreateProjectile(node, type, -0.5f, 0.5f, textures);
-			CreateProjectile(node, type, 0.5f, 0.5f, textures);
-			m_is_firing = false;
-			break;
-		}
+		CreateProjectile(node, type, 0.0f, 0.5f, textures);
+		CreateProjectile(node, type, -0.5f, 0.5f, textures);
+		CreateProjectile(node, type, 0.5f, 0.5f, textures);
+		break;
 	}
 }
 
-/// <summary>
-/// Modified: Ben Mc Keever D00254413
-/// Now projectiles face the direction of the turret
-/// Creates and launches a projectile in the direction of the turret. (GPT)
-/// Modified: Kaylon Riordan D00255039
-/// Changed projectiles rotation to check turret instead of tank
-/// </summary>
 void Tank::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset, float y_offset, const TextureHolder& textures) const
 {
-	if (m_is_firing)
-	{
-		std::unique_ptr<Projectile> projectile(new Projectile(type, textures));
+	std::unique_ptr<Projectile> projectile(new Projectile(type, textures));
+	sf::Vector2f offset(x_offset * m_sprite.getGlobalBounds().size.x, y_offset * m_sprite.getGlobalBounds().size.y);
+	sf::Vector2f velocity(0, projectile->GetMaxSpeed());
 
-		sf::Vector2f offset(x_offset * m_sprite.getGlobalBounds().size.x, y_offset * m_sprite.getGlobalBounds().size.y);
-
-		// Subtract 90 degrees but keep the format in radians
-		float radians = (m_turret->GetWorldRotation() - sf::degrees(-90.f)).asRadians();
-
-		// Create the unit vector pointing in the angle of our direction
-		// https://gamedev.stackexchange.com/questions/117583/how-do-i-get-a-vector-from-an-angle
-		sf::Vector2f direction(
-			std::cos(radians),
-			std::sin(radians)
-		);
-
-		projectile->setPosition(GetWorldPosition() + offset + (direction * 25.0f));
-		projectile->setRotation(m_turret->GetWorldRotation() - sf::degrees(180.f));
-		projectile->SetVelocity(direction * projectile->GetMaxSpeed());
-		node.AttachChild(std::move(projectile));
-	}
+	float sign = IsAllied() ? -1.f : 1.f;
+	projectile->setPosition(GetWorldPosition() + offset * sign);
+	projectile->SetVelocity(velocity * sign);
+	node.AttachChild(std::move(projectile));
 }
 
-/// <summary>
-/// Returns the world-space bounding rectangle for collision detection. (GPT)
-/// </summary>
 sf::FloatRect Tank::GetBoundingRect() const
 {
 	return GetWorldTransform().transformRect(m_sprite.getGlobalBounds());
 }
 
-/// <summary>
-/// Determines whether the tank should be removed from the scene. (GPT)
-/// </summary>
 bool Tank::IsMarkedForRemoval() const
 {
 	return IsDestroyed() && (m_explosion.IsFinished() || !m_show_explosion);
 }
 
-/// <summary>
-/// Draws the tank sprite or explosion animation depending on state. (GPT)
-/// </summary>
-void Tank::DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const
-{
-	if (IsDestroyed() && m_show_explosion)
-	{
-		m_turret->Hide();
-		target.draw(m_explosion, states);
-	}
-	else
-	{
-		target.draw(m_sprite, states);
-	}
-}
-
-/// <summary>
-/// Updates tank logic each frame including movement, firing, and destruction handling. (GPT)
-/// </summary>
-void Tank::UpdateCurrent(sf::Time dt, CommandQueue& commands)
-{
-	if (IsDestroyed())
-	{
-		m_explosion.Update(dt);
-		//Play explosion sound only once
-		if (!m_explosion_began)
-		{
-			SoundEffect soundEffect = (Utility::RandomInt(2) == 0) ? SoundEffect::kExplosion1 : SoundEffect::kExplosion2;
-			PlayLocalSound(commands, soundEffect);
-			m_explosion_began = true;
-		}
-		m_is_marked_for_removal = true;
-		return;
-	}
-	Entity::UpdateCurrent(dt, commands);
-
-	//Check if bullets were fired
-	CheckProjectileLaunch(dt, commands);
-}
-
-/// <summary>
-/// Handles projectile firing cooldown and command dispatch. (GPT)
-/// </summary>
-void Tank::CheckProjectileLaunch(sf::Time dt, CommandQueue& commands)
-{
-	if (m_is_firing && m_fire_countdown <= sf::Time::Zero)
-	{
-		PlayLocalSound(commands, IsAllied() ? SoundEffect::kBlueGunfire : SoundEffect::kRedGunfire);
-
-		commands.Push(m_fire_command);
-		m_fire_countdown += Table[static_cast<int>(m_type)].m_fire_interval / (m_fire_rate + 1.f);
-	}
-	else if (m_fire_countdown > sf::Time::Zero)
-	{
-		m_fire_countdown -= dt;
-		m_is_firing = false;
-	}
-}
-
-/// <summary>
-/// Returns true if tank is allied (red tank). (GPT)
-/// </summary>
-bool Tank::IsAllied() const
-{
-	return m_type == TankType::kRedTank;
-}
-
-/// <summary>
-/// Plays a spatial sound effect at the tank's world position. (GPT)
-/// </summary>
 void Tank::PlayLocalSound(CommandQueue& commands, SoundEffect effect)
 {
 	sf::Vector2f world_position = GetWorldPosition();
@@ -267,29 +235,131 @@ void Tank::PlayLocalSound(CommandQueue& commands, SoundEffect effect)
 	commands.Push(command);
 }
 
-/// <summary>
-/// Modified: Ben Mc Keever D00254413
-/// No longer adjusts velocity based on scrolling as there is no scrolling. No reason for it to exist in world.cpp anymore.
-/// Taken from world.cpp
-/// Normalizes diagonal velocity to prevent faster diagonal movement. (GPT)
-/// </summary>
-void Tank::AdaptVelocity()
+void Tank::DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const
 {
-	sf::Vector2f velocity = GetVelocity();
-
-	//If they are moving diagonally divide by sqrt 2
-	if (velocity.x != 0.f && velocity.y != 0.f)
+	if (IsDestroyed() && m_show_explosion)
 	{
-		SetVelocity(velocity / std::sqrt(2.f));
+		target.draw(m_explosion, states);
+	}
+	else
+	{
+		target.draw(m_sprite, states);
 	}
 }
 
-uint8_t	Tank::GetIdentifier()
+void Tank::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 {
-	return m_identifier;
+	if (IsDestroyed())
+	{
+		m_explosion.Update(dt);
+		//Play explosion sound only once
+		if (!m_explosion_began)
+		{
+			SoundEffect soundEffect = (Utility::RandomInt(2) == 0) ? SoundEffect::kExplosion1 : SoundEffect::kExplosion2;
+			PlayLocalSound(commands, soundEffect);
+
+			//Emit network game action for enemy explodes
+			if (!IsAllied())
+			{
+				sf::Vector2f position = GetWorldPosition();
+
+				Command command;
+				command.category = static_cast<int>(ReceiverCategories::kNetwork);
+				command.action = DerivedAction<NetworkNode>([position](NetworkNode& node, sf::Time)
+					{
+						node.NotifyGameAction(GameActions::kEnemyExplode, position);
+					});
+
+				commands.Push(command);
+			}
+			m_explosion_began = true;
+		}
+		return;
+	}
+	Entity::UpdateCurrent(dt, commands);
+	UpdateTexts();
+	UpdateMovementPattern(dt);
+
+	//UpdateRollAnimation();
+
+	//Check if bullets or missiles were fired
+	CheckProjectileLaunch(dt, commands);
 }
 
-void Tank::SetIdentifier(uint8_t identifier)
+void Tank::CheckProjectileLaunch(sf::Time dt, CommandQueue& commands)
 {
-	m_identifier = identifier;
+	if (!IsAllied())
+	{
+		Fire();
+	}
+
+	if (m_is_firing && m_fire_countdown <= sf::Time::Zero)
+	{
+		PlayLocalSound(commands, IsAllied() ? SoundEffect::kRedGunfire : SoundEffect::kRedGunfire);
+		commands.Push(m_fire_command);
+		m_fire_countdown += Table[static_cast<int>(m_type)].m_fire_interval / (m_fire_rate + 1.f);
+		m_is_firing = false;
+	}
+	else if (m_fire_countdown > sf::Time::Zero)
+	{
+		m_fire_countdown -= dt;
+		m_is_firing = false;
+	}
+
+	////Missile launch
+	//if (m_is_launching_missile)
+	//{
+	//	PlayLocalSound(commands, SoundEffect::kLaunchMissile);
+	//	commands.Push(m_missile_command);
+	//	m_is_launching_missile = false;
+	//}
 }
+
+bool Tank::IsAllied() const
+{
+	return m_type == TankType::kRedTank;
+}
+
+void Tank::Remove()
+{
+	Entity::Remove();
+	m_show_explosion = false;
+}
+
+//void Aircraft::CreatePickup(SceneNode& node, const TextureHolder& textures) const
+//{
+//	auto type = static_cast<PickupType>(Utility::RandomInt(static_cast<int>(PickupType::kPickupCount)));
+//	std::unique_ptr<Pickup> pickup(new Pickup(type, textures));
+//	pickup->setPosition(GetWorldPosition());
+//	pickup->SetVelocity(0.f, 0.f);
+//	node.AttachChild(std::move(pickup));
+//}
+
+//void Aircraft::CheckPickupDrop(CommandQueue& commands)
+//{
+//	if (!IsAllied() && Utility::RandomInt(kPickupDropChance) == 0 && !m_spawned_pickup)
+//	{
+//		commands.Push(m_drop_pickup_command);
+//	}
+//	m_spawned_pickup = true;
+//}
+
+//void Aircraft::UpdateRollAnimation()
+//{
+//	if (Table[static_cast<int>(m_type)].m_has_roll_animation)
+//	{
+//		sf::IntRect textureRect = Table[static_cast<int>(m_type)].m_texture_rect;
+//
+//		//Roll left: Texture rect is offset once
+//		if (GetVelocity().x < 0.f)
+//		{
+//			textureRect.position.x += textureRect.size.x;
+//		}
+//		else if (GetVelocity().x > 0.f)
+//		{
+//			textureRect.position.x += 2 * textureRect.size.x;
+//		}
+//		m_sprite.setTextureRect(textureRect);
+//
+//	}
+//}

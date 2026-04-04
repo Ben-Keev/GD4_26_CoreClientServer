@@ -4,6 +4,7 @@
 #include "scene_node.hpp"
 #include "scene_layers.hpp"
 #include "tank.hpp"
+#include "tank_type.hpp"
 #include "command_queue.hpp"
 #include "bloom_effect.hpp"
 #include "sound_player.hpp"
@@ -30,7 +31,6 @@ public:
 	bool HasAlivePlayer() const;
 	bool HasPlayerReachedEnd() const;
 
-	void SetWorldScrollCompensation(float compensation);
 	Tank* GetAircraft(int identifier) const;
 	sf::FloatRect GetBattleFieldBounds() const;
 	bool PollGameAction(GameActions::Action& out);
