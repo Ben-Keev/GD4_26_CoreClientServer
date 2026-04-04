@@ -1,5 +1,6 @@
 #include "SocketWrapperPCH.hpp"
 #include "Player.hpp"
+#include "application.hpp"
 
 Player::Player()
     : health_(10)
@@ -198,18 +199,19 @@ Player::Player(int player_number) :
 /// <param name="command_queue"></param>
 void Player::HandleEvent(const sf::Event& event, CommandQueue& command_queue)
 {
-    const auto* joy_pressed = event.getIf<sf::Event::JoystickButtonPressed>();
-    if (joy_pressed)
-    {
-        auto found = m_joystick_binding.find(static_cast<XboxLayout>(joy_pressed->button));
-
-        // Trigger command if bound and not real-time (GPT)
-        if (found != m_joystick_binding.end() && !IsRealTimeAction(found->second))
+    if (Application::m_joystick) {
+        const auto* joy_pressed = event.getIf<sf::Event::JoystickButtonPressed>();
+        if (joy_pressed)
         {
-            command_queue.Push(m_action_binding[found->second]);
+            auto found = m_joystick_binding.find(static_cast<XboxLayout>(joy_pressed->button));
+
+            // Trigger command if bound and not real-time (GPT)
+            if (found != m_joystick_binding.end() && !IsRealTimeAction(found->second))
+            {
+                command_queue.Push(m_action_binding[found->second]);
+            }
         }
     }
-
 }
 
 /// <summary>
@@ -220,48 +222,39 @@ void Player::HandleEvent(const sf::Event& event, CommandQueue& command_queue)
 /// <param name="command_queue"></param>
 void Player::HandleRealTimeInput(CommandQueue& command_queue)
 {
-    // Axes of left thumbstick
-    float x = sf::Joystick::getAxisPosition(player_number, sf::Joystick::Axis::X);
-    float y = sf::Joystick::getAxisPosition(player_number, sf::Joystick::Axis::Y);
+    if (Application::m_joystick) {
+        // Axes of left thumbstick
+        float x = sf::Joystick::getAxisPosition(player_number, sf::Joystick::Axis::X);
+        float y = sf::Joystick::getAxisPosition(player_number, sf::Joystick::Axis::Y);
 
-    // Axes of right stick
-    float u = sf::Joystick::getAxisPosition(player_number, sf::Joystick::Axis::U);
-    float v = sf::Joystick::getAxisPosition(player_number, sf::Joystick::Axis::V);
+        // Axes of right stick
+        float u = sf::Joystick::getAxisPosition(player_number, sf::Joystick::Axis::U);
+        float v = sf::Joystick::getAxisPosition(player_number, sf::Joystick::Axis::V);
 
-    // Deadzone for analogue sticks
-    const float deadZone = 15.f;
+        // Deadzone for analogue sticks
+        const float deadZone = 15.f;
 
-    // Movement input if outside deadzone (GPT)
-    if (std::abs(x) > deadZone || std::abs(y) > deadZone)
-    {
-        command_queue.Push(AnalogueMovement(x, y));
-    }
-
-    // Aiming input if outside deadzone (GPT)
-    if (std::abs(u) > deadZone || std::abs(v) > deadZone)
-    {
-        command_queue.Push(AnalogueAiming(u, v));
-    }
-
- //   if (sf::Joystick::isButtonPressed(0, static_cast<int>(m_joystick_binding[XboxLayout::RB])))
- //   {
- //       if (player_number < 16)
- //           player_number++;
-
- //       if (player_number >= 16)
- //           player_number = 0;
-
- //       std::cout << player_number;
-	//}
-
-    // Buttons (real-time)
-    for (auto pair : m_joystick_binding)
-    {
-        if (sf::Joystick::isButtonPressed(player_number,
-            static_cast<unsigned int>(pair.first)) &&
-            IsRealTimeAction(pair.second))
+        // Movement input if outside deadzone (GPT)
+        if (std::abs(x) > deadZone || std::abs(y) > deadZone)
         {
-            command_queue.Push(m_action_binding[pair.second]);
+            command_queue.Push(AnalogueMovement(x, y));
+        }
+
+        // Aiming input if outside deadzone (GPT)
+        if (std::abs(u) > deadZone || std::abs(v) > deadZone)
+        {
+            command_queue.Push(AnalogueAiming(u, v));
+        }
+
+        // Buttons (real-time)
+        for (auto pair : m_joystick_binding)
+        {
+            if (sf::Joystick::isButtonPressed(player_number,
+                static_cast<unsigned int>(pair.first)) &&
+                IsRealTimeAction(pair.second))
+            {
+                command_queue.Push(m_action_binding[pair.second]);
+            }
         }
     }
 }

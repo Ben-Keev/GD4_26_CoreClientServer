@@ -9,6 +9,14 @@
 #include "game_over_state.hpp"
 #include "SocketWrapperPCH.hpp"
 
+bool Application::m_joystick = sf::Joystick::isConnected(0);
+
+void Application::isJoystickConnected()
+{
+	Application::m_joystick = sf::Joystick::isConnected(0);
+	std::cout << "Joystick connected: " << Application::m_joystick << std::endl;
+}
+
 /// <summary>
 /// Modified: Ben Mc Keever D00254413
 /// Now takes two players in constructor

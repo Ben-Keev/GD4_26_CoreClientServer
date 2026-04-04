@@ -46,5 +46,13 @@ bool TitleState::HandleEvent(const sf::Event& event)
         RequestStackPop();
         RequestStackPush(StateID::kMenu);
     }
+
+    const auto* key_pressed = event.getIf<sf::Event::KeyPressed>();
+    if (key_pressed)
+    {
+        RequestStackPop();
+        RequestStackPush(StateID::kMenu);
+    }
+
     return true;
 }

@@ -1,6 +1,7 @@
 #include "SocketWrapperPCH.hpp"
 #include "container.hpp"
 #include "xbox_layout.hpp"
+#include "application.hpp"
 
 /// <summary>
 /// Modified: Ben Mc Keever D00254413
@@ -65,8 +66,8 @@ void gui::Container::HandleEvent(const sf::Event& event)
     if (HasSelection() && m_children[m_selected_child]->IsActive())
     {
         m_children[m_selected_child]->HandleEvent(event);
-    }  
-    else if (joy_released) 
+    }
+    else if (joy_released)
     {
         if (joy_released->button == static_cast<int>(XboxLayout::A))
         {
@@ -78,10 +79,35 @@ void gui::Container::HandleEvent(const sf::Event& event)
     }
 
     const auto* joy_moved = event.getIf<sf::Event::JoystickMoved>();
-    if (joy_moved) 
+    if (joy_moved)
     {
         if (joy_moved->axis == sf::Joystick::Axis::PovY || joy_moved->axis == sf::Joystick::Axis::Y)
             HandleJoystickInput(joy_moved->joystickId);
+    }
+
+    // Kb + M
+    const auto* key_released = event.getIf<sf::Event::KeyReleased>();
+    if (HasSelection() && m_children[m_selected_child]->IsActive())
+    {
+        m_children[m_selected_child]->HandleEvent(event);
+    }
+    else if (key_released)
+    {
+        if (key_released->scancode == sf::Keyboard::Scancode::W || key_released->scancode == sf::Keyboard::Scancode::Up)
+        {
+            SelectPrevious();
+        }
+        else if (key_released->scancode == sf::Keyboard::Scancode::S || key_released->scancode == sf::Keyboard::Scancode::Down)
+        {
+            SelectNext();
+        }
+        else if (key_released->scancode == sf::Keyboard::Scancode::Enter || key_released->scancode == sf::Keyboard::Scancode::Space)
+        {
+            if (HasSelection())
+            {
+                m_children[m_selected_child]->Activate();
+            }
+        }
     }
 }
 

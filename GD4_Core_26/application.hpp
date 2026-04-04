@@ -13,6 +13,8 @@ class Application
 public:
 	Application();
 	void Run();
+	static void isJoystickConnected();
+	static bool m_joystick;
 
 private:
 	void ProcessInput();

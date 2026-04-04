@@ -50,6 +50,7 @@ class Player
 		static bool IsRealTimeAction(Action action);
 
 	private:
+
 		std::map<XboxLayout, Action> m_joystick_binding;
 		std::map<Action, Command> m_action_binding;
 		MissionStatus m_current_mission_status;
@@ -57,5 +58,3 @@ class Player
 		ReceiverCategories tankCategory;
 		ReceiverCategories turretCategory;
 };
-
-
