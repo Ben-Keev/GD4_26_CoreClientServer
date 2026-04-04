@@ -88,7 +88,7 @@ bool SettingsState::HandleEvent(const sf::Event& event)
                 // Check if joystick button was released for correct player (GPT)
                 if (joy_released && joy_released->joystickId == player)
                 {
-                    Player* target = (player == 0) ? GetContext().red_player : GetContext().blue_player;
+                    Player* target = (player == 0) ? GetContext().local_player : GetContext().local_player;
 
                     // Assign released button to selected action (GPT)
                     target->AssignKey(
@@ -127,13 +127,12 @@ bool SettingsState::HandleEvent(const sf::Event& event)
 /// </summary>
 void SettingsState::UpdateLabels()
 {
-    Player& red_player = *GetContext().red_player;
-    Player& blue_player = *GetContext().blue_player;
+    Player& local_player = *GetContext().local_player;
 
     // Loop through both players (GPT)
     for (int player = 0; player < 2; ++player)
     {
-        Player& target = (player == 0) ? red_player : blue_player;
+        Player& target = (player == 0) ? local_player : local_player;
 
         // Loop through bindable actions (GPT)
         for (std::size_t i = 4; i < static_cast<int>(Action::kActionCount); ++i)

@@ -220,7 +220,6 @@ void Player::HandleEvent(const sf::Event& event, CommandQueue& command_queue)
 /// <param name="command_queue"></param>
 void Player::HandleRealTimeInput(CommandQueue& command_queue)
 {
-
     // Axes of left thumbstick
     float x = sf::Joystick::getAxisPosition(player_number, sf::Joystick::Axis::X);
     float y = sf::Joystick::getAxisPosition(player_number, sf::Joystick::Axis::Y);
@@ -243,6 +242,17 @@ void Player::HandleRealTimeInput(CommandQueue& command_queue)
     {
         command_queue.Push(AnalogueAiming(u, v));
     }
+
+ //   if (sf::Joystick::isButtonPressed(0, static_cast<int>(m_joystick_binding[XboxLayout::RB])))
+ //   {
+ //       if (player_number < 16)
+ //           player_number++;
+
+ //       if (player_number >= 16)
+ //           player_number = 0;
+
+ //       std::cout << player_number;
+	//}
 
     // Buttons (real-time)
     for (auto pair : m_joystick_binding)

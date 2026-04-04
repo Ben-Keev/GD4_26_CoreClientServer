@@ -16,13 +16,12 @@ public:
 
 	struct Context
 	{
-		Context(sf::RenderWindow& window, TextureHolder& textures, FontHolder& fonts, Player& red_player, Player& blue_player, MusicPlayer& music, SoundPlayer& sound);
+		Context(sf::RenderWindow& window, TextureHolder& textures, FontHolder& fonts, Player& local_player, MusicPlayer& music, SoundPlayer& sound);
 		//TODO unique_ptr rather than raw pointers here?
 		sf::RenderWindow* window;
 		TextureHolder* textures;
 		FontHolder* fonts;
-		Player* red_player;
-		Player* blue_player;
+		Player* local_player;
 		MusicPlayer* music;
 		SoundPlayer* sound;
 	};

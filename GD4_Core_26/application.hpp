@@ -22,8 +22,7 @@ private:
 
 private:
 	sf::RenderWindow m_window;
-	Player m_red_player;
-	Player m_blue_player;
+	Player m_local_player;
 
 	TextureHolder m_textures;
 	FontHolder m_fonts;

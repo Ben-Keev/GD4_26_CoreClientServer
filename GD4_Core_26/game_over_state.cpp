@@ -19,15 +19,15 @@ GameOverState::GameOverState(StateStack& stack, Context context)
     context.music->Stop();
 	context.sound->Play(SoundEffect::kGameEnd);
 
-    if (context.red_player->GetMissionStatus() == MissionStatus::kMissionFailure && context.blue_player->GetMissionStatus() == MissionStatus::kMissionFailure) 
+    if (context.local_player->GetMissionStatus() == MissionStatus::kMissionFailure && context.local_player->GetMissionStatus() == MissionStatus::kMissionFailure)
     {
         m_game_over_text.setString("It's a tie!");
     }
-    else if (context.red_player->GetMissionStatus() == MissionStatus::kMissionSuccess)
+    else if (context.local_player->GetMissionStatus() == MissionStatus::kMissionSuccess)
     {
         m_game_over_text.setString("Red Tank Won!");
     }
-    else if (context.blue_player->GetMissionStatus() == MissionStatus::kMissionSuccess)
+    else if (context.local_player->GetMissionStatus() == MissionStatus::kMissionSuccess)
     {
         m_game_over_text.setString("Blue Tank Won!");
     }

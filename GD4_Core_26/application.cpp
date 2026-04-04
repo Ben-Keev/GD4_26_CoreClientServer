@@ -17,9 +17,8 @@
 /// </summary>
 Application::Application() 
 	: m_window(sf::VideoMode({ 1024, 576 }), "States", sf::Style::Close)
-	, m_red_player(0)
-	, m_blue_player(1)
-	, m_stack(State::Context(m_window, m_textures, m_fonts, m_red_player, m_blue_player, m_music, m_sound))
+	, m_local_player(0)
+	, m_stack(State::Context(m_window, m_textures, m_fonts, m_local_player, m_music, m_sound))
 {
 	m_window.setKeyRepeatEnabled(false);
 	m_fonts.Load(FontID::kMain, "Media/Fonts/Sansation.ttf");
