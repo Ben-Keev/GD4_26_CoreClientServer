@@ -23,6 +23,8 @@ public:
 	void Update(sf::Time dt);
 	void Draw();
 
+	Tank* AddTank(uint8_t identifier);
+
 	CommandQueue& GetCommandQueue();
 
 	bool AllPlayersAlive() const;
@@ -31,6 +33,7 @@ public:
 private:
 	void LoadTextures();
 	void BuildScene();
+
 
 	void AddWalls();
 	void SpawnWall(WallType type, float x, float y, float rotation);
@@ -70,7 +73,7 @@ private:
 	sf::Vector2f m_center;
 	float m_scroll_speed;
 	
-	std::array<Tank*, kMaxPlayers> m_tanks;
+	std::vector<Tank*> m_player_tanks;
 
 	CommandQueue m_command_queue;
 

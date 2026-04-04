@@ -11,6 +11,7 @@
 #include <vector>
 #include <string>
 #include "Math.hpp"
+#include "key_binding.hpp"
 
 class Player
 {
@@ -51,10 +52,16 @@ class Player
 
 	private:
 
+		const KeyBinding* m_key_binding;
+
 		std::map<XboxLayout, Action> m_joystick_binding;
+
 		std::map<Action, Command> m_action_binding;
 		MissionStatus m_current_mission_status;
 		int player_number;
+
+		uint8_t m_identifier;
+
 		ReceiverCategories tankCategory;
 		ReceiverCategories turretCategory;
 };

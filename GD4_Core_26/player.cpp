@@ -113,22 +113,30 @@ sf::Angle CalculateRotation(float x, float y)
 /// </summary>
 struct TankMover
 {
-    TankMover(float x, float y, float vx, float vy) : axis(x, y), velocity(vx, vy) {}
+    TankMover(float x, float y, float vx, float vy, int identifier)
+        : axis(x, y), 
+        velocity(vx, vy),
+        tank_id(identifier)
+    {}
 
     /// <summary>
     /// Applies rotation and acceleration to the tank using current axis input. (GPT)
     /// </summary>
     void operator()(Tank& tank, sf::Time) const
     {
-        sf::Angle angle = CalculateRotation(axis.x, axis.y);
+        if (tank.GetIdentifier() == tank_id) 
+        {
+            sf::Angle angle = CalculateRotation(axis.x, axis.y);
 
-        tank.setRotation(angle);
+            tank.setRotation(angle);
 
-        tank.Accelerate(velocity);
+            tank.Accelerate(velocity);
+        }
     }
 
     sf::Vector2f axis;      // Raw joystick axis values (GPT)
     sf::Vector2f velocity;  // Calculated velocity from axis input (GPT)
+	int tank_id;           // Identifier for the tank (GPT)
 };
 
 /// <summary>
@@ -139,7 +147,10 @@ struct TankMover
 /// </summary>
 struct TurretRotator
 {
-    TurretRotator(float x, float y) : axis(x, y) {}
+    TurretRotator(float x, float y, int identifier) : 
+        axis(x, y),
+        turret_id(identifier)
+    {}
 
     /// <summary>
     /// Rotates turret relative to parent tank rotation. (GPT)
@@ -152,6 +163,7 @@ struct TurretRotator
     }
 
     sf::Vector2f axis; // Raw joystick axis values for aiming (GPT)
+	int turret_id;     // Identifier for the turret (GPT)
 };
 
 /// <summary>
@@ -374,16 +386,37 @@ MissionStatus Player::GetMissionStatus() const
     return m_current_mission_status;
 }
 
+// Functor that triggers bullet firing
+struct TankFireTrigger
+{
+    TankFireTrigger(int identifier)
+        : tank_id(identifier)
+    {
+    }
+
+    void operator() (Tank& tank, sf::Time) const
+    {
+        // Only fire for this player's aircraft
+        if (tank.GetIdentifier() == tank_id)
+            tank.Fire();
+    }
+
+    int tank_id;
+};
+
 /// <summary>
 /// Initialises available player actions and their corresponding commands. (GPT)
 /// </summary>
 void Player::InitialiseActions()
 {
-    m_action_binding[Action::kBulletFire].action =
-        DerivedAction<Tank>([](Tank& a, sf::Time)
-            {
-                a.Fire();
-            });
+    // Movement
+    m_action_binding[Action::kMoveLeft].action = DerivedAction<Aircraft>(AircraftMover(-1, 0.f, m_identifier));
+    m_action_binding[Action::kMoveRight].action = DerivedAction<Aircraft>(AircraftMover(+1, 0.f, m_identifier));
+    m_action_binding[Action::kMoveUp].action = DerivedAction<Aircraft>(AircraftMover(0.f, -1, m_identifier));
+    m_action_binding[Action::kMoveDown].action = DerivedAction<Aircraft>(AircraftMover(0.f, 1, m_identifier));
+
+    // Weapons
+    m_action_binding[Action::kBulletFire].action = DerivedAction<Aircraft>(TankFireTrigger(m_identifier));
 }
 
 /// <summary>

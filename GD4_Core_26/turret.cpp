@@ -47,3 +47,13 @@ void Turret::DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) cons
 		target.draw(m_sprite, states);
 	}
 }
+
+uint8_t	Turret::GetIdentifier()
+{
+	return m_identifier;
+}
+
+void Turret::SetIdentifier(uint8_t identifier)
+{
+	m_identifier = identifier;
+}

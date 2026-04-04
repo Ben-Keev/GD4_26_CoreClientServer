@@ -16,11 +16,17 @@ public:
 	unsigned int GetCategory() const override;
 	void Hide();
 
+	uint8_t GetIdentifier();
+	void SetIdentifier(uint8_t identifier);
+
 protected:
 	virtual void DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const;
+
 
 private:
 	TurretType m_type;
 	sf::Sprite m_sprite;
 	bool m_visible = true;
+
+	uint8_t m_identifier;
 };

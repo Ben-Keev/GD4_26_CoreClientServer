@@ -28,6 +28,10 @@ public:
 
 	void AdaptVelocity();
 
+	uint8_t GetIdentifier();
+
+	void SetIdentifier(uint8_t identifier);
+
 protected:
 	virtual void DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const;
 	virtual void UpdateCurrent(sf::Time dt, CommandQueue& commands) override;
@@ -53,6 +57,8 @@ private:
 	bool m_is_firing;
 
 	sf::Time m_fire_countdown;
+	
+	uint8_t m_identifier;
 
 	bool m_is_marked_for_removal;
 	bool m_show_explosion;

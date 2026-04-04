@@ -61,6 +61,8 @@ bool GameState::Update(sf::Time dt)
 /// <returns></returns>
 bool GameState::HandleEvent(const sf::Event& event)
 {
+	m_world.AddTank(1);
+
 	CommandQueue& commands = m_world.GetCommandQueue();
 	m_red_player.HandleEvent(event, commands);
 	//m_blue_player.HandleEvent(event, commands);

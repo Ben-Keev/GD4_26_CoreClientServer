@@ -31,7 +31,7 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	, m_center(m_camera.getSize().x / 2.f, m_world_bounds.size.y - m_camera.getSize().y / 2.f)
 	// Set scroll speed to 0 as a temporary solution to removing scrolling
 	, m_scroll_speed(0.f)
-	, m_tanks()
+	, m_player_tanks()
 {
 	m_scene_texture.resize({ m_target.getSize().x, m_target.getSize().y });
 	LoadTextures();
@@ -51,7 +51,7 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 void World::Update(sf::Time dt)
 {
 
-	for (Tank* tank : m_tanks)
+	for (Tank* tank : m_player_tanks)
 	{
 		if (tank)  // check that the pointer is valid
 		{
@@ -67,7 +67,7 @@ void World::Update(sf::Time dt)
 		m_scene_graph.OnCommand(m_command_queue.Pop(), dt);
 	}
 
-	for (Tank* tank : m_tanks)
+	for (Tank* tank : m_player_tanks)
 	{
 		if (tank)  // check that the pointer is valid
 		{
@@ -166,12 +166,12 @@ void World::BuildScene()
 	//Add the walls
 	AddWalls();
 
-	std::vector<TankData> data(static_cast<int>(TankType::kTankCount));
+	//std::vector<TankData> data(static_cast<int>(TankType::kTankCount));
 
-	for (int i = 0; i <= static_cast<int>(TankType::kTanTank); ++i)
-	{
-		m_tanks[i] = SpawnTank(static_cast<TankType>(i));
-	}
+	//for (int i = 0; i <= static_cast<int>(TankType::kTanTank); ++i)
+	//{
+	//	m_player_tanks[i] = SpawnTank(static_cast<TankType>(i));
+	//}
 
 	//m_red_tank = SpawnTank(TankType::kRedTank);
 	//m_blue_tank = SpawnTank(TankType::kBlueTank);
@@ -186,6 +186,23 @@ void World::BuildScene()
 
 	std::unique_ptr<ParticleNode> propellantNode(new ParticleNode(ParticleType::kPropellant, m_textures));
 	m_scene_layers[static_cast<int>(SceneLayers::kParticles)]->AttachChild(std::move(propellantNode));
+}
+
+Tank* World::AddTank(uint8_t identifier) 
+{
+	// Harcode spawn a red tank
+	std::unique_ptr<Tank> player(new Tank(TankType::kRedTank, m_textures, m_fonts));
+
+	// Spawn where a red tank spawns
+	player->setPosition(spawnpoints[static_cast<int>(TankType::kRedTank)]);
+
+	std::cout << "World::AddTank " << +identifier << std::endl;
+	player->SetIdentifier(identifier);
+
+	m_player_tanks.emplace_back(player.get());
+	m_scene_layers[static_cast<int>(SceneLayers::kTanks)]->AttachChild(std::move(player));
+
+	return m_player_tanks.back();
 }
 
 Tank* World::SpawnTank(TankType type) 

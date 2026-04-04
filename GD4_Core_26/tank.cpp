@@ -38,6 +38,7 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 	, m_show_explosion(true)
 	, m_explosion(textures.Get(TextureID::kExplosion))
 	, m_explosion_began(false)
+	, m_identifier(0)
 {
 	m_explosion.SetFrameSize(sf::Vector2i(200, 200));
 	m_explosion.SetNumFrames(9);
@@ -281,4 +282,14 @@ void Tank::AdaptVelocity()
 	{
 		SetVelocity(velocity / std::sqrt(2.f));
 	}
+}
+
+uint8_t	Tank::GetIdentifier()
+{
+	return m_identifier;
+}
+
+void Tank::SetIdentifier(uint8_t identifier)
+{
+	m_identifier = identifier;
 }
