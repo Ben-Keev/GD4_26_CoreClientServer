@@ -1,3 +1,4 @@
+#include "SocketWrapperPCH.hpp"
 #include "network_node.hpp"
 NetworkNode::NetworkNode()
 	: SceneNode()

@@ -1,3 +1,4 @@
+#include "SocketWrapperPCH.hpp"
 #include "PostEffect.hpp"
 #include <SFML/Graphics/Shader.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>

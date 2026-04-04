@@ -13,36 +13,18 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\ClientCoreServer HPPs">
+      <UniqueIdentifier>{e6f74254-7972-4be6-b959-9b5bfcb2fccd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ClientCoreServer CPPs">
+      <UniqueIdentifier>{fef56679-74b7-4f2c-96cf-f43b88b7e05c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="SocketAddress.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SocketAddressFactory.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SocketUtil.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SocketWrapperPCH.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="StringUtils.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="UDPSocket.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Server.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="player.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MemoryStream.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MemoryBitStream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="animation.cpp">
@@ -55,9 +37,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="button.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Client.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="command.cpp">
@@ -135,9 +114,6 @@
     <ClCompile Include="tank.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TCPSocket.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="text_node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -162,21 +138,51 @@
     <ClCompile Include="key_binding.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SocketAddress.cpp">
+      <Filter>Source Files\ClientCoreServer CPPs</Filter>
+    </ClCompile>
+    <ClCompile Include="SocketAddressFactory.cpp">
+      <Filter>Source Files\ClientCoreServer CPPs</Filter>
+    </ClCompile>
+    <ClCompile Include="SocketUtil.cpp">
+      <Filter>Source Files\ClientCoreServer CPPs</Filter>
+    </ClCompile>
+    <ClCompile Include="SocketWrapperPCH.cpp">
+      <Filter>Source Files\ClientCoreServer CPPs</Filter>
+    </ClCompile>
+    <ClCompile Include="TCPSocket.cpp">
+      <Filter>Source Files\ClientCoreServer CPPs</Filter>
+    </ClCompile>
+    <ClCompile Include="StringUtils.cpp">
+      <Filter>Source Files\ClientCoreServer CPPs</Filter>
+    </ClCompile>
+    <ClCompile Include="UDPSocket.cpp">
+      <Filter>Source Files\ClientCoreServer CPPs</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryStream.cpp">
+      <Filter>Source Files\ClientCoreServer CPPs</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryBitStream.cpp">
+      <Filter>Source Files\ClientCoreServer CPPs</Filter>
+    </ClCompile>
+    <ClCompile Include="Client.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_server.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="multiplayer_gamestate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="network_node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="posteffect.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SocketAddress.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SocketAddressFactory.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="SocketUtil.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SocketWrapperPCH.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SocketWrapperShared.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="StringUtils.hpp">
@@ -197,18 +203,6 @@
     <ClInclude Include="player.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MemoryStream.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Math.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ByteSwap.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MemoryBitStream.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="action.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -225,9 +219,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="button_type.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Client.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="command.hpp">
@@ -350,9 +341,6 @@
     <ClInclude Include="tank_type.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TCPSocket.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="text_node.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -388,6 +376,60 @@
     </ClInclude>
     <ClInclude Include="key_binding.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Client.hpp">
+      <Filter>Header Files\ClientCoreServer HPPs</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryStream.hpp">
+      <Filter>Header Files\ClientCoreServer HPPs</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryBitStream.hpp">
+      <Filter>Header Files\ClientCoreServer HPPs</Filter>
+    </ClInclude>
+    <ClInclude Include="Math.hpp">
+      <Filter>Header Files\ClientCoreServer HPPs</Filter>
+    </ClInclude>
+    <ClInclude Include="SocketAddressFactory.hpp">
+      <Filter>Header Files\ClientCoreServer HPPs</Filter>
+    </ClInclude>
+    <ClInclude Include="SocketAddress.hpp">
+      <Filter>Header Files\ClientCoreServer HPPs</Filter>
+    </ClInclude>
+    <ClInclude Include="SocketWrapperShared.hpp">
+      <Filter>Header Files\ClientCoreServer HPPs</Filter>
+    </ClInclude>
+    <ClInclude Include="SocketWrapperPCH.hpp">
+      <Filter>Header Files\ClientCoreServer HPPs</Filter>
+    </ClInclude>
+    <ClInclude Include="game_server.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="multiplayer_gamestate.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="network_node.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="network_protocol.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="particletype.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pickup.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pickup_type.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="posteffect.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ByteSwap.hpp">
+      <Filter>Header Files\ClientCoreServer HPPs</Filter>
+    </ClInclude>
+    <ClInclude Include="TCPSocket.hpp">
+      <Filter>Header Files\ClientCoreServer HPPs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

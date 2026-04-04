@@ -1,14 +1,12 @@
 #include "SocketWrapperPCH.hpp"
 #include "pause_state.hpp"
 #include "utility.hpp"
+#include "button.hpp"
 
-/// <summary>
-/// Modified: Ben Mc Keever D00254413
-/// Now message reflects use of controller
-/// </summary>
-/// <param name="stack"></param>
-/// <param name="context"></param>
-PauseState::PauseState(StateStack& stack, Context context) : State(stack, context), m_paused_text(context.fonts->Get(FontID::kMain)), m_instruction_text(context.fonts->Get(FontID::kMain))
+PauseState::PauseState(StateStack& stack, Context context, bool lets_updates_through)
+    : State(stack, context)
+    , m_paused_text(context.fonts->Get(FontID::kMain))
+    , m_lets_updates_through(lets_updates_through)
 {
     sf::Vector2f view_size = context.window->getView().getSize();
 
@@ -17,10 +15,34 @@ PauseState::PauseState(StateStack& stack, Context context) : State(stack, contex
     Utility::CentreOrigin(m_paused_text);
     m_paused_text.setPosition(sf::Vector2f(0.5f * view_size.x, 0.4f * view_size.y));
 
-    m_instruction_text.setString("Press back to return to the main menu, start to return to the game");
-    Utility::CentreOrigin(m_instruction_text);
-    m_instruction_text.setPosition(sf::Vector2f(0.5f * view_size.x, 0.6f * view_size.y));
+    auto returnButton = std::make_shared<gui::Button>(context);
+    returnButton->setPosition(sf::Vector2f(0.5f * view_size.x - 100, 0.4f * view_size.y + 75));
+    returnButton->SetText("Return");
+    returnButton->SetCallback([this]()
+        {
+            RequestStackPop();
+
+        });
+
+    auto backToMenuButton = std::make_shared<gui::Button>(context);
+    backToMenuButton->setPosition(sf::Vector2f(0.5f * view_size.x - 100, 0.4f * view_size.y + 125));
+    backToMenuButton->SetText("Back to menu");
+    backToMenuButton->SetCallback([this]()
+        {
+            RequestStackClear();
+            RequestStackPush(StateID::kMenu);
+        });
+
+    m_gui_container.Pack(returnButton);
+    m_gui_container.Pack(backToMenuButton);
+
+    //Pause the music
     GetContext().music->SetPaused(true);
+}
+
+PauseState::~PauseState()
+{
+    GetContext().music->SetPaused(false);
 }
 
 void PauseState::Draw()
@@ -34,41 +56,16 @@ void PauseState::Draw()
 
     window.draw(backgroundShape);
     window.draw(m_paused_text);
-    window.draw(m_instruction_text);
+    window.draw(m_gui_container);
 }
 
 bool PauseState::Update(sf::Time dt)
 {
-    return false;
+    return m_lets_updates_through;
 }
 
-PauseState::~PauseState()
-{
-    GetContext().music->SetPaused(false);
-}
-
-/// <summary>
-/// Modified: Ben Mc Keever D00254413
-/// Now takes joystick input to unpause or return to menu, rather than keyboard input. (Copilot)
-/// </summary>
-/// <param name="event"></param>
-/// <returns></returns>
 bool PauseState::HandleEvent(const sf::Event& event)
 {
-    const auto* joy_pressed = event.getIf<sf::Event::JoystickButtonPressed>();
-
-    if (!joy_pressed)
-    {
-        return false;
-    }
-    if (joy_pressed->button == static_cast<int>(XboxLayout::Start))
-    {
-        RequestStackPop();
-    }
-    if (joy_pressed->button == static_cast<int>(XboxLayout::Back))
-    {
-        RequestStackClear();
-        RequestStackPush(StateID::kMenu);
-    }
+    m_gui_container.HandleEvent(event);
     return false;
 }

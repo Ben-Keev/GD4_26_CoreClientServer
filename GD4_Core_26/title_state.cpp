@@ -5,7 +5,7 @@
 
 TitleState::TitleState(StateStack& stack, Context context) : State(stack, context), m_show_text(true), m_text_effect_time(sf::Time::Zero), m_background_sprite(context.textures->Get(TextureID::kTitleScreen)), m_text(context.fonts->Get(FontID::kMain))
 {
-    m_text.setString("Press any button to continue");
+    m_text.setString("Press any key to continue");
     Utility::CentreOrigin(m_text);
     m_text.setPosition(context.window->getView().getSize() / 2.f);
 }
@@ -32,27 +32,13 @@ bool TitleState::Update(sf::Time dt)
     return true;
 }
 
-/// <summary>
-/// Modified: Ben Mc Keever D00254413
-/// Now takes joystick input
-/// </summary>
-/// <param name="event"></param>
-/// <returns></returns>
 bool TitleState::HandleEvent(const sf::Event& event)
 {
-    const auto* joy_released = event.getIf < sf::Event::JoystickButtonReleased > ();
-    if (joy_released)
-    {
-        RequestStackPop();
-        RequestStackPush(StateID::kMenu);
-    }
-
     const auto* key_pressed = event.getIf<sf::Event::KeyPressed>();
     if (key_pressed)
     {
         RequestStackPop();
         RequestStackPush(StateID::kMenu);
     }
-
     return true;
 }

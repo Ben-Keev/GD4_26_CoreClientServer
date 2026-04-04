@@ -69,6 +69,7 @@ void StateStack::ApplyPendingChanges()
 		case StackActions::kPop:
 			m_stack.pop_back();
 			break;
+			//TODO should we clear the pending list when queueing up clear
 		case StackActions::kClear:
 			m_stack.clear();
 			break;

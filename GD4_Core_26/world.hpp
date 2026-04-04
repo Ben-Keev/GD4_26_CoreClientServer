@@ -5,47 +5,49 @@
 #include "scene_layers.hpp"
 #include "tank.hpp"
 #include "command_queue.hpp"
-#include "sound_player.hpp"
 #include "bloom_effect.hpp"
-#include "Wall.hpp"
+#include "sound_player.hpp"
+#include "sprite_node.hpp"
 
-/// <summary>
-/// Modified: Ben Mc Keever D00254413
-/// 
-/// Modified: Kaylon Riordan D00255039
-/// Added methods used to place walls in the map
-/// </summary>
+#include <array>
+#include "network_node.hpp"
 
 class World
 {
 public:
-	explicit World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sounds);
+	explicit World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sounds, bool networked = false);
 	void Update(sf::Time dt);
 	void Draw();
 
-	Tank* AddTank(uint8_t identifier);
-
+	sf::FloatRect GetViewBounds() const;
 	CommandQueue& GetCommandQueue();
 
-	bool AllPlayersAlive() const;
-	bool HasPlayerDied(int player) const;
+	Tank* AddAircraft(uint8_t identifier);
+	void RemoveAircraft(uint8_t identifier);
+	void SetCurrentBattleFieldPosition(float line_y);
+	void SetWorldHeight(float height);
+
+	bool HasAlivePlayer() const;
+	bool HasPlayerReachedEnd() const;
+
+	void SetWorldScrollCompensation(float compensation);
+	Tank* GetAircraft(int identifier) const;
+	sf::FloatRect GetBattleFieldBounds() const;
+	bool PollGameAction(GameActions::Action& out);
 
 private:
 	void LoadTextures();
 	void BuildScene();
+	void AdaptPlayerVelocity();
+	void AdaptPlayerPosition();
 
-
-	void AddWalls();
-	void SpawnWall(WallType type, float x, float y, float rotation);
-
-	Tank* SpawnTank(TankType type);
-
-	sf::FloatRect GetViewBounds() const;
-	sf::FloatRect GetBattleFieldBounds() const;
+	void SpawnEnemies();
+	void AddEnemies();
 
 	void HandleCollisions();
 
 	void DestroyEntitiesOutsideView();
+
 	void UpdateSounds();
 
 private:
@@ -70,10 +72,11 @@ private:
 	SceneNode m_scene_graph;
 	std::array<SceneNode*, static_cast<int>(SceneLayers::kLayerCount)> m_scene_layers;
 	sf::FloatRect m_world_bounds;
-	sf::Vector2f m_center;
+	sf::Vector2f m_spawn_position;
 	float m_scroll_speed;
-	
-	std::vector<Tank*> m_player_tanks;
+	float m_scrollspeed_compensation;
+
+	std::vector<Tank*> m_player_tank;
 
 	CommandQueue m_command_queue;
 
@@ -81,4 +84,7 @@ private:
 	std::vector<Tank*> m_active_enemies;
 
 	BloomEffect m_bloom_effect;
+	bool m_networked_world;
+	NetworkNode* m_network_node;
+	SpriteNode* m_finish_sprite;
 };

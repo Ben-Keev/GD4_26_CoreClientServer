@@ -14,7 +14,6 @@ int main()
 	{
 		Application app;
 		app.Run();
-		app.isJoystickConnected();
 	}
 	catch (std::runtime_error& e)
 	{

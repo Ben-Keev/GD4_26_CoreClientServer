@@ -2,36 +2,16 @@
 #include "game_over_state.hpp"
 #include "utility.hpp"
 #include "constants.hpp"
-#include <iostream>
 
-/// <summary>
-/// Modified: Ben Mc Keever D00254413
-/// </summary>
-/// <param name="stack"></param>
-/// <param name="context"></param>
-GameOverState::GameOverState(StateStack& stack, Context context)
+GameOverState::GameOverState(StateStack& stack, Context context, const std::string& text)
     : State(stack, context)
     , m_game_over_text(context.fonts->Get(FontID::kMain))
     , m_elapsed_time(sf::Time::Zero)
 {
     sf::Vector2f window_size(context.window->getSize());
 
-    context.music->Stop();
-	context.sound->Play(SoundEffect::kGameEnd);
+    m_game_over_text.setString(text);
 
-    //if (context.local_player->GetMissionStatus() == MissionStatus::kMissionFailure && context.local_player->GetMissionStatus() == MissionStatus::kMissionFailure)
-    //{
-    //    m_game_over_text.setString("It's a tie!");
-    //}
-    //else if (context.local_player->GetMissionStatus() == MissionStatus::kMissionSuccess)
-    //{
-    //    m_game_over_text.setString("Red Tank Won!");
-    //}
-    //else if (context.local_player->GetMissionStatus() == MissionStatus::kMissionSuccess)
-    //{
-    //    m_game_over_text.setString("Blue Tank Won!");
-    //}
-    
     m_game_over_text.setCharacterSize(70);
     Utility::CentreOrigin(m_game_over_text);
     m_game_over_text.setPosition(sf::Vector2f(0.5 * window_size.x, 0.4 * window_size.y));

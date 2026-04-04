@@ -5,10 +5,6 @@
 #include "button.hpp"
 #include "label.hpp"
 
-/// <summary>
-/// Modified: Ben Mc Keever D00254413
-/// </summary>
-
 class SettingsState : public State
 {
 public:
@@ -19,12 +15,12 @@ public:
 
 private:
 	void UpdateLabels();
-	std::string ButtonIntegerToXboxString(int button);
-	void AddButtonLabel(Action action, int playerIndex, float y, const std::string& text, Context context);
+	void AddButtonLabel(std::size_t index, std::size_t x, std::size_t y, const std::string& text, Context context);
 
 private:
 	sf::Sprite m_background_sprite;
 	gui::Container m_gui_container;
-	std::array<std::array<gui::Button::Ptr, static_cast<int>(Action::kActionCount)>, 2> m_binding_buttons;
-	std::array<std::array<gui::Label::Ptr, static_cast<int>(Action::kActionCount)>, 2> m_binding_labels;
+	std::array<gui::Button::Ptr, static_cast<int>(Action::kActionCount) * 2> m_binding_buttons;
+	std::array<gui::Label::Ptr, static_cast<int>(Action::kActionCount) * 2> m_binding_labels;
 };
+

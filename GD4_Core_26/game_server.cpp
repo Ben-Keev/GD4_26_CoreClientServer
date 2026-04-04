@@ -1,10 +1,10 @@
+#include "SocketWrapperPCH.hpp"
 #include "game_server.hpp"
 #include "network_protocol.hpp"
-#include "aircraft_type.hpp"
+#include "tank_type.hpp"
 #include "utility.hpp"
 #include <SFML/Network/Packet.hpp>
 #include <SFML/System/Sleep.hpp>
-#include "pickup_type.hpp"
 #include <iostream>
 
 GameServer::GameServer(sf::Vector2f battlefield_size)
@@ -183,7 +183,7 @@ void GameServer::Tick()
             {
                 sf::Packet packet;
                 packet << static_cast<uint8_t>(Server::PacketType::kSpawnEnemy);
-                packet << static_cast<uint8_t>(1 + Utility::RandomInt(static_cast<int>(AircraftType::kAircraftCount) - 1));
+                packet << static_cast<uint8_t>(1 + Utility::RandomInt(static_cast<int>(TankType::kTankCount) - 1));
                 packet << m_world_height - m_battlefield_rect.position.y + 500;
                 packet << next_spawn_position;
 
@@ -332,13 +332,13 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
         //To avoid multiple messages only listen to the first peer (host)
         if (action == GameActions::kEnemyExplode && Utility::RandomInt(3) == 0 && &receiving_peer == m_peers[0].get())
         {
-            sf::Packet packet;
-            packet << static_cast<uint8_t>(Server::PacketType::kSpawnPickup);
-            packet << static_cast<uint8_t>(Utility::RandomInt(static_cast<int>(PickupType::kPickupCount)));
-            packet << x;
-            packet << y;
+            //sf::Packet packet;
+            //packet << static_cast<uint8_t>(Server::PacketType::kSpawnPickup);
+            //packet << static_cast<uint8_t>(Utility::RandomInt(static_cast<int>(PickupType::kPickupCount)));
+            //packet << x;
+            //packet << y;
 
-            SendToAll(packet);
+            //SendToAll(packet);
         }
     }
     }

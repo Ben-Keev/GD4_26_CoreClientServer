@@ -1,3 +1,4 @@
+#include "SocketWrapperPCH.hpp"
 #include "application.hpp"
 #include "constants.hpp"
 #include "fontid.hpp"
@@ -7,27 +8,13 @@
 #include "pause_state.hpp"
 #include "settings_state.hpp"
 #include "game_over_state.hpp"
-#include "SocketWrapperPCH.hpp"
-#include "state.hpp"
+#include "multiplayer_gamestate.hpp"
 
-bool Application::m_joystick = sf::Joystick::isConnected(0);
-
-void Application::isJoystickConnected()
-{
-	Application::m_joystick = sf::Joystick::isConnected(0);
-	std::cout << "Joystick connected: " << Application::m_joystick << std::endl;
-}
-
-/// <summary>
-/// Modified: Ben Mc Keever D00254413
-/// Now takes two players in constructor
-/// Modified: Kaylon Riordan D00255039
-/// Adjusted window size to fit new assets
-/// </summary>
 Application::Application()
-	: m_window(sf::VideoMode({ 1024, 576 }), "States", sf::Style::Close)
-	, m_key_binding(1)
-	, m_stack(State::Context(m_window, m_textures, m_fonts, m_music, m_sound, m_key_binding))
+	: m_window(sf::VideoMode({ 1024, 768 }), "States", sf::Style::Close)
+	, m_key_binding_1(1)
+	, m_key_binding_2(2)
+	, m_stack(State::Context(m_window, m_textures, m_fonts, m_music, m_sound, m_key_binding_1, m_key_binding_2))
 {
 	m_window.setKeyRepeatEnabled(false);
 	m_fonts.Load(FontID::kMain, "Media/Fonts/Sansation.ttf");
@@ -91,9 +78,13 @@ void Application::RegisterStates()
 	m_stack.RegisterState<TitleState>(StateID::kTitle);
 	m_stack.RegisterState<MenuState>(StateID::kMenu);
 	m_stack.RegisterState<GameState>(StateID::kGame);
+	m_stack.RegisterState<MultiplayerGameState>(StateID::kHostGame, true);
+	m_stack.RegisterState<MultiplayerGameState>(StateID::kJoinGame, false);
 	m_stack.RegisterState<PauseState>(StateID::kPause);
+	m_stack.RegisterState<PauseState>(StateID::kNetworkPause, true);
 	m_stack.RegisterState<SettingsState>(StateID::kSettings);
-	m_stack.RegisterState<GameOverState>(StateID::kGameOver);
+	m_stack.RegisterState<GameOverState>(StateID::kGameOver, "Mission Failed!");
+	m_stack.RegisterState<GameOverState>(StateID::kMissionSuccess, "Mission Successful!");
 }
 
 

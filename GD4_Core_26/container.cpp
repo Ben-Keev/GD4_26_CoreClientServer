@@ -1,11 +1,5 @@
 #include "SocketWrapperPCH.hpp"
 #include "container.hpp"
-#include "xbox_layout.hpp"
-#include "application.hpp"
-
-/// <summary>
-/// Modified: Ben Mc Keever D00254413
-/// </summary>
 
 gui::Container::Container() : m_selected_child(-1)
 {
@@ -25,67 +19,8 @@ bool gui::Container::IsSelectable() const
     return false;
 }
 
-void gui::Container::HandleRealtimeInput() 
-{
-
-}
-
-/// <summary>
-/// Author: Ben Mc Keever D00254413
-/// </summary>
-/// <param name="joystick">Joystick Number</param>
-void gui::Container::HandleJoystickInput(int joystick)
-{
-    bool upHeld = false;
-    bool downHeld = false;
-
-    // Returns within range of -100 and 100
-    float dpadY = sf::Joystick::getAxisPosition(joystick, sf::Joystick::Axis::PovY);
-
-    // Due to SFML input logic the inputs are flipped for dpad/thumbstick axes
-    bool upNow = dpadY > 50.f;
-    bool downNow = dpadY < -50.f;
-
-    if (upNow && !upHeld)
-        SelectPrevious();
-
-    if (downNow && !downHeld)
-        SelectNext();
-
-    upHeld = upNow;
-    downHeld = downNow;
-}
-
-/// <summary>
-/// Modified: Ben Mc Keever D00254413
-/// </summary>
-/// <param name="event"></param>
 void gui::Container::HandleEvent(const sf::Event& event)
 {
-    const auto* joy_released = event.getIf<sf::Event::JoystickButtonReleased>();
-    if (HasSelection() && m_children[m_selected_child]->IsActive())
-    {
-        m_children[m_selected_child]->HandleEvent(event);
-    }
-    else if (joy_released)
-    {
-        if (joy_released->button == static_cast<int>(XboxLayout::A))
-        {
-            if (HasSelection())
-            {
-                m_children[m_selected_child]->Activate();
-            }
-        }
-    }
-
-    const auto* joy_moved = event.getIf<sf::Event::JoystickMoved>();
-    if (joy_moved)
-    {
-        if (joy_moved->axis == sf::Joystick::Axis::PovY || joy_moved->axis == sf::Joystick::Axis::Y)
-            HandleJoystickInput(joy_moved->joystickId);
-    }
-
-    // Kb + M
     const auto* key_released = event.getIf<sf::Event::KeyReleased>();
     if (HasSelection() && m_children[m_selected_child]->IsActive())
     {
@@ -108,6 +43,7 @@ void gui::Container::HandleEvent(const sf::Event& event)
                 m_children[m_selected_child]->Activate();
             }
         }
+
     }
 }
 
@@ -166,10 +102,4 @@ void gui::Container::SelectPrevious()
         prev = (prev + m_children.size() - 1) % m_children.size();
     } while (!m_children[prev]->IsSelectable());
     Select(prev);
-}
-
-size_t gui::Container::GetContainerSize()
-{
-    size_t count = m_children.size();
-    return count;
 }

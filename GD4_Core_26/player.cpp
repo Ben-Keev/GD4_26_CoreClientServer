@@ -1,181 +1,62 @@
 #include "SocketWrapperPCH.hpp"
-#include "Player.hpp"
-#include "application.hpp"
-
-Player::Player()
-    : health_(10)
-    , ammo_(3)
-    , name_("Default")
-    , position_(10, 10, 10)
-    , rotation_(0, 0, 0, 1)
-    , weapons_{ 60, 70, 80, 90, 100 }
-{}
-
-uint32_t Player::GetHealth() const
-{
-    return health_;
-}
-
-uint32_t Player::GetAmmo() const
-{
-    return ammo_;
-}
-
-void Player::Write(OutputMemoryStream& out_stream) const
-{
-    out_stream.Write(health_);
-    out_stream.Write(ammo_);
-    out_stream.Write(name_, 128);
-    out_stream.Write(position_);
-    out_stream.Write(rotation_);
-    out_stream.Write(weapons_);
-}
-
-void Player::Read(InputMemoryStream & in_stream)
-{
-    in_stream.Read(health_);
-    in_stream.Read(ammo_);
-    in_stream.Read(name_, 128);
-    in_stream.Read(position_);
-    in_stream.Read(rotation_);
-    in_stream.Read(weapons_);
-}
-
-void Player::Write(OutputMemoryBitStream& out_bit_stream) const
-{
-    out_bit_stream.WriteBits(health_, 4);
-    out_bit_stream.WriteBits(ammo_, 2);
-    uint8_t name_length = static_cast<uint8_t>(strlen(name_));
-    std::cout << "Write namelength " << static_cast<int>(name_length) << std::endl;
-    out_bit_stream.WriteBits(name_length, 8);
-    out_bit_stream.WriteBits(name_, (name_length * 8));
-    //Position uses entropy encoding
-    out_bit_stream.WritePos(position_);
-    //Quaternion uses fixed point compression
-    out_bit_stream.Write(rotation_);
-    out_bit_stream.Write(weapons_);
-}
-
-void Player::ReadBits(InputMemoryBitStream & in_bit_stream)
-{
-    uint8_t name_length;
-    in_bit_stream.ReadBits(&health_, 4);
-    std::cout << "Health " << health_ << std::endl;
-    in_bit_stream.ReadBits(&ammo_, 2);
-    std::cout << "Health " << ammo_ << std::endl;
-    in_bit_stream.ReadBits(&name_length, 8);
-    std::cout << "Name Length " << static_cast<int>(name_length) << std::endl;
-    in_bit_stream.ReadBits(&name_, ((static_cast<int>(name_length)) * 8));
-    std::cout << "Name " << name_ << std::endl;
-    in_bit_stream.ReadPos(position_);
-    std::cout << "Position " << position_.mX << std::endl;
-    in_bit_stream.Read(rotation_);
-    std::cout << "Rotation " << rotation_.mX << std::endl;
-    in_bit_stream.Read(weapons_);
-}
-
-void Player::ToString() const
-{
-    std::cout << name_ << " has health: " << health_ << ", Ammo: " << ammo_ << " Position: " << "(" << position_.mX << ", " << position_.mY << ", " << position_.mZ << ")" << "Quaternion: (" << rotation_.mX << ", " << rotation_.mY << ", " << rotation_.mZ << ", " << rotation_.mW << ")" << std::endl;
-    for (const int weapon : weapons_)
-    {
-        std::cout << weapon << std::endl;
-    }
- }
-
+#include "player.hpp"
+#include "command_queue.hpp"
 #include "tank.hpp"
-#include "SFML/Window/Joystick.hpp"
-#include <iostream>
 
-/// <summary>
-/// Modified: Ben Mc Keever D00254413
-/// Modified: Kaylon Riordan D00255039
-/// </summary>
+#include "network_protocol.hpp"
+#include <SFML/Network/Packet.hpp>
 
-/// <summary>
-/// Calculates sprite rotation angle from joystick axis values. (GPT)
-/// </summary>
-sf::Angle CalculateRotation(float x, float y)
+#include <map>
+
+// Functor that moves an aircraft when a command is executed
+struct AircraftMover
 {
-    // Compute aim angle https://godotforums.org/d/25705-2d-joystick-rotation/2#:~:text=If%20you%20have%20a%20Vector2%20with%20the%20joystick%20value%2C%20then%20you%20can%20convert%20it%20to%20a%20rotation%20using%20atan2
-    // Returns radians
-    float radians = std::atan2(y, x);
-
-    // Rotate an added 90 degrees so that the sprite renders upright
-    return sf::radians(radians) + sf::degrees(-90.f);
-}
-
-/// <summary>
-/// Now calculates rotation of tank
-/// Functor used to move and rotate the tank based on analogue stick input. (GPT)
-/// Modified: Kaylon Riordan D00255039
-/// Updated method to rotate tank based off its movement angle so it faces the direction its moving
-/// </summary>
-struct TankMover
-{
-    TankMover(float x, float y, float vx, float vy, int identifier)
-        : axis(x, y), 
-        velocity(vx, vy),
-        tank_id(identifier)
-    {}
-
-    /// <summary>
-    /// Applies rotation and acceleration to the tank using current axis input. (GPT)
-    /// </summary>
-    void operator()(Tank& tank, sf::Time) const
+    AircraftMover(float vx, float vy, int identifier)
+        : velocity(vx, vy)
+        , aircraft_id(identifier)
     {
-        if (tank.GetIdentifier() == tank_id) 
+    }
+
+    // This runs when the command is executed
+    void operator()(Tank& aircraft, sf::Time) const
+    {
+        // Only move the aircraft that belongs to this player
+        if (aircraft.GetIdentifier() == aircraft_id)
         {
-            sf::Angle angle = CalculateRotation(axis.x, axis.y);
-
-            tank.setRotation(angle);
-
-            tank.Accelerate(velocity);
+            aircraft.Accelerate(velocity);
         }
     }
 
-    sf::Vector2f axis;      // Raw joystick axis values (GPT)
-    sf::Vector2f velocity;  // Calculated velocity from axis input (GPT)
-	int tank_id;           // Identifier for the tank (GPT)
+    sf::Vector2f velocity; // Direction of movement
+    int aircraft_id;       // Which aircraft to control
 };
 
-/// <summary>
-/// Authored: Ben Mc Keever D00254413
-/// Functor used to rotate the turret independently from the tank body. (GPT)
-/// Modified: Kaylon Riordan D00255039
-/// Updated method to rotate turret instead of tank to achieve appearance of turret aiming on top of tank
-/// </summary>
-struct TurretRotator
+// Functor that triggers bullet firing
+struct AircraftFireTrigger
 {
-    TurretRotator(float x, float y, int identifier) : 
-        axis(x, y),
-        turret_id(identifier)
-    {}
-
-    /// <summary>
-    /// Rotates turret relative to parent tank rotation. (GPT)
-    /// </summary>
-    void operator()(Turret& turret, sf::Time) const
+    AircraftFireTrigger(int identifier)
+        : aircraft_id(identifier)
     {
-
-        if (turret.GetIdentifier() == turret_id)
-        {
-            sf::Angle angle = CalculateRotation(axis.x, axis.y);
-
-            turret.setRotation(angle - turret.GetParent()->GetWorldRotation());
-        }
-
     }
 
-    sf::Vector2f axis; // Raw joystick axis values for aiming (GPT)
-	int turret_id;     // Identifier for the turret (GPT)
+    void operator() (Tank& aircraft, sf::Time) const
+    {
+        // Only fire for this player's aircraft
+        if (aircraft.GetIdentifier() == aircraft_id)
+            aircraft.Fire();
+    }
+
+    int aircraft_id;
 };
 
-Player::Player(uint8_t identifier, const KeyBinding* binding)
-    : rotation_(0, 0, 0, 1)
-    , m_identifier(identifier)
+// Player constructor
+Player::Player(sf::TcpSocket* socket, uint8_t identifier, const KeyBinding* binding)
+    : m_key_binding(binding)                 // Key bindings for this player
+    , m_current_mission_status(MissionStatus::kMissionRunning)
+    , m_identifier(identifier)               // Player ID
+    , m_socket(socket)                       // Network socket (nullptr if local game)
 {
-    InitialiseActions();
+    InitialiseActions(); // Setup all action -> command mappings
 
     // Set all commands to affect player aircraft category
     for (auto& pair : m_action_binding)
@@ -184,64 +65,62 @@ Player::Player(uint8_t identifier, const KeyBinding* binding)
     }
 }
 
-/// <summary>
-/// Modified: Ben Mc Keever D00254413
-/// Now takes joystick number to support multiple players with separate controls. (Copilot)
-/// Constructs a Player and binds default controls for a specific joystick. (GPT)
-/// </summary>
-/// <param name="player_number"></param>
-Player::Player(int player_number, int throwaway) :
-    rotation_(0, 0, 0, 1),
-    player_number(player_number)
-{
-	std::cout << "Constructing Player with joystick number: " << player_number << std::endl;
-
-    // Default binding: A button fires (GPT)
-    m_joystick_binding[XboxLayout::RB] = Action::kBulletFire;
-
-    InitialiseActions();
-
-    if (player_number >= 0 && player_number < 16)
-    {
-        // Compute tank and turret category directly
-        tankCategory = static_cast<ReceiverCategories>(1ULL << (12 + player_number));
-        turretCategory = static_cast<ReceiverCategories>(1ULL << (28 + player_number));
-    }
-    else
-    {
-		std::cout << "Warning: Player number " << player_number << " is out of range. Defaulting to Red Tank and Turret categories." << std::endl;
-        // Fallback
-        tankCategory = ReceiverCategories::kRedTank;
-        turretCategory = ReceiverCategories::kRedTurret;
-    }
-
-    // Apply tank category to all action bindings (GPT)
-    for (auto& pair : m_action_binding)
-    {
-        pair.second.category = static_cast<unsigned int>(tankCategory);
-    }
-}
-
-/// <summary>
-/// Modified: Ben Mc Keever D00254413
-/// Now checks if the event is a joystick button press and matches the player's joystick number. (Copilot)
-/// Handles discrete joystick button press events. (GPT)
-/// </summary>
-/// <param name="event"></param>
-/// <param name="command_queue"></param>
+// Handles key press/release events
 void Player::HandleEvent(const sf::Event& event, CommandQueue& command_queue)
 {
-    if (Application::m_joystick) {
-        const auto* joy_pressed = event.getIf<sf::Event::JoystickButtonPressed>();
-        if (joy_pressed)
-        {
-            auto found = m_joystick_binding.find(static_cast<XboxLayout>(joy_pressed->button));
+    const auto* key_pressed = event.getIf<sf::Event::KeyPressed>();
+    if (key_pressed)
+    {
+        Action action;
 
-            // Trigger command if bound and not real-time (GPT)
-            if (found != m_joystick_binding.end() && !IsRealTimeAction(found->second))
+        // Check if key corresponds to an action and is NOT realtime (e.g. fire missile)
+        if (m_key_binding && m_key_binding->CheckAction(key_pressed->scancode, action) && !IsRealtimeAction(action))
+        {
+            // If connected to network -> send event to server
+            if (m_socket)
             {
-                command_queue.Push(m_action_binding[found->second]);
+                sf::Packet packet;
+                packet << static_cast<uint8_t>(Client::PacketType::kPlayerEvent);
+                packet << m_identifier;
+                packet << static_cast<uint8_t>(action);
+                m_socket->send(packet);
             }
+            // Otherwise execute locally (single player)
+            else
+            {
+                command_queue.Push(m_action_binding[action]);
+            }
+        }
+    }
+
+    // Structure to track key press/release state
+    struct KeyStatus {
+        sf::Keyboard::Scancode code;
+        bool isPressed;
+    };
+
+    std::optional<KeyStatus> keyData;
+
+    // Detect press
+    if (const auto* press = event.getIf<sf::Event::KeyPressed>())
+        keyData = { press->scancode, true };
+    // Detect release
+    else if (const auto* release = event.getIf<sf::Event::KeyReleased>())
+        keyData = { release->scancode, false };
+
+    // Handle realtime input over network (movement keys)
+    if (keyData && m_socket)
+    {
+        Action action;
+        if (m_key_binding && m_key_binding->CheckAction(keyData->code, action) && IsRealtimeAction(action))
+        {
+            // Send realtime input change to server
+            sf::Packet packet;
+            packet << static_cast<uint8_t>(Client::PacketType::kPlayerRealtimeChange);
+            packet << m_identifier;
+            packet << static_cast<uint8_t>(action);
+            packet << keyData->isPressed;
+            m_socket->send(packet);
         }
     }
 }
@@ -253,231 +132,82 @@ bool Player::IsLocal() const
     return m_key_binding != nullptr;
 }
 
-/// <summary>
-/// Modified: Ben Mc Keever D00254413
-/// Now processes analogue stick input for movement and aiming, as well as held buttons. (Copilot)
-/// Handles continuous real-time joystick input (movement, aiming, held buttons). (GPT)
-/// </summary>
-/// <param name="command_queue"></param>
+// Enables/disables all realtime actions over network
+void Player::DisableAllRealtimeActions(bool enable)
+{
+    for (auto& action : m_action_proxies)
+    {
+        sf::Packet packet;
+        packet << static_cast<uint8_t>(Client::PacketType::kPlayerRealtimeChange);
+        packet << m_identifier;
+        packet << static_cast<uint8_t>(action.first);
+        packet << enable;
+        m_socket->send(packet);
+    }
+}
+
+// Handles realtime input (movement keys held down)
 void Player::HandleRealTimeInput(CommandQueue& command_queue)
 {
-
-    // Get all currently held realtime keys
-    std::vector<Action> activeActions = m_key_binding->GetRealtimeActions();
-
-    // Push movement commands
-    for (Action action : activeActions)
-        command_queue.Push(m_action_binding[action]);
-
-    if (Application::m_joystick) {
-        // Axes of left thumbstick
-        float x = sf::Joystick::getAxisPosition(player_number, sf::Joystick::Axis::X);
-        float y = sf::Joystick::getAxisPosition(player_number, sf::Joystick::Axis::Y);
-
-        // Axes of right stick
-        float u = sf::Joystick::getAxisPosition(player_number, sf::Joystick::Axis::U);
-        float v = sf::Joystick::getAxisPosition(player_number, sf::Joystick::Axis::V);
-
-        // Deadzone for analogue sticks
-        const float deadZone = 15.f;
-
-        // Movement input if outside deadzone (GPT)
-        if (std::abs(x) > deadZone || std::abs(y) > deadZone)
-        {
-            command_queue.Push(AnalogueMovement(x, y));
-        }
-
-        // Aiming input if outside deadzone (GPT)
-        if (std::abs(u) > deadZone || std::abs(v) > deadZone)
-        {
-            command_queue.Push(AnalogueAiming(u, v));
-        }
-
-        // Buttons (real-time)
-        for (auto pair : m_joystick_binding)
-        {
-            if (sf::Joystick::isButtonPressed(player_number,
-                static_cast<unsigned int>(pair.first)) &&
-                IsRealTimeAction(pair.second))
-            {
-                command_queue.Push(m_action_binding[pair.second]);
-            }
-        }
-    }
-}
-
-/// <summary>
-/// Authored: Ben Mc Keever D00254413
-/// Creates a movement command based on analogue stick position. (GPT)
-/// </summary>
-/// <param name="x"></param>
-/// <param name="y"></param>
-/// <returns></returns>
-Command Player::AnalogueMovement(float x, float y)
-{
-    // Speed the player moves
-    const float kPlayerSpeed = 200.f;
-
-    // The command must be called in update so it can reflect the analogue values of the thumbstick
-    Command move;
-
-    // As with other actions set category
-    move.category = static_cast<unsigned int>(tankCategory);
-
-    // Define the action using live axes values as opposed to preset speed
-    move.action = DerivedAction<Tank>(
-        TankMover({
-            x,
-            y,
-            kPlayerSpeed * (x / 100.f),
-            kPlayerSpeed * (y / 100.f),
-            m_identifier
-            })
-            );
-
-    return move;
-}
-
-/// <summary>
-/// Authored: Ben Mc Keever D00254413
-/// Creates a turret rotation command based on right analogue stick. (GPT)
-/// </summary>
-/// <param name="u"></param>
-/// <param name="v"></param>
-/// <returns></returns>
-Command Player::AnalogueAiming(float u, float v)
-{
-    // The command must be called in update so it can reflect the analogue values of the thumbstick
-    Command rotate;
-
-    // As with other actions set category
-    rotate.category = static_cast<unsigned int>(turretCategory);
-
-    rotate.action = DerivedAction<Turret>(
-        TurretRotator({ u, v , m_identifier})
-    );
-
-    return rotate;
-}
-
-/// <summary>
-/// Modified: Ben Mc Keever D00254413
-/// Now assigns keys based on Xbox controller layout. (Copilot)
-/// Rebinds an action to a new Xbox button, removing previous bindings. (GPT)
-/// </summary>
-/// <param name="action"></param>
-/// <param name="button"></param>
-void Player::AssignKey(Action action, XboxLayout button)
-{
-    //Remove keys that are currently bound to the action
-    for (auto itr = m_joystick_binding.begin(); itr != m_joystick_binding.end();)
+    // If local player in multiplayer OR single player
+    if ((m_socket && IsLocal()) || !m_socket)
     {
-        if (itr->second == action)
-        {
-            m_joystick_binding.erase(itr++);
-        }
-        else
-        {
-            ++itr;
-        }
-    }
+        // Get all currently held realtime keys
+        std::vector<Action> activeActions = m_key_binding->GetRealtimeActions();
 
-    m_joystick_binding[button] = action;
+        // Push movement commands
+        for (Action action : activeActions)
+            command_queue.Push(m_action_binding[action]);
+    }
 }
 
-/// <summary>
-/// Get the button assigned to an action
-/// Modified: Ben Mc Keever D00254413
-/// Now returns the Xbox button assigned to an action, or -1 if no binding exists. (Copilot)
-/// Returns the integer representation of the bound Xbox button,
-/// or -1 if no binding exists. (GPT)
-/// </summary>
-/// <param name="action">action</param>
-/// <returns>the integer the button is tied to, -1 if none found</returns>
-int Player::GetAssignedKey(Action action) const
+// Handles realtime input received from network
+void Player::HandleRealtimeNetworkInput(CommandQueue& commands)
 {
-    for (auto pair : m_joystick_binding)
+    if (m_socket && !IsLocal())
     {
-        if (pair.second == action)
+        // For remote players, use proxy states
+        for (auto pair : m_action_proxies)
         {
-            return static_cast<int>(pair.first);
+            if (pair.second && IsRealtimeAction(pair.first))
+                commands.Push(m_action_binding[pair.first]);
         }
     }
-    return -1;
 }
 
-/// <summary>
-/// Sets the player's current mission status. (GPT)
-/// </summary>
+// Handles a network event (like fire)
+void Player::HandleNetworkEvent(Action action, CommandQueue& commands)
+{
+    commands.Push(m_action_binding[action]);
+}
+
+// Handles realtime network input change (key pressed/released)
+void Player::HandleNetworkRealtimeChange(Action action, bool actionEnabled)
+{
+    m_action_proxies[action] = actionEnabled;
+}
+
+// Set mission/game status
 void Player::SetMissionStatus(MissionStatus status)
 {
     m_current_mission_status = status;
 }
 
-/// <summary>
-/// Gets the player's current mission status. (GPT)
-/// </summary>
+// Get mission/game status
 MissionStatus Player::GetMissionStatus() const
 {
     return m_current_mission_status;
 }
 
-// Functor that triggers bullet firing
-struct TankFireTrigger
-{
-    TankFireTrigger(int identifier)
-        : tank_id(identifier)
-    {
-    }
-
-    void operator() (Tank& tank, sf::Time) const
-    {
-        // Only fire for this player's aircraft
-        if (tank.GetIdentifier() == tank_id)
-            tank.Fire();
-    }
-
-    int tank_id;
-};
-
-/// <summary>
-/// Initialises available player actions and their corresponding commands. (GPT)
-/// </summary>
+// Setup action -> command mappings
 void Player::InitialiseActions()
 {
     // Movement
-    m_action_binding[Action::kMoveLeft].action = DerivedAction<Tank>(TankMover(-1, 0.f, kPlayerSpeed * (-1 / 100.f), kPlayerSpeed * (0.f / 100.f), m_identifier));
-    m_action_binding[Action::kMoveRight].action = DerivedAction<Tank>(TankMover(+1, 0.f, kPlayerSpeed * (+1 / 100.f), kPlayerSpeed * (0.f / 100.f), m_identifier));
-    m_action_binding[Action::kMoveUp].action = DerivedAction<Tank>(TankMover(0.f, -1, kPlayerSpeed * (0.f / 100.f), kPlayerSpeed * (-1 / 100.f), m_identifier));
-    m_action_binding[Action::kMoveDown].action = DerivedAction<Tank>(TankMover(0.f, 1, kPlayerSpeed * (0.f / 100.f), kPlayerSpeed * (1 / 100.f), m_identifier));
+    m_action_binding[Action::kMoveLeft].action = DerivedAction<Tank>(AircraftMover(-1, 0.f, m_identifier));
+    m_action_binding[Action::kMoveRight].action = DerivedAction<Tank>(AircraftMover(+1, 0.f, m_identifier));
+    m_action_binding[Action::kMoveUp].action = DerivedAction<Tank>(AircraftMover(0.f, -1, m_identifier));
+    m_action_binding[Action::kMoveDown].action = DerivedAction<Tank>(AircraftMover(0.f, 1, m_identifier));
 
     // Weapons
-    m_action_binding[Action::kBulletFire].action = DerivedAction<Tank>(TankFireTrigger(m_identifier));
-}
-
-/// <summary>
-/// Determines whether an action should be processed as real-time input. (GPT)
-/// </summary>
-bool Player::IsRealTimeAction(Action action)
-{
-    switch (action)
-    {
-    case Action::kMoveLeft:
-    case Action::kMoveRight:
-    case Action::kMoveUp:
-    case Action::kMoveDown:
-    case Action::kBulletFire:
-        return true;
-    default:
-        return false;
-    }
-}
-
-/// <summary>
-/// Authored: Ben Mc Keever D00254413
-/// Destructor outputs debug information when player is destroyed. (GPT)
-/// </summary>
-Player::~Player()
-{
-    std::cout << "Destroyed player " << player_number << std::endl;
+    m_action_binding[Action::kBulletFire].action = DerivedAction<Tank>(AircraftFireTrigger(m_identifier));
 }

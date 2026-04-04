@@ -5,66 +5,37 @@
 #include <map>
 #include "command.hpp"
 #include "mission_status.hpp"
-#include "xbox_layout.hpp"
-#include "MemoryStream.hpp"
-#include "MemoryBitStream.hpp"
-#include <vector>
-#include "Math.hpp"
 #include "key_binding.hpp"
+#include <SFML/Network/TcpSocket.hpp>
+
 
 class Player
 {
-	public:
-		Player();
-		
-		uint32_t GetHealth() const;
-		uint32_t GetAmmo() const;
-		void Write(OutputMemoryStream& out_stream) const;
-		void Read(InputMemoryStream& in_stream);
-		void Write(OutputMemoryBitStream& out_stream) const;
-		void ReadBits(InputMemoryBitStream& in_stream);
-		void ToString() const;
-	
-		sf::Angle CalculateRotation(float x, float y);
+public:
+	Player(sf::TcpSocket* socket, uint8_t identifier, const KeyBinding* binding);
+	void HandleEvent(const sf::Event& event, CommandQueue& command_queue);
+	void HandleRealTimeInput(CommandQueue& command_queue);
+	void HandleRealtimeNetworkInput(CommandQueue& commands);
 
-		Player(uint8_t identifier, const KeyBinding* binding);
-		Player(int player_number, int throwaway);
-		void HandleEvent(const sf::Event& event, CommandQueue& command_queue);
-		bool IsLocal() const;
-		void HandleRealTimeInput(CommandQueue& command_queue);
+	//React to events or realtime state changes recevied over the network
+	void HandleNetworkEvent(Action action, CommandQueue& commands);
+	void HandleNetworkRealtimeChange(Action action, bool action_enabled);
 
-		Command AnalogueMovement(float x, float y);
-		Command AnalogueAiming(float u, float v);
+	void SetMissionStatus(MissionStatus status);
+	MissionStatus GetMissionStatus() const;
 
-		void AssignKey(Action action, XboxLayout);
-		int GetAssignedKey(Action action) const;
-		void SetMissionStatus(MissionStatus status);
-		MissionStatus GetMissionStatus() const;
+	void DisableAllRealtimeActions(bool enable);
+	bool IsLocal() const;
 
-		~Player();
+private:
+	void InitialiseActions();
 
-	private:
-		uint32_t health_;
-		uint32_t ammo_;
-		char name_[128];
-		Vector3 position_;
-		Quaternion rotation_;
-		std::vector<int> weapons_;
-		void InitialiseActions();
-		static bool IsRealTimeAction(Action action);
-
-	private:
-
-		const KeyBinding* m_key_binding;
-
-		std::map<XboxLayout, Action> m_joystick_binding;
-
-		std::map<Action, Command> m_action_binding;
-		MissionStatus m_current_mission_status;
-		int player_number;
-
-		uint8_t m_identifier;
-
-		ReceiverCategories tankCategory;
-		ReceiverCategories turretCategory;
+private:
+	const KeyBinding* m_key_binding;
+	std::map<Action, Command> m_action_binding;
+	std::map<Action, bool> m_action_proxies;
+	MissionStatus m_current_mission_status;
+	uint8_t m_identifier;
+	sf::TcpSocket* m_socket;
 };
+

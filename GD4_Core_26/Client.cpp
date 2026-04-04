@@ -14,16 +14,16 @@ int main()
 {
 	std::cout << "YOU IN THE CLIENT BOAH" << std::endl;
 
-	Player* new_player = new Player();
+	//Player* new_player = new Player();
 
-	std::cout << "Size of a player is: " << sizeof(new_player) << std::endl;
+	//std::cout << "Size of a player is: " << sizeof(new_player) << std::endl;
 
-	SocketUtil::StaticInit();
+	//SocketUtil::StaticInit();
 
-	UDPSocketPtr client_socket = SocketUtil::CreateUDPSocket(INET);
+	//UDPSocketPtr client_socket = SocketUtil::CreateUDPSocket(INET);
 
-	client_socket->SetNonBlockingMode(false);
-	Client client = Client(client_socket, "127.0.0.1");
+	//client_socket->SetNonBlockingMode(false);
+	//Client client = Client(client_socket, "127.0.0.1");
 
 	// RUN THE CA1 GAME ====================================================================
 
@@ -33,7 +33,6 @@ int main()
 	{
 		Application app;
 		app.Run();
-		app.isJoystickConnected();
 	}
 	catch (std::runtime_error& e)
 	{
@@ -42,9 +41,9 @@ int main()
 
 	// RUN THE CA1 GAME ====================================================================
 
-	client.DoServiceLoop();
-	client.SendPlayerOutputBitStream(client_socket, new_player);
-	SocketUtil::CleanUp();
+	//client.DoServiceLoop();
+	//client.SendPlayerOutputBitStream(client_socket, new_player);
+	//SocketUtil::CleanUp();
 }
 
 Client::Client(UDPSocketPtr client_socket, string server_address)
@@ -168,22 +167,22 @@ void Client::ProcessReceivedData(char* receive_buffer, int bytes_received, Socke
 
 void Client::SendPlayerOutputByteStream(UDPSocketPtr client_socket, Player* new_player)
 {
-	SocketAddress server_address = SocketAddress(SocketUtil::ConvertIPStringToInt("127.0.0.1"), 50000);
-	OutputMemoryStream out_stream;
-	new_player->Write(out_stream);
-	int bytes_sent = client_socket->SendTo(out_stream.GetBufferPtr(), out_stream.GetLength(), server_address);
-	std::cout << "Sent: " << bytes_sent << std::endl;
-	std::cin.ignore();
+	//SocketAddress server_address = SocketAddress(SocketUtil::ConvertIPStringToInt("127.0.0.1"), 50000);
+	//OutputMemoryStream out_stream;
+	//new_player->Write(out_stream);
+	//int bytes_sent = client_socket->SendTo(out_stream.GetBufferPtr(), out_stream.GetLength(), server_address);
+	//std::cout << "Sent: " << bytes_sent << std::endl;
+	//std::cin.ignore();
 }
 
 void Client::SendPlayerOutputBitStream(UDPSocketPtr client_socket, Player* new_player)
 {
-	SocketAddress server_address = SocketAddress(SocketUtil::ConvertIPStringToInt("127.0.0.1"), 50000);
-	OutputMemoryBitStream out_stream;
-	new_player->Write(out_stream);
-	int bytes_sent = client_socket->SendTo(out_stream.GetBufferPtr(), out_stream.GetByteLength(), server_address);
-	std::cout << "Sent: " << bytes_sent << std::endl;
-	std::cin.ignore();
+	//SocketAddress server_address = SocketAddress(SocketUtil::ConvertIPStringToInt("127.0.0.1"), 50000);
+	//OutputMemoryBitStream out_stream;
+	//new_player->Write(out_stream);
+	//int bytes_sent = client_socket->SendTo(out_stream.GetBufferPtr(), out_stream.GetByteLength(), server_address);
+	//std::cout << "Sent: " << bytes_sent << std::endl;
+	//std::cin.ignore();
 }
 
 
