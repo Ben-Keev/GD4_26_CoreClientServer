@@ -68,8 +68,6 @@ private:
 	std::array<SceneNode*, static_cast<int>(SceneLayers::kLayerCount)> m_scene_layers;
 	sf::FloatRect m_world_bounds;
 	sf::Vector2f m_center;
-	sf::Vector2f m_red_position;
-	sf::Vector2f m_blue_position;
 	float m_scroll_speed;
 	
 	std::array<Tank*, kMaxPlayers> m_tanks;

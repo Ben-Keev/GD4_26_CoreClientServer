@@ -29,8 +29,6 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	, m_scene_layers()
 	, m_world_bounds(sf::Vector2f(0.f, 0.f), sf::Vector2f(m_camera.getSize().x, 3000.f))
 	, m_center(m_camera.getSize().x / 2.f, m_world_bounds.size.y - m_camera.getSize().y / 2.f)
-	, m_red_position(m_center.x - 280, m_center.y + 120)
-	, m_blue_position(m_center.x + 280, m_center.y - 120)
 	// Set scroll speed to 0 as a temporary solution to removing scrolling
 	, m_scroll_speed(0.f)
 	, m_tanks()
@@ -42,7 +40,6 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 
 	std::cout << "Center: " << m_center.x << ", " << m_center.y << std::endl;
 
-	std::cout << "Blue spawn: " << m_blue_position.x << ", " << m_blue_position.y << std::endl;
 	std::cout << "Camera size: " << m_camera.getSize().x << ", " << m_camera.getSize().y << std::endl;
 }
 
@@ -211,53 +208,52 @@ Tank* World::SpawnTank(TankType type)
 /// </summary>
 void World::AddWalls()
 {
-	// Left side wall
-	SpawnWall(WallType::kMetalWall, m_center.x - 340, m_center.y - 140, 90);
-	SpawnWall(WallType::kMetalWall, m_center.x - 340, m_center.y - 84, 90);
-	SpawnWall(WallType::kMetalWall, m_center.x - 340, m_center.y - 28, 90);
-	SpawnWall(WallType::kMetalWall, m_center.x - 340, m_center.y + 28, 90);
-	SpawnWall(WallType::kMetalWall, m_center.x - 326, m_center.y + 42, 0);
-	SpawnWall(WallType::kWoodWall, m_center.x - 284, m_center.y + 42, 0);
-	SpawnWall(WallType::kWoodWall, m_center.x - 256, m_center.y + 42, 0);
-	SpawnWall(WallType::kWoodWall, m_center.x - 228, m_center.y + 42, 0);
-	SpawnWall(WallType::kMetalWall, m_center.x - 186, m_center.y + 42, 0);
-	SpawnWall(WallType::kMetalWall, m_center.x - 172, m_center.y + 84, 90);
-	SpawnWall(WallType::kMetalWall, m_center.x - 172, m_center.y + 140, 90);
-	SpawnWall(WallType::kMetalWall, m_center.x - 130, m_center.y + 154, 0);
-	SpawnWall(WallType::kWoodWall, m_center.x - 88, m_center.y + 154, 0);
-	SpawnWall(WallType::kMetalWall, m_center.x - 46, m_center.y + 154, 0);
-	SpawnWall(WallType::kWoodWall, m_center.x - 4, m_center.y + 154, 0);
-	SpawnWall(WallType::kMetalWall, m_center.x + 38, m_center.y + 154, 0);
-	SpawnWall(WallType::kWoodWall, m_center.x + 80, m_center.y + 154, 0);
-	SpawnWall(WallType::kMetalWall, m_center.x + 122, m_center.y + 154, 0);
+	//// Left side wall
+	//SpawnWall(WallType::kMetalWall, m_center.x - 340, m_center.y - 140, 90);
+	//SpawnWall(WallType::kMetalWall, m_center.x - 340, m_center.y - 84, 90);
+	//SpawnWall(WallType::kMetalWall, m_center.x - 340, m_center.y - 28, 90);
+	//SpawnWall(WallType::kMetalWall, m_center.x - 340, m_center.y + 28, 90);
+	//SpawnWall(WallType::kMetalWall, m_center.x - 326, m_center.y + 42, 0);
+	//SpawnWall(WallType::kWoodWall, m_center.x - 284, m_center.y + 42, 0);
+	//SpawnWall(WallType::kWoodWall, m_center.x - 256, m_center.y + 42, 0);
+	//SpawnWall(WallType::kWoodWall, m_center.x - 228, m_center.y + 42, 0);
+	//SpawnWall(WallType::kMetalWall, m_center.x - 186, m_center.y + 42, 0);
+	//SpawnWall(WallType::kMetalWall, m_center.x - 172, m_center.y + 84, 90);
+	//SpawnWall(WallType::kMetalWall, m_center.x - 172, m_center.y + 140, 90);
+	//SpawnWall(WallType::kMetalWall, m_center.x - 130, m_center.y + 154, 0);
+	//SpawnWall(WallType::kWoodWall, m_center.x - 88, m_center.y + 154, 0);
+	//SpawnWall(WallType::kMetalWall, m_center.x - 46, m_center.y + 154, 0);
+	//SpawnWall(WallType::kWoodWall, m_center.x - 4, m_center.y + 154, 0);
+	//SpawnWall(WallType::kMetalWall, m_center.x + 38, m_center.y + 154, 0);
+	//SpawnWall(WallType::kWoodWall, m_center.x + 80, m_center.y + 154, 0);
+	//SpawnWall(WallType::kMetalWall, m_center.x + 122, m_center.y + 154, 0);
 
-	// Right side wall
-	SpawnWall(WallType::kMetalWall, m_center.x + 340, m_center.y + 140, 90);
-	SpawnWall(WallType::kMetalWall, m_center.x + 340, m_center.y + 84, 90);
-	SpawnWall(WallType::kMetalWall, m_center.x + 340, m_center.y + 28, 90);
-	SpawnWall(WallType::kMetalWall, m_center.x + 340, m_center.y - 28, 90);
-	SpawnWall(WallType::kMetalWall, m_center.x + 326, m_center.y - 42, 0);
-	SpawnWall(WallType::kWoodWall, m_center.x + 284, m_center.y - 42, 0);
-	SpawnWall(WallType::kWoodWall, m_center.x + 256, m_center.y - 42, 0);
-	SpawnWall(WallType::kWoodWall, m_center.x + 228, m_center.y - 42, 0);
-	SpawnWall(WallType::kMetalWall, m_center.x + 186, m_center.y - 42, 0);
-	SpawnWall(WallType::kMetalWall, m_center.x + 172, m_center.y - 84, 90);
-	SpawnWall(WallType::kMetalWall, m_center.x + 172, m_center.y - 140, 90);
-	SpawnWall(WallType::kMetalWall, m_center.x + 130, m_center.y - 154, 0);
-	SpawnWall(WallType::kWoodWall, m_center.x + 88, m_center.y - 154, 0);
-	SpawnWall(WallType::kMetalWall, m_center.x + 46, m_center.y - 154, 0);
-	SpawnWall(WallType::kWoodWall, m_center.x + 4, m_center.y - 154, 0);
-	SpawnWall(WallType::kMetalWall, m_center.x - 38, m_center.y - 154, 0);
-	SpawnWall(WallType::kWoodWall, m_center.x - 80, m_center.y - 154, 0);
-	SpawnWall(WallType::kMetalWall, m_center.x - 122, m_center.y - 154, 0);
+	//// Right side wall
+	//SpawnWall(WallType::kMetalWall, m_center.x + 340, m_center.y + 140, 90);
+	//SpawnWall(WallType::kMetalWall, m_center.x + 340, m_center.y + 84, 90);
+	//SpawnWall(WallType::kMetalWall, m_center.x + 340, m_center.y + 28, 90);
+	//SpawnWall(WallType::kMetalWall, m_center.x + 340, m_center.y - 28, 90);
+	//SpawnWall(WallType::kMetalWall, m_center.x + 326, m_center.y - 42, 0);
+	//SpawnWall(WallType::kWoodWall, m_center.x + 284, m_center.y - 42, 0);
+	//SpawnWall(WallType::kWoodWall, m_center.x + 256, m_center.y - 42, 0);
+	//SpawnWall(WallType::kWoodWall, m_center.x + 228, m_center.y - 42, 0);
+	//SpawnWall(WallType::kMetalWall, m_center.x + 186, m_center.y - 42, 0);
+	//SpawnWall(WallType::kMetalWall, m_center.x + 172, m_center.y - 84, 90);
+	//SpawnWall(WallType::kMetalWall, m_center.x + 172, m_center.y - 140, 90);
+	//SpawnWall(WallType::kMetalWall, m_center.x + 130, m_center.y - 154, 0);
+	//SpawnWall(WallType::kWoodWall, m_center.x + 88, m_center.y - 154, 0);
+	//SpawnWall(WallType::kMetalWall, m_center.x + 46, m_center.y - 154, 0);
+	//SpawnWall(WallType::kWoodWall, m_center.x + 4, m_center.y - 154, 0);
+	//SpawnWall(WallType::kMetalWall, m_center.x - 38, m_center.y - 154, 0);
+	//SpawnWall(WallType::kWoodWall, m_center.x - 80, m_center.y - 154, 0);
+	//SpawnWall(WallType::kMetalWall, m_center.x - 122, m_center.y - 154, 0);
 
-	// Add Exterior Walls
-	SpawnWall(WallType::kExterior, m_center.x + 526, m_center.y, 90);
-	SpawnWall(WallType::kExterior, m_center.x - 526, m_center.y, 90);
-	SpawnWall(WallType::kExterior, m_center.x, m_center.y + 302, 0);
-	SpawnWall(WallType::kExterior, m_center.x, m_center.y - 302, 0);
+	//// Add Exterior Walls
+	//SpawnWall(WallType::kExterior, m_center.x + 526, m_center.y, 90);
+	//SpawnWall(WallType::kExterior, m_center.x - 526, m_center.y, 90);
+	//SpawnWall(WallType::kExterior, m_center.x, m_center.y + 302, 0);
+	//SpawnWall(WallType::kExterior, m_center.x, m_center.y - 302, 0);
 }
-
 /// <summary>
 /// Authored: Kaylon Riordan D00255039
 /// Spawn a wall, on the wall layer, based on specified type, position quordinates, and rotation given in degrees
@@ -312,9 +308,11 @@ void World::HandleCollisions()
 {
 	std::set<SceneNode::Pair> collision_pairs;
 	m_scene_graph.CheckSceneCollision(m_scene_graph, collision_pairs);
+	
 
 	for (SceneNode::Pair pair : collision_pairs)
 	{
+
 		// Handle collision for 2 tanks
 		// destroy both tnaks on collision
 		if (MatchesCategories(pair, ReceiverCategories::kRedTank, ReceiverCategories::kBlueTank))
