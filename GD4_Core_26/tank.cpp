@@ -66,6 +66,7 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 		};
 
 	std::unique_ptr<Turret> turret;
+
 	turret = std::unique_ptr<Turret>(new Turret(TurretType::kTurret, textures));
 	m_turret = turret.get();
 	AttachChild(std::move(turret));
@@ -105,6 +106,11 @@ uint8_t	Tank::GetIdentifier()
 void Tank::SetIdentifier(uint8_t identifier)
 {
 	m_identifier = identifier;
+
+	std::cout << "Creating turret for tank with identifier: " << identifier << " and that's the identifier" << std::endl;
+
+	// Tank and turret identifier should match
+	m_turret->SetIdentifier(identifier);
 }
 
 /// <summary>

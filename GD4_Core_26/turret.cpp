@@ -23,7 +23,8 @@ sf::Angle Turret::CalculateMouseRotation(const sf::Vector2f& turret_position, co
 
 /// Create  turret using a scene node with its own type and sprites, used as a sprite on top of tank to show aim direction
 Turret::Turret(TurretType type, const TextureHolder& textures)
-	:m_type(type)
+	: m_identifier(0)
+	, m_type(type)
 	, m_sprite(textures.Get(Table[static_cast<int>(type)].m_texture), Table[static_cast<int>(type)].m_texture_rect)
 {
 	Utility::CentreOrigin(m_sprite);
