@@ -9,6 +9,8 @@
 #include "bloom_effect.hpp"
 #include "sound_player.hpp"
 #include "sprite_node.hpp"
+#include "wall_type.hpp"
+#include "wall.hpp"
 
 #include <array>
 #include "network_node.hpp"
@@ -40,6 +42,9 @@ private:
 	void BuildScene();
 	void AdaptPlayerVelocity();
 	void AdaptPlayerPosition();
+
+	void SpawnWall(WallType type, float x, float y, float rotation);
+	void AddWalls();
 
 	void SpawnEnemies();
 	void AddEnemies();

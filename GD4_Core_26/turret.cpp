@@ -34,11 +34,7 @@ Turret::Turret(TurretType type, const TextureHolder& textures)
 
 unsigned int Turret::GetCategory() const
 {
-	if (m_type == TurretType::kRedTurret)
-	{
-		return static_cast<unsigned int>(ReceiverCategories::kRedTurret);
-	}
-	return static_cast<unsigned int>(ReceiverCategories::kBlueTurret);
+	return static_cast<unsigned int>(ReceiverCategories::kTurret);
 }
 
 /// <summary>

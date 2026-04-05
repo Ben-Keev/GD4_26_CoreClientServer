@@ -42,17 +42,11 @@ std::vector<TankData> InitializeTankData()
 {
 	std::vector<TankData> data(static_cast<int>(TankType::kTankCount));
 
-	for (int i = 0; i <= static_cast<int>(TankType::kTanTank); ++i)
-	{
-		auto& tank = data[i];
-
-		tank.m_hitpoints = 10;
-		tank.m_fire_interval = sf::seconds(2.5);
-		tank.m_texture = TextureID::kEntities;
-
-		// All tanks are red for now
-		tank.m_texture_rect = sf::IntRect({ 260, 80 }, { 38, 40 });
-	}
+	auto& tank = data[0];
+	tank.m_hitpoints = 10;
+	tank.m_fire_interval = sf::seconds(2.5);
+	tank.m_texture = TextureID::kEntities;
+	tank.m_texture_rect = sf::IntRect({ 260, 80 }, { 38, 40 });
 
 	return data;
 }
@@ -65,15 +59,9 @@ std::vector<TurretData> InitializeTurretData()
 {
 	std::vector<TurretData> data(static_cast<int>(TurretType::kTurretCount));
 
-	for (int i = 0; i < static_cast<int>(TurretType::kTanTurret); ++i)
-	{
-		auto& turret = data[i];
-
-		turret.m_texture = TextureID::kEntities;
-
-		// All turrets appear red for now
-		turret.m_texture_rect = sf::IntRect({ 343, 108 }, { 16, 50 });
-	}
+	auto& turret = data[0];
+	turret.m_texture = TextureID::kEntities;
+	turret.m_texture_rect = sf::IntRect({ 343, 108 }, { 16, 50 });
 
 	return data;
 }
@@ -87,17 +75,12 @@ std::vector<ProjectileData> InitializeProjectileData()
 {
 	std::vector<ProjectileData> data(static_cast<int>(ProjectileType::kProjectileCount));
 
-	for (int i = 0; i < static_cast<int>(ProjectileType::kBlueBullet); ++i)
-	{
-		auto& bullet = data[i];
-
-		bullet.m_damage = 10;
-		bullet.m_speed = 300;
-		bullet.m_max_bounces = 2;
-		bullet.m_texture = TextureID::kEntities;
-		// All bullets appear red for now
-		bullet.m_texture_rect = sf::IntRect({ 96, 176 }, { 8, 14 });
-	}
+	auto& bullet = data[0];
+	bullet.m_damage = 10;
+	bullet.m_speed = 300;
+	bullet.m_max_bounces = 2;
+	bullet.m_texture = TextureID::kEntities;
+	bullet.m_texture_rect = sf::IntRect({ 96, 176 }, { 8, 14 });
 	
 	return data;
 }

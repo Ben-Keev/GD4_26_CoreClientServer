@@ -104,7 +104,7 @@ void World::RemoveAircraft(uint8_t identifier)
 
 Tank* World::AddAircraft(uint8_t identifier)
 {
-	std::unique_ptr<Tank> player(new Tank(TankType::kRedTank, m_textures, m_fonts));
+	std::unique_ptr<Tank> player(new Tank(TankType::kTank, m_textures, m_fonts));
 	player->setPosition(m_camera.getCenter());
 	std::cout << "World::AddTank " << +identifier << std::endl;
 	player->SetIdentifier(identifier);
@@ -182,6 +182,8 @@ void World::BuildScene()
 	background_sprite->setPosition(sf::Vector2f(m_world_bounds.position.x, m_world_bounds.position.y - view_height));
 	m_scene_layers[static_cast<int>(SceneLayers::kBackground)]->AttachChild(std::move(background_sprite));
 
+	AddWalls();
+
 	//Add sound effect node
 	std::unique_ptr<SoundNode> soundNode(new SoundNode(m_sounds));
 	m_scene_graph.AttachChild(std::move(soundNode));
@@ -228,9 +230,80 @@ void World::AdaptPlayerPosition()
 	}
 }
 
-void World::SpawnEnemies()
+void World::SpawnEnemies() 
 {
-	return;
+    return;
+}
+	 
+/// <summary>
+/// Authored: Kaylon Riordan D00255039
+/// Call the spawn wall function for each individual wall in the level
+/// </summary>
+void World::AddWalls()
+{
+
+    // Left side wall
+    SpawnWall(WallType::kMetalWall, m_spawn_position.x - 340, m_spawn_position.y - 140, 90);
+    SpawnWall(WallType::kWoodWall, m_spawn_position.x - 284, m_spawn_position.y + 42, 0);
+    /*
+    SpawnWall(WallType::kMetalWall, m_center.x - 340, m_center.y - 140, 90);
+    SpawnWall(WallType::kMetalWall, m_center.x - 340, m_center.y - 84, 90);
+    SpawnWall(WallType::kMetalWall, m_center.x - 340, m_center.y - 28, 90);
+    SpawnWall(WallType::kMetalWall, m_center.x - 340, m_center.y + 28, 90);
+    SpawnWall(WallType::kMetalWall, m_center.x - 326, m_center.y + 42, 0);
+    SpawnWall(WallType::kWoodWall, m_center.x - 284, m_center.y + 42, 0);
+    SpawnWall(WallType::kWoodWall, m_center.x - 256, m_center.y + 42, 0);
+    SpawnWall(WallType::kWoodWall, m_center.x - 228, m_center.y + 42, 0);
+    SpawnWall(WallType::kMetalWall, m_center.x - 186, m_center.y + 42, 0);
+    SpawnWall(WallType::kMetalWall, m_center.x - 172, m_center.y + 84, 90);
+    SpawnWall(WallType::kMetalWall, m_center.x - 172, m_center.y + 140, 90);
+    SpawnWall(WallType::kMetalWall, m_center.x - 130, m_center.y + 154, 0);
+    SpawnWall(WallType::kWoodWall, m_center.x - 88, m_center.y + 154, 0);
+    SpawnWall(WallType::kMetalWall, m_center.x - 46, m_center.y + 154, 0);
+    SpawnWall(WallType::kWoodWall, m_center.x - 4, m_center.y + 154, 0);
+    SpawnWall(WallType::kMetalWall, m_center.x + 38, m_center.y + 154, 0);
+    SpawnWall(WallType::kWoodWall, m_center.x + 80, m_center.y + 154, 0);
+    SpawnWall(WallType::kMetalWall, m_center.x + 122, m_center.y + 154, 0);
+
+    //// Right side wall
+    SpawnWall(WallType::kMetalWall, m_center.x + 340, m_center.y + 140, 90);
+    SpawnWall(WallType::kMetalWall, m_center.x + 340, m_center.y + 84, 90);
+    SpawnWall(WallType::kMetalWall, m_center.x + 340, m_center.y + 28, 90);
+    SpawnWall(WallType::kMetalWall, m_center.x + 340, m_center.y - 28, 90);
+    SpawnWall(WallType::kMetalWall, m_center.x + 326, m_center.y - 42, 0);
+    SpawnWall(WallType::kWoodWall, m_center.x + 284, m_center.y - 42, 0);
+    SpawnWall(WallType::kWoodWall, m_center.x + 256, m_center.y - 42, 0);
+    SpawnWall(WallType::kWoodWall, m_center.x + 228, m_center.y - 42, 0);
+    SpawnWall(WallType::kMetalWall, m_center.x + 186, m_center.y - 42, 0);
+    SpawnWall(WallType::kMetalWall, m_center.x + 172, m_center.y - 84, 90);
+    SpawnWall(WallType::kMetalWall, m_center.x + 172, m_center.y - 140, 90);
+    SpawnWall(WallType::kMetalWall, m_center.x + 130, m_center.y - 154, 0);
+    SpawnWall(WallType::kWoodWall, m_center.x + 88, m_center.y - 154, 0);
+    SpawnWall(WallType::kMetalWall, m_center.x + 46, m_center.y - 154, 0);
+    SpawnWall(WallType::kWoodWall, m_center.x + 4, m_center.y - 154, 0);
+    SpawnWall(WallType::kMetalWall, m_center.x - 38, m_center.y - 154, 0);
+    SpawnWall(WallType::kWoodWall, m_center.x - 80, m_center.y - 154, 0);
+    SpawnWall(WallType::kMetalWall, m_center.x - 122, m_center.y - 154, 0);
+
+    // Add Exterior Walls
+    SpawnWall(WallType::kExterior, m_center.x + 526, m_center.y, 90);
+    SpawnWall(WallType::kExterior, m_center.x - 526, m_center.y, 90);
+    SpawnWall(WallType::kExterior, m_center.x, m_center.y + 302, 0);
+    SpawnWall(WallType::kExterior, m_center.x, m_center.y - 302, 0);
+    */
+
+}
+
+/// <summary>
+/// Authored: Kaylon Riordan D00255039
+/// Spawn a wall, on the wall layer, based on specified type, position quordinates, and rotation given in degrees
+/// </summary>
+void World::SpawnWall(WallType type, float x, float y, float rotation)
+{
+    std::unique_ptr<Wall> wall(new Wall(type, m_textures));
+    wall->setPosition(sf::Vector2f(x, y));
+    wall->setRotation(sf::degrees(rotation));
+    m_scene_layers[static_cast<int>(SceneLayers::kWalls)]->AttachChild(std::move(wall));
 }
 
 void World::AddEnemies()
@@ -274,7 +347,127 @@ bool MatchesCategories(SceneNode::Pair& colliders, ReceiverCategories type1, Rec
 
 void World::HandleCollisions()
 {
-	return;
+	std::set<SceneNode::Pair> collision_pairs;
+	m_scene_graph.CheckSceneCollision(m_scene_graph, collision_pairs);
+	
+
+	for (SceneNode::Pair pair : collision_pairs)
+	{
+
+		// Handle collision for 2 tanks
+		// destroy both tnaks on collision
+		if (MatchesCategories(pair, ReceiverCategories::kTank, ReceiverCategories::kTank))
+		{
+			auto& one = static_cast<Tank&>(*pair.first);
+			auto& two = static_cast<Tank&>(*pair.second);
+
+			one.Destroy();
+			two.Destroy();
+		}
+		// Handle projectile/tank collision
+		// If its the player's own bullet then only deal damage if the bullet has already bounced once, stops bullet imediately killing player as it can spawn inside the players bounding box depending on rotation
+		else if (MatchesCategories(pair, ReceiverCategories::kTank, ReceiverCategories::kProjectile))
+		{
+			auto& tank = static_cast<Tank&>(*pair.first);
+			auto& projectile = static_cast<Projectile&>(*pair.second);
+			if (&tank != &projectile.GetOwner() || projectile.GetBounces() != 0)
+			{
+				// Collision response
+				tank.Damage(projectile.GetDamage());
+				projectile.Destroy();
+			}
+		}
+		// Handle player/wall collisions
+		else if (MatchesCategories(pair, ReceiverCategories::kTank, ReceiverCategories::kWall))
+		{
+			auto& tank = static_cast<Tank&>(*pair.first);
+			auto& wall = static_cast<Wall&>(*pair.second);
+
+			// Store position before changing it
+			sf::Vector2f currentPosition = tank.getPosition();
+
+			// Check if collision is caused by the rotation, if so revert to previous rotation
+			tank.setPosition(sf::Vector2f(tank.GetPreviousPosition().x, tank.GetPreviousPosition().y));
+			if (Collision(tank, wall))
+			{
+				tank.setRotation(tank.GetPreviousRotation());
+			}
+
+			// Check if collision is caused by the x axis, if so revert to previous x position
+			tank.setPosition(sf::Vector2f(currentPosition.x, tank.GetPreviousPosition().y));
+			if (Collision(tank, wall))
+			{
+				currentPosition = sf::Vector2f(tank.GetPreviousPosition().x, currentPosition.y);
+			}
+
+			// Check if collision is caused by the y axis, if so revert to previous y position
+			tank.setPosition(sf::Vector2f(tank.GetPreviousPosition().x, currentPosition.y));
+			if (Collision(tank, wall))
+			{
+				currentPosition = sf::Vector2f(currentPosition.x, tank.GetPreviousPosition().y);
+			}
+
+			// Update position to one with no wall collision
+			tank.setPosition(sf::Vector2f(currentPosition.x, currentPosition.y));
+		}
+		// Handle projectile/breakable wall collisions
+		else if (MatchesCategories(pair, ReceiverCategories::kProjectile, ReceiverCategories::kWoodWall))
+		{
+			auto& projectile = static_cast<Projectile&>(*pair.first);
+			auto& wall = static_cast<Wall&>(*pair.second);
+			wall.Damage(projectile.GetDamage());
+			projectile.Destroy();
+		}
+		// Handle projectile/durable wall collisions
+		else if (MatchesCategories(pair, ReceiverCategories::kProjectile, ReceiverCategories::kWall))
+		{
+			auto& projectile = static_cast<Projectile&>(*pair.first);
+			auto& wall = static_cast<Wall&>(*pair.second);
+			if (projectile.CanBounce())
+			{
+				bool corner = true;
+				projectile.AddBounce();
+
+				// Collision response
+				sf::Vector2f currentPosition = projectile.getPosition();
+
+				// If collision is was on the x axis, invert the x velocity to bounce projectile
+				projectile.setPosition(sf::Vector2f(currentPosition.x, projectile.GetPreviousPosition().y));
+				if (Collision(projectile, wall))
+				{
+					currentPosition = sf::Vector2f(projectile.GetPreviousPosition().x, currentPosition.y);
+					projectile.SetVelocity(-projectile.GetVelocity().x, projectile.GetVelocity().y);
+					corner = false;
+				}
+
+				// If collision is was on the y axis, invert the y velocity to bounce projectile
+				projectile.setPosition(sf::Vector2f(projectile.GetPreviousPosition().x, currentPosition.y));
+				if (Collision(projectile, wall))
+				{
+					currentPosition = sf::Vector2f(currentPosition.x, projectile.GetPreviousPosition().y);
+					projectile.SetVelocity(projectile.GetVelocity().x, -projectile.GetVelocity().y);
+					corner = false;
+				}
+
+				// If neither x or y alone are triggered, then the bullet hit perfectly on the corner of a wall, invert both velocities
+				if (corner)
+				{
+					currentPosition = sf::Vector2f(projectile.GetPreviousPosition().x, projectile.GetPreviousPosition().y);
+					projectile.SetVelocity(-projectile.GetVelocity().x, -projectile.GetVelocity().y);
+				}
+
+				// Rotate projectile to face the direction they are moving after bounce
+				projectile.setRotation(sf::degrees((std::atan2(projectile.GetVelocity().y, projectile.GetVelocity().x) * 180 / 3.14159265f) + 90));
+				projectile.setPosition(sf::Vector2f(currentPosition.x, currentPosition.y));
+
+				// If the wall is wooden, break it after bounce
+				if (wall.GetCategory() == static_cast<unsigned int>(ReceiverCategories::kWoodWall))
+				{
+					wall.Damage(projectile.GetDamage());
+				}
+			}
+		}
+	}
 }
 
 void World::DestroyEntitiesOutsideView()

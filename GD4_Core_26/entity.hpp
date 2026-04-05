@@ -10,6 +10,8 @@ public:
 	sf::Vector2f GetVelocity() const;
 	void Accelerate(sf::Vector2f velocity);
 	void Accelerate(float vx, float vy);
+	sf::Vector2f GetPreviousPosition() const;
+	sf::Angle GetPreviousRotation() const;
 
 	int GetHitPoints() const;
 	void SetHitpoints(int points);
@@ -24,6 +26,8 @@ protected:
 
 private:
 	sf::Vector2f m_velocity;
+	sf::Vector2f m_previous_position;
+	sf::Angle m_previous_rotation;
 	int m_hitpoints;
 };
 

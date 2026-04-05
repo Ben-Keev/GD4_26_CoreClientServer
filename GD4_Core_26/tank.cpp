@@ -66,7 +66,7 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 		};
 
 	std::unique_ptr<Turret> turret;
-	turret = std::unique_ptr<Turret>(new Turret(TurretType::kRedTurret, textures));
+	turret = std::unique_ptr<Turret>(new Turret(TurretType::kTurret, textures));
 	m_turret = turret.get();
 	AttachChild(std::move(turret));
 
@@ -86,7 +86,7 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 	m_health_display = health_display.get();
 	AttachChild(std::move(health_display));
 
-	if (Tank::GetCategory() == static_cast<int>(ReceiverCategories::kRedTank))
+	if (Tank::GetCategory() == static_cast<int>(ReceiverCategories::kTank))
 	{
 		std::string* missile_ammo = new std::string("");
 		std::unique_ptr<TextNode> missile_display(new TextNode(fonts, *missile_ammo));
@@ -107,9 +107,12 @@ void Tank::SetIdentifier(uint8_t identifier)
 	m_identifier = identifier;
 }
 
+/// <summary>
+/// Returns the category used by the command system for filtering. (GPT)
+/// </summary>
 unsigned int Tank::GetCategory() const
 {
-	return static_cast<unsigned int>(ReceiverCategories::kRedTank);
+	return static_cast<unsigned int>(ReceiverCategories::kTank);
 }
 
 void Tank::IncreaseFireRate()
@@ -181,8 +184,8 @@ void Tank::UpdateMovementPattern(sf::Time dt)
 float Tank::GetMaxSpeed() const
 {
 	return 100.f;
-		
-		//Table[static_cast<int>(m_type)].m_speed;
+
+	//Table[static_cast<int>(m_type)].m_speed;
 }
 
 void Tank::Fire()
@@ -193,9 +196,12 @@ void Tank::Fire()
 	}
 }
 
-void Tank::CreateBullet(SceneNode& node, const TextureHolder& textures) const
+void Tank::CreateBullet(SceneNode& node, const TextureHolder& textures)
 {
-	ProjectileType type = IsAllied() ? ProjectileType::kRedBullet : ProjectileType::kRedBullet;
+	// It may be an enemy bullet or an allied bullet.
+	ProjectileType type = ProjectileType::kBullet;
+
+	// How many bullets are fired based on the level accquired
 	switch (m_spread_level)
 	{
 	case 1:
@@ -213,9 +219,16 @@ void Tank::CreateBullet(SceneNode& node, const TextureHolder& textures) const
 	}
 }
 
-void Tank::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset, float y_offset, const TextureHolder& textures) const
+/// <summary>
+/// Modified: Ben Mc Keever D00254413
+/// Now projectiles face the direction of the turret
+/// Creates and launches a projectile in the direction of the turret. (GPT)
+/// Modified: Kaylon Riordan D00255039
+/// Changed projectiles rotation to check turret instead of tank
+/// </summary>
+void Tank::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset, float y_offset, const TextureHolder& textures)
 {
-	std::unique_ptr<Projectile> projectile(new Projectile(type, textures));
+	std::unique_ptr<Projectile> projectile(new Projectile(type, textures, this));
 
 	sf::Vector2f offset(x_offset * m_sprite.getGlobalBounds().size.x, y_offset * m_sprite.getGlobalBounds().size.y);
 
@@ -245,7 +258,7 @@ bool Tank::IsMarkedForRemoval() const
 	return IsDestroyed() && (m_explosion.IsFinished() || !m_show_explosion);
 }
 
-void Tank::PlayLocalSound(CommandQueue& commands, SoundEffect effect)
+void Tank::PlayLocalSound(CommandQueue & commands, SoundEffect effect)
 {
 	sf::Vector2f world_position = GetWorldPosition();
 
@@ -259,7 +272,7 @@ void Tank::PlayLocalSound(CommandQueue& commands, SoundEffect effect)
 	commands.Push(command);
 }
 
-void Tank::DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const
+void Tank::DrawCurrent(sf::RenderTarget & target, sf::RenderStates states) const
 {
 	if (IsDestroyed() && m_show_explosion)
 	{
@@ -271,7 +284,7 @@ void Tank::DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const
 	}
 }
 
-void Tank::UpdateCurrent(sf::Time dt, CommandQueue& commands)
+void Tank::UpdateCurrent(sf::Time dt, CommandQueue & commands)
 {
 	if (IsDestroyed())
 	{
@@ -310,7 +323,7 @@ void Tank::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 	CheckProjectileLaunch(dt, commands);
 }
 
-void Tank::CheckProjectileLaunch(sf::Time dt, CommandQueue& commands)
+void Tank::CheckProjectileLaunch(sf::Time dt, CommandQueue & commands)
 {
 	if (!IsAllied())
 	{
@@ -339,9 +352,12 @@ void Tank::CheckProjectileLaunch(sf::Time dt, CommandQueue& commands)
 	//}
 }
 
+/// <summary>
+/// Returns true if tank is allied (red tank). (GPT)
+/// </summary>
 bool Tank::IsAllied() const
 {
-	return m_type == TankType::kRedTank;
+	return m_type == TankType::kTank;
 }
 
 void Tank::Remove()

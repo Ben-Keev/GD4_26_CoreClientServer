@@ -32,9 +32,9 @@ struct TurretRotator
     {
         sf::Angle angle = Turret::CalculateMouseRotation(turret.GetWorldPosition(), mouse_position);
 
-		std::cout << "Mouse Position: (" << mouse_position.x << ", " << mouse_position.y << ") | "
-                  << "Turret World Position: (" << turret.GetWorldPosition().x << ", " << turret.GetWorldPosition().y << ") | "
-                  << "Calculated Angle: " << angle.asDegrees() << " degrees" << std::endl;
+		//std::cout << "Mouse Position: (" << mouse_position.x << ", " << mouse_position.y << ") | "
+  //                << "Turret World Position: (" << turret.GetWorldPosition().x << ", " << turret.GetWorldPosition().y << ") | "
+  //                << "Calculated Angle: " << angle.asDegrees() << " degrees" << std::endl;
 
         // Make turret rotation relative to tank
         turret.setRotation(angle - turret.GetParent()->GetWorldRotation());
@@ -100,7 +100,7 @@ Player::Player(sf::TcpSocket* socket, uint8_t identifier, const KeyBinding* bind
     // Set all commands to affect player aircraft category
     for (auto& pair : m_action_binding)
     {
-        pair.second.category = static_cast<unsigned int>(ReceiverCategories::kRedTank);
+        pair.second.category = static_cast<unsigned int>(ReceiverCategories::kTank);
     }
 }
 
@@ -116,6 +116,8 @@ Command Player::AnalogueAiming(const sf::Vector2f& mousePos)
 void Player::HandleEvent(const sf::Event& event, CommandQueue& command_queue)
 {
     const auto* key_pressed = event.getIf<sf::Event::KeyPressed>();
+
+
     if (key_pressed)
     {
         Action action;
