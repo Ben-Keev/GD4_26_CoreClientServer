@@ -21,6 +21,7 @@ sf::Angle CalculateRotation(float x, float y)
     return sf::radians(radians) + sf::degrees(-90.f);
 }
 
+// Modified heavily to work with mouses
 struct TurretRotator
 {
     TurretRotator(const sf::Vector2f& mousePos)

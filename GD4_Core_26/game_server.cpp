@@ -183,7 +183,18 @@ void GameServer::Tick()
             {
                 sf::Packet packet;
                 packet << static_cast<uint8_t>(Server::PacketType::kSpawnEnemy);
-                packet << static_cast<uint8_t>(1 + Utility::RandomInt(static_cast<int>(TankType::kTankCount) - 1));
+
+                // Fix a bug causing random to be called with a 0 or negative number
+                int tank_types = static_cast<int>(TankType::kTankCount) - 1;
+                if (tank_types > 0)
+                {
+                    packet << static_cast<uint8_t>(1 + Utility::RandomInt(tank_types));
+                }
+                else
+                {
+                    packet << static_cast<uint8_t>(1); // fallback to first tank type
+                }
+
                 packet << m_world_height - m_battlefield_rect.position.y + 500;
                 packet << next_spawn_position;
 
