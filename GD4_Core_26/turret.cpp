@@ -28,6 +28,7 @@ Turret::Turret(TurretType type, const TextureHolder& textures)
 	:m_type(type)
 	, m_sprite(textures.Get(Table[static_cast<int>(type)].m_texture), Table[static_cast<int>(type)].m_texture_rect)
 {
+	m_sprite.setColor(Table[static_cast<int>(m_type)].m_colour);
 	Utility::CentreOrigin(m_sprite);
 }
 

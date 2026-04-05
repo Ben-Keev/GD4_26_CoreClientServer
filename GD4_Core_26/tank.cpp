@@ -45,6 +45,7 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 	, m_pickups_enabled(true)
 	, m_identifier(0)
 {
+	m_sprite.setColor(Table[static_cast<int>(m_type)].m_colour);
 	m_explosion.SetFrameSize(sf::Vector2i(256, 256));
 	m_explosion.SetNumFrames(16);
 	m_explosion.SetDuration(sf::seconds(1));

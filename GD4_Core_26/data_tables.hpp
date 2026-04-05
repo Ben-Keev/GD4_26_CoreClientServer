@@ -22,6 +22,7 @@ struct TankData
 	int m_hitpoints;
 	TextureID m_texture;
 	sf::IntRect m_texture_rect;
+	sf::Color m_colour;
 	sf::Time m_fire_interval;
 	std::vector<Direction> m_directions;
 	bool m_has_roll_animation;
@@ -31,6 +32,7 @@ struct TurretData
 {
 	TextureID m_texture;
 	sf::IntRect m_texture_rect;
+	sf::Color m_colour;
 };
 
 /// <summary>
@@ -44,6 +46,7 @@ struct ProjectileData
 	int m_max_bounces;
 	TextureID m_texture;
 	sf::IntRect m_texture_rect;
+	sf::Color m_colour;
 };
 
 struct WallData
