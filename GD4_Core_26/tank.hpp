@@ -36,6 +36,7 @@ public:
 	sf::FloatRect GetBoundingRect() const override;
 	bool IsMarkedForRemoval() const override;
 	void Remove() override;
+	Turret* GetTurret() const { return m_turret; }
 	void PlayLocalSound(CommandQueue& commands, SoundEffect effect);
 
 private:

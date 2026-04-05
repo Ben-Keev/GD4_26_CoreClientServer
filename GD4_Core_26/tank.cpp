@@ -372,8 +372,6 @@ void Tank::Remove()
 	m_show_explosion = false;
 }
 
-
-
 //void Aircraft::CreatePickup(SceneNode& node, const TextureHolder& textures) const
 //{
 //	auto type = static_cast<PickupType>(Utility::RandomInt(static_cast<int>(PickupType::kPickupCount)));

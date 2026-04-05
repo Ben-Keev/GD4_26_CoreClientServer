@@ -33,6 +33,9 @@ private:
 		sf::Vector2f m_position;
 		uint8_t m_hitpoints;
 		uint8_t m_missile_ammo;
+		// Turret rotation stored in degrees
+		float m_turret_rotation;
+		float m_aircraft_rotation;
 		std::map<uint8_t, bool> m_real_time_actions;
 	};
 
