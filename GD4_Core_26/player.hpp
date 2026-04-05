@@ -1,6 +1,7 @@
 #pragma once
 #include "command_queue.hpp"
 #include <SFML/Window/Event.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
 #include "action.hpp"
 #include <map>
 #include "command.hpp"
@@ -12,7 +13,8 @@
 class Player
 {
 public:
-	Player(sf::TcpSocket* socket, uint8_t identifier, const KeyBinding* binding);
+	Player(sf::TcpSocket* socket, uint8_t identifier, const KeyBinding* binding, sf::RenderWindow* window);
+	Command AnalogueAiming(const sf::Vector2f& mousePos);
 	void HandleEvent(const sf::Event& event, CommandQueue& command_queue);
 	void HandleRealTimeInput(CommandQueue& command_queue);
 	void HandleRealtimeNetworkInput(CommandQueue& commands);
@@ -37,5 +39,6 @@ private:
 	MissionStatus m_current_mission_status;
 	uint8_t m_identifier;
 	sf::TcpSocket* m_socket;
+	sf::RenderWindow* m_window;
 };
 

@@ -19,7 +19,9 @@ public:
 	uint8_t GetIdentifier();
 	void SetIdentifier(uint8_t identifier);
 
-protected:
+	static sf::Angle CalculateMouseRotation(const sf::Vector2f& turret_position, const sf::Vector2f& mouse_position);
+
+protected: 
 	virtual void DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const;
 
 

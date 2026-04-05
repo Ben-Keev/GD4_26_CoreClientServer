@@ -2,6 +2,7 @@
 #include "player.hpp"
 #include "command_queue.hpp"
 #include "tank.hpp"
+#include "turret_type.hpp"
 
 #include "network_protocol.hpp"
 #include <SFML/Network/Packet.hpp>
@@ -20,19 +21,26 @@ sf::Angle CalculateRotation(float x, float y)
 
 struct TurretRotator
 {
-    TurretRotator(float x, float y) : axis(x, y) {}
+    TurretRotator(const sf::Vector2f& mousePos)
+        : mouse_position(mousePos) 
+    {}
 
     /// <summary>
     /// Rotates turret relative to parent tank rotation. (GPT)
     /// </summary>
     void operator()(Turret& turret, sf::Time) const
     {
-        sf::Angle angle = CalculateRotation(axis.x, axis.y);
+        sf::Angle angle = Turret::CalculateMouseRotation(turret.GetWorldPosition(), mouse_position);
 
+		std::cout << "Mouse Position: (" << mouse_position.x << ", " << mouse_position.y << ") | "
+                  << "Turret World Position: (" << turret.GetWorldPosition().x << ", " << turret.GetWorldPosition().y << ") | "
+                  << "Calculated Angle: " << angle.asDegrees() << " degrees" << std::endl;
+
+        // Make turret rotation relative to tank
         turret.setRotation(angle - turret.GetParent()->GetWorldRotation());
     }
 
-    sf::Vector2f axis; // Raw joystick axis values for aiming (GPT)
+    sf::Vector2f mouse_position;
 };
 
 // Functor that moves an aircraft when a command is executed
@@ -80,11 +88,12 @@ struct AircraftFireTrigger
 };
 
 // Player constructor
-Player::Player(sf::TcpSocket* socket, uint8_t identifier, const KeyBinding* binding)
+Player::Player(sf::TcpSocket* socket, uint8_t identifier, const KeyBinding* binding, sf::RenderWindow* window)
     : m_key_binding(binding)                 // Key bindings for this player
     , m_current_mission_status(MissionStatus::kMissionRunning)
     , m_identifier(identifier)               // Player ID
     , m_socket(socket)                       // Network socket (nullptr if local game)
+    , m_window(window)
 {
     InitialiseActions(); // Setup all action -> command mappings
 
@@ -93,6 +102,14 @@ Player::Player(sf::TcpSocket* socket, uint8_t identifier, const KeyBinding* bind
     {
         pair.second.category = static_cast<unsigned int>(ReceiverCategories::kRedTank);
     }
+}
+
+Command Player::AnalogueAiming(const sf::Vector2f& mousePos)
+{
+    Command rotate;
+    rotate.category = static_cast<unsigned int>(ReceiverCategories::kTurret);
+    rotate.action = DerivedAction<Turret>(TurretRotator(mousePos));
+    return rotate;
 }
 
 // Handles key press/release events
@@ -191,6 +208,11 @@ void Player::HandleRealTimeInput(CommandQueue& command_queue)
             //std::cout << "Realtime key held: " << static_cast<int>(action) << std::endl;
             command_queue.Push(m_action_binding[action]);
         }
+
+        sf::Vector2i mouseScreen = sf::Mouse::getPosition(*m_window); // screen coordinates
+        sf::Vector2f mouseWorld = m_window->mapPixelToCoords(mouseScreen); // world coordinates
+
+        command_queue.Push(AnalogueAiming(mouseWorld));
     }
 }
 
