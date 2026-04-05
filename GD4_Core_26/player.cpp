@@ -95,6 +95,7 @@ Player::Player(sf::TcpSocket* socket, uint8_t identifier, const KeyBinding* bind
     , m_identifier(identifier)               // Player ID
     , m_socket(socket)                       // Network socket (nullptr if local game)
     , m_window(window)
+    , m_details{ "", sf::Color(240, 70, 90), 0}
 {
     InitialiseActions(); // Setup all action -> command mappings
 
@@ -180,6 +181,11 @@ bool Player::IsLocal() const
 {
     // No key binding means this player is remote
     return m_key_binding != nullptr;
+}
+
+PlayerDetails Player::GetDetails()
+{
+    return m_details;
 }
 
 // Enables/disables all realtime actions over network

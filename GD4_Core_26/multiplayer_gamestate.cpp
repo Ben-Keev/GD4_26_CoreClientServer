@@ -387,7 +387,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 		sf::Vector2f aircraft_position;
 		packet >> aircraft_identifier >> aircraft_position.x >> aircraft_position.y;
 		std::cout << "Client kSpawnSelf" << +aircraft_identifier << std::endl;
-		Tank* aircraft = m_world.AddAircraft(aircraft_identifier, { 512, 288 });
+		Tank* aircraft = m_world.AddAircraft(aircraft_identifier, m_players[aircraft_identifier]->GetDetails().m_colour, { 512, 288 });
 		aircraft->setPosition(aircraft_position);
 		m_players[aircraft_identifier].reset(new Player(&m_socket, aircraft_identifier, GetContext().keys1, GetContext().window));
 		m_local_player_identifiers.push_back(aircraft_identifier);
@@ -401,7 +401,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 		sf::Vector2f aircraft_position;
 		packet >> aircraft_identifier >> aircraft_position.x >> aircraft_position.y;
 
-		Tank* aircraft = m_world.AddAircraft(aircraft_identifier, { 512, 288 });
+		Tank* aircraft = m_world.AddAircraft(aircraft_identifier, m_players[aircraft_identifier]->GetDetails().m_colour, { 512, 288 });
 		aircraft->setPosition(aircraft_position);
 		m_players[aircraft_identifier].reset(new Player(&m_socket, aircraft_identifier, nullptr, GetContext().window));
 	}
@@ -437,7 +437,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 			float aircraft_rotation; // This is only needed for initial state
 			packet >> aircraft_identifier >> aircraft_position.x >> aircraft_position.y >> hitpoints >> missile_ammo >> turret_rotation >> aircraft_rotation;
 
-			Tank* aircraft = m_world.AddAircraft(aircraft_identifier, { 512, 288 });
+			Tank* aircraft = m_world.AddAircraft(aircraft_identifier, m_players[aircraft_identifier]->GetDetails().m_colour, { 512, 288 });
 			aircraft->setPosition(aircraft_position);
 			aircraft->setRotation(sf::degrees(aircraft_rotation));
 			aircraft->GetTurret()->setRotation(sf::degrees(turret_rotation));
@@ -455,7 +455,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 		uint8_t aircraft_identifier;
 		packet >> aircraft_identifier;
 
-		m_world.AddAircraft(aircraft_identifier, { 512, 288 });
+		m_world.AddAircraft(aircraft_identifier, m_players[aircraft_identifier]->GetDetails().m_colour, { 512, 288 });
 		m_players[aircraft_identifier].reset(new Player(&m_socket, aircraft_identifier, GetContext().keys2, GetContext().window));
 		m_local_player_identifiers.emplace_back(aircraft_identifier);
 	}

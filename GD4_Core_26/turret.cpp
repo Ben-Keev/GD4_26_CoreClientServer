@@ -17,16 +17,15 @@ sf::Angle Turret::CalculateMouseRotation(const sf::Vector2f& turret_position, co
 	sf::Vector2f delta = mouse_position - turret_position;
 	float radians = std::atan2(delta.y, delta.x);
 
-	// Add -90 degrees so the turret sprite points "up" correctly
-	return sf::radians(radians) + sf::degrees(-90.f);
+	return sf::radians(radians);
 }
 
-/// Create  turret using a scene node with its own type and sprites, used as a sprite on top of tank to show aim direction
-Turret::Turret(TurretType type, const TextureHolder& textures)
+Turret::Turret(TurretType type, const TextureHolder& textures, sf::Color colour)
 	: m_identifier(0)
-	, m_type(type)
+    , m_type(type)
 	, m_sprite(textures.Get(Table[static_cast<int>(type)].m_texture), Table[static_cast<int>(type)].m_texture_rect)
 {
+	m_sprite.setColor(colour);
 	Utility::CentreOrigin(m_sprite);
 }
 

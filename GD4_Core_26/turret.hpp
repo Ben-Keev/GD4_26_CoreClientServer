@@ -12,7 +12,7 @@
 class Turret : public SceneNode
 {
 public:
-	Turret(TurretType type, const TextureHolder& textures);
+	Turret(TurretType type, const TextureHolder& textures, sf::Color colour);
 	unsigned int GetCategory() const override;
 	void Hide();
 
