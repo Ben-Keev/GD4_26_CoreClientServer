@@ -16,7 +16,7 @@ public:
 	Player(sf::TcpSocket* socket, uint8_t identifier, const KeyBinding* binding, sf::RenderWindow* window);
 	Command AnalogueAiming(const sf::Vector2f& mousePos);
 	void HandleEvent(const sf::Event& event, CommandQueue& command_queue);
-	void HandleRealTimeInput(CommandQueue& command_queue);
+	void HandleRealTimeInput(CommandQueue& command_queue, const sf::View& world_view);
 	void HandleRealtimeNetworkInput(CommandQueue& commands);
 
 	//React to events or realtime state changes recevied over the network

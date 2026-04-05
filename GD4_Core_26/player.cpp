@@ -9,6 +9,8 @@
 
 #include <map>
 #include "turret.hpp"
+#include "application.hpp"
+#include "multiplayer_gamestate.hpp"
 
 sf::Angle CalculateRotation(float x, float y)
 {
@@ -22,21 +24,13 @@ sf::Angle CalculateRotation(float x, float y)
 struct TurretRotator
 {
     TurretRotator(const sf::Vector2f& mousePos)
-        : mouse_position(mousePos) 
-    {}
+        : mouse_position(mousePos)
+    {
+    }
 
-    /// <summary>
-    /// Rotates turret relative to parent tank rotation. (GPT)
-    /// </summary>
     void operator()(Turret& turret, sf::Time) const
     {
         sf::Angle angle = Turret::CalculateMouseRotation(turret.GetWorldPosition(), mouse_position);
-
-		//std::cout << "Mouse Position: (" << mouse_position.x << ", " << mouse_position.y << ") | "
-  //                << "Turret World Position: (" << turret.GetWorldPosition().x << ", " << turret.GetWorldPosition().y << ") | "
-  //                << "Calculated Angle: " << angle.asDegrees() << " degrees" << std::endl;
-
-        // Make turret rotation relative to tank
         turret.setRotation(angle - turret.GetParent()->GetWorldRotation());
     }
 
@@ -196,7 +190,7 @@ void Player::DisableAllRealtimeActions(bool enable)
 }
 
 // Handles realtime input (movement keys held down)
-void Player::HandleRealTimeInput(CommandQueue& command_queue)
+void Player::HandleRealTimeInput(CommandQueue& command_queue, const sf::View& world_view)
 {
     // If local player in multiplayer OR single player
     if ((m_socket && IsLocal()) || !m_socket)
@@ -212,7 +206,7 @@ void Player::HandleRealTimeInput(CommandQueue& command_queue)
         }
 
         sf::Vector2i mouseScreen = sf::Mouse::getPosition(*m_window); // screen coordinates
-        sf::Vector2f mouseWorld = m_window->mapPixelToCoords(mouseScreen); // world coordinates
+        sf::Vector2f mouseWorld = m_window->mapPixelToCoords(mouseScreen, world_view); // world coordinates
 
         command_queue.Push(AnalogueAiming(mouseWorld));
     }

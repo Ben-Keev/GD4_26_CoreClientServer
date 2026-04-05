@@ -495,3 +495,4 @@ void World::UpdateSounds()
 	m_sounds.SetListenerPosition(listener_position);
 	m_sounds.RemoveStoppedSounds();
 }
+

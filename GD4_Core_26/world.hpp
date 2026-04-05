@@ -37,6 +37,8 @@ public:
 	sf::FloatRect GetBattleFieldBounds() const;
 	bool PollGameAction(GameActions::Action& out);
 
+	const sf::View& GetCamera() const { return m_camera; };
+
 private:
 	void LoadTextures();
 	void BuildScene();
