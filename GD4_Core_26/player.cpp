@@ -7,6 +7,33 @@
 #include <SFML/Network/Packet.hpp>
 
 #include <map>
+#include "turret.hpp"
+
+sf::Angle CalculateRotation(float x, float y)
+{
+    // Returns radians
+    float radians = std::atan2(y, x);
+
+    // Rotate an added 90 degrees so that the sprite renders upright
+    return sf::radians(radians) + sf::degrees(-90.f);
+}
+
+struct TurretRotator
+{
+    TurretRotator(float x, float y) : axis(x, y) {}
+
+    /// <summary>
+    /// Rotates turret relative to parent tank rotation. (GPT)
+    /// </summary>
+    void operator()(Turret& turret, sf::Time) const
+    {
+        sf::Angle angle = CalculateRotation(axis.x, axis.y);
+
+        turret.setRotation(angle - turret.GetParent()->GetWorldRotation());
+    }
+
+    sf::Vector2f axis; // Raw joystick axis values for aiming (GPT)
+};
 
 // Functor that moves an aircraft when a command is executed
 struct AircraftMover
@@ -20,9 +47,12 @@ struct AircraftMover
     // This runs when the command is executed
     void operator()(Tank& aircraft, sf::Time) const
     {
+        sf::Angle angle = CalculateRotation(velocity.x, velocity.y);
+
         // Only move the aircraft that belongs to this player
         if (aircraft.GetIdentifier() == aircraft_id)
         {
+            aircraft.setRotation(angle);
             aircraft.Accelerate(velocity * 200.f);
         }
     }

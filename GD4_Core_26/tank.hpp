@@ -6,6 +6,7 @@
 #include "projectile_type.hpp"
 #include "command_queue.hpp"
 #include "animation.hpp"
+#include "turret.hpp"
 
 class Tank : public Entity
 {
@@ -81,5 +82,6 @@ private:
 
 	uint8_t m_identifier;
 
+	Turret* m_turret;
 };
 

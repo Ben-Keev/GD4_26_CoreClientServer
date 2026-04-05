@@ -19,7 +19,7 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	, m_scene_layers()
 	, m_world_bounds(sf::Vector2f(0.f, 0.f), sf::Vector2f(m_camera.getSize().x, 5000.f))
 	, m_spawn_position(m_camera.getSize().x / 2.f, m_world_bounds.size.y - m_camera.getSize().y / 2.f)
-	, m_scroll_speed(-50.f)
+	, m_scroll_speed(0)
 	, m_scrollspeed_compensation(1.f)
 	, m_player_tank()
 	, m_enemy_spawn_points()
@@ -48,6 +48,7 @@ void World::Update(sf::Time dt)
 	{
 		m_scene_graph.OnCommand(m_command_queue.Pop(), dt);
 	}
+
 	AdaptPlayerVelocity();
 
 	HandleCollisions();

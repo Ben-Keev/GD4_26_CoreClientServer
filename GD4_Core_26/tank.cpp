@@ -10,6 +10,7 @@
 #include "sound_node.hpp"
 #include "network_node.hpp"
 #include "tank_type.hpp"
+#include "turret.hpp"
 
 
 namespace
@@ -53,8 +54,21 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 	m_fire_command.category = static_cast<int>(ReceiverCategories::kScene);
 	m_fire_command.action = [this, &textures](SceneNode& node, sf::Time dt)
 		{
+			m_explosion.SetFrameSize(sf::Vector2i(200, 200));
+			m_explosion.SetNumFrames(9);
+			m_explosion.SetDuration(sf::seconds(0.5));
+
+			// Center sprite origins for correct rotation/positioning (GPT)
+			Utility::CentreOrigin(m_sprite);
+			Utility::CentreOrigin(m_explosion);
+
 			CreateBullet(node, textures);
 		};
+
+	std::unique_ptr<Turret> turret;
+	turret = std::unique_ptr<Turret>(new Turret(TurretType::kRedTurret, textures));
+	m_turret = turret.get();
+	AttachChild(std::move(turret));
 
 	//m_missile_command.category = static_cast<int>(ReceiverCategories::kScene);
 	//m_missile_command.action = [this, &textures](SceneNode& node, sf::Time dt)
@@ -202,12 +216,22 @@ void Tank::CreateBullet(SceneNode& node, const TextureHolder& textures) const
 void Tank::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset, float y_offset, const TextureHolder& textures) const
 {
 	std::unique_ptr<Projectile> projectile(new Projectile(type, textures));
-	sf::Vector2f offset(x_offset * m_sprite.getGlobalBounds().size.x, y_offset * m_sprite.getGlobalBounds().size.y);
-	sf::Vector2f velocity(0, projectile->GetMaxSpeed());
 
-	float sign = IsAllied() ? -1.f : 1.f;
-	projectile->setPosition(GetWorldPosition() + offset * sign);
-	projectile->SetVelocity(velocity * sign);
+	sf::Vector2f offset(x_offset * m_sprite.getGlobalBounds().size.x, y_offset * m_sprite.getGlobalBounds().size.y);
+
+	// Subtract 90 degrees but keep the format in radians
+	float radians = (m_turret->GetWorldRotation() - sf::degrees(-90.f)).asRadians();
+
+	// Create the unit vector pointing in the angle of our direction
+	// https://gamedev.stackexchange.com/questions/117583/how-do-i-get-a-vector-from-an-angle
+	sf::Vector2f direction(
+		std::cos(radians),
+		std::sin(radians)
+	);
+
+	projectile->setPosition(GetWorldPosition() + offset + (direction * 25.0f));
+	projectile->setRotation(m_turret->GetWorldRotation() - sf::degrees(180.f));
+	projectile->SetVelocity(direction * projectile->GetMaxSpeed());
 	node.AttachChild(std::move(projectile));
 }
 
@@ -325,6 +349,8 @@ void Tank::Remove()
 	Entity::Remove();
 	m_show_explosion = false;
 }
+
+
 
 //void Aircraft::CreatePickup(SceneNode& node, const TextureHolder& textures) const
 //{
