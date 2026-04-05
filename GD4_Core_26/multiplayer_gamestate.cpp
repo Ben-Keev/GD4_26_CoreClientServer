@@ -381,7 +381,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 		sf::Vector2f aircraft_position;
 		packet >> aircraft_identifier >> aircraft_position.x >> aircraft_position.y;
 		std::cout << "Client kSpawnSelf" << +aircraft_identifier << std::endl;
-		Tank* aircraft = m_world.AddAircraft(aircraft_identifier);
+		Tank* aircraft = m_world.AddAircraft(aircraft_identifier, { 512, 288 });
 		aircraft->setPosition(aircraft_position);
 		m_players[aircraft_identifier].reset(new Player(&m_socket, aircraft_identifier, GetContext().keys1, GetContext().window));
 		m_local_player_identifiers.push_back(aircraft_identifier);
@@ -395,7 +395,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 		sf::Vector2f aircraft_position;
 		packet >> aircraft_identifier >> aircraft_position.x >> aircraft_position.y;
 
-		Tank* aircraft = m_world.AddAircraft(aircraft_identifier);
+		Tank* aircraft = m_world.AddAircraft(aircraft_identifier, { 512, 288 });
 		aircraft->setPosition(aircraft_position);
 		m_players[aircraft_identifier].reset(new Player(&m_socket, aircraft_identifier, nullptr, GetContext().window));
 	}
@@ -428,7 +428,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 			sf::Vector2f aircraft_position;
 			packet >> aircraft_identifier >> aircraft_position.x >> aircraft_position.y >> hitpoints >> missile_ammo;
 
-			Tank* aircraft = m_world.AddAircraft(aircraft_identifier);
+			Tank* aircraft = m_world.AddAircraft(aircraft_identifier, { 512, 288 });
 			aircraft->setPosition(aircraft_position);
 			//aircraft->SetHitpoints(hitpoints); // TODO
 			//aircraft->SetMissileAmmo(missile_ammo);
@@ -443,7 +443,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 		uint8_t aircraft_identifier;
 		packet >> aircraft_identifier;
 
-		m_world.AddAircraft(aircraft_identifier);
+		m_world.AddAircraft(aircraft_identifier, { 512, 288 });
 		m_players[aircraft_identifier].reset(new Player(&m_socket, aircraft_identifier, GetContext().keys2, GetContext().window));
 		m_local_player_identifiers.emplace_back(aircraft_identifier);
 	}
@@ -527,7 +527,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 			bool is_local_plane = std::find(m_local_player_identifiers.begin(), m_local_player_identifiers.end(), aircraft_identifier) != m_local_player_identifiers.end();
 			if (aircraft && !is_local_plane)
 			{
-				sf::Vector2f interpolated_position = aircraft->getPosition() + (aircraft_position - aircraft->getPosition()) * 0.1f;
+			 	sf::Vector2f interpolated_position = aircraft->getPosition() + (aircraft_position - aircraft->getPosition()) * 0.1f;
 				aircraft->setPosition(interpolated_position);
 				//aircraft->SetHitpoints(hitpoints);
 				//aircraft->SetMissileAmmo(ammo);

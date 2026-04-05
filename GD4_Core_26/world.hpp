@@ -25,7 +25,7 @@ public:
 	sf::FloatRect GetViewBounds() const;
 	CommandQueue& GetCommandQueue();
 
-	Tank* AddAircraft(uint8_t identifier);
+	Tank* AddAircraft(uint8_t identifier, sf::Vector2f position);
 	void RemoveAircraft(uint8_t identifier);
 	void SetCurrentBattleFieldPosition(float line_y);
 	void SetWorldHeight(float height);

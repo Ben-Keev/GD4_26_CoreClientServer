@@ -17,7 +17,7 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	, m_sounds(sounds)
 	, m_scene_graph(ReceiverCategories::kNone)
 	, m_scene_layers()
-	, m_world_bounds(sf::Vector2f(0.f, 0.f), sf::Vector2f(m_camera.getSize().x, 5000.f))
+	, m_world_bounds(sf::Vector2f(0.f, 0.f), sf::Vector2f(m_camera.getSize().x, m_camera.getSize().y))
 	, m_spawn_position(m_camera.getSize().x / 2.f, m_world_bounds.size.y - m_camera.getSize().y / 2.f)
 	, m_scroll_speed(0)
 	, m_scrollspeed_compensation(1.f)
@@ -102,10 +102,10 @@ void World::RemoveAircraft(uint8_t identifier)
 	}
 }
 
-Tank* World::AddAircraft(uint8_t identifier)
+Tank* World::AddAircraft(uint8_t identifier, sf::Vector2f position)
 {
 	std::unique_ptr<Tank> player(new Tank(TankType::kTank, m_textures, m_fonts));
-	player->setPosition(m_camera.getCenter());
+	player->setPosition(position);
 	std::cout << "World::AddTank " << +identifier << std::endl;
 	player->SetIdentifier(identifier);
 
