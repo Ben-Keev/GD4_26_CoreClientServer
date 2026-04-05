@@ -23,7 +23,7 @@ struct AircraftMover
         // Only move the aircraft that belongs to this player
         if (aircraft.GetIdentifier() == aircraft_id)
         {
-            aircraft.Accelerate(velocity);
+            aircraft.Accelerate(velocity * 200.f);
         }
     }
 
@@ -155,9 +155,12 @@ void Player::HandleRealTimeInput(CommandQueue& command_queue)
         // Get all currently held realtime keys
         std::vector<Action> activeActions = m_key_binding->GetRealtimeActions();
 
-        // Push movement commands
+        // Debug: print held realtime keys
         for (Action action : activeActions)
+        {
+            //std::cout << "Realtime key held: " << static_cast<int>(action) << std::endl;
             command_queue.Push(m_action_binding[action]);
+        }
     }
 }
 
