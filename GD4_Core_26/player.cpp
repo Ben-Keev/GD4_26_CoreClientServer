@@ -24,18 +24,24 @@ sf::Angle CalculateRotation(float x, float y)
 // Modified heavily to work with mouses
 struct TurretRotator
 {
-    TurretRotator(const sf::Vector2f& mousePos)
+    TurretRotator(const sf::Vector2f& mousePos, int identifier)
         : mouse_position(mousePos)
+		, turret_id(identifier)
     {
     }
 
     void operator()(Turret& turret, sf::Time) const
     {
-        sf::Angle angle = Turret::CalculateMouseRotation(turret.GetWorldPosition(), mouse_position);
-        turret.setRotation(angle - turret.GetParent()->GetWorldRotation());
+        // Only move the aircraft that belongs to this player
+        if (turret.GetIdentifier() == turret_id)
+        {
+            sf::Angle angle = Turret::CalculateMouseRotation(turret.GetWorldPosition(), mouse_position);
+            turret.setRotation(angle - turret.GetParent()->GetWorldRotation());
+        }
     }
 
     sf::Vector2f mouse_position;
+    int turret_id;
 };
 
 // Functor that moves an aircraft when a command is executed
@@ -103,7 +109,7 @@ Command Player::AnalogueAiming(const sf::Vector2f& mousePos)
 {
     Command rotate;
     rotate.category = static_cast<unsigned int>(ReceiverCategories::kTurret);
-    rotate.action = DerivedAction<Turret>(TurretRotator(mousePos));
+    rotate.action = DerivedAction<Turret>(TurretRotator(mousePos, m_identifier));
     return rotate;
 }
 
