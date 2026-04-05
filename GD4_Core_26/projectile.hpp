@@ -12,7 +12,7 @@
 class Projectile : public Entity
 {
 public:
-	Projectile(ProjectileType type, const TextureHolder& textures, Tank* owner);
+	Projectile(ProjectileType type, const TextureHolder& textures, sf::Color colour, Tank* owner);
 
 	virtual unsigned int GetCategory() const override;
 	virtual sf::FloatRect GetBoundingRect() const override;

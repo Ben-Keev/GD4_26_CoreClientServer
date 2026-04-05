@@ -23,10 +23,11 @@ TextureID ToTextureID(TankType type)
 	return TextureID::kEntities;
 }
 
-Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts)
+Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts, sf::Color colour)
 	: Entity(Table[static_cast<int>(type)].m_hitpoints)
 	, m_type(type)
 	, m_sprite(textures.Get(Table[static_cast<int>(type)].m_texture), Table[static_cast<int>(type)].m_texture_rect)
+	, m_colour(colour)
 	, m_health_display(nullptr)
 	, m_missile_display(nullptr)
 	, m_distance_travelled(0.f)
@@ -45,7 +46,7 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 	, m_pickups_enabled(true)
 	, m_identifier(0)
 {
-	m_sprite.setColor(Table[static_cast<int>(m_type)].m_colour);
+	m_sprite.setColor(colour);
 	m_explosion.SetFrameSize(sf::Vector2i(256, 256));
 	m_explosion.SetNumFrames(16);
 	m_explosion.SetDuration(sf::seconds(1));
@@ -67,7 +68,7 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 		};
 
 	std::unique_ptr<Turret> turret;
-	turret = std::unique_ptr<Turret>(new Turret(TurretType::kTurret, textures));
+	turret = std::unique_ptr<Turret>(new Turret(TurretType::kTurret, textures, colour));
 	m_turret = turret.get();
 	AttachChild(std::move(turret));
 
@@ -229,7 +230,7 @@ void Tank::CreateBullet(SceneNode& node, const TextureHolder& textures)
 /// </summary>
 void Tank::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset, float y_offset, const TextureHolder& textures)
 {
-	std::unique_ptr<Projectile> projectile(new Projectile(type, textures, this));
+	std::unique_ptr<Projectile> projectile(new Projectile(type, textures, m_colour, this));
 
 	sf::Vector2f offset(x_offset * m_sprite.getGlobalBounds().size.x, y_offset * m_sprite.getGlobalBounds().size.y);
 

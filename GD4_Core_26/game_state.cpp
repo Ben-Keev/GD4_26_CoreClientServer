@@ -4,7 +4,7 @@
 
 GameState::GameState(StateStack& stack, Context context) : State(stack, context), m_world(*context.window, *context.fonts, *context.sound, false), m_player(nullptr, 1, context.keys1, context.window)
 {
-	m_world.AddAircraft(1);
+	Tank* aircraft = m_world.AddAircraft(1, m_player.GetDetails().m_colour);
 	m_player.SetMissionStatus(MissionStatus::kMissionRunning);
 	context.music->Play(MusicThemes::kMissionTheme);
 }

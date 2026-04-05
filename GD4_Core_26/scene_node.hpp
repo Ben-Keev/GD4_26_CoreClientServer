@@ -29,6 +29,7 @@ public:
 
 	virtual sf::FloatRect GetBoundingRect() const;
 	void DrawBoundingRect(sf::RenderTarget& target, sf::RenderStates states, sf::FloatRect& rect) const;
+
 	void CheckSceneCollision(SceneNode& scene_graph, std::set<Pair>& collision_pairs);
 	virtual unsigned int GetCategory() const;
 	void RemoveWrecks();

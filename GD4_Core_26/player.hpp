@@ -10,6 +10,13 @@
 #include <SFML/Network/TcpSocket.hpp>
 
 
+struct PlayerDetails
+{
+	std::string m_name;
+	sf::Color m_colour;
+	int m_score;
+};
+
 class Player
 {
 public:
@@ -29,10 +36,13 @@ public:
 	void DisableAllRealtimeActions(bool enable);
 	bool IsLocal() const;
 
+	PlayerDetails GetDetails();
+
 private:
 	void InitialiseActions();
 
 private:
+	PlayerDetails m_details;
 	const KeyBinding* m_key_binding;
 	std::map<Action, Command> m_action_binding;
 	std::map<Action, bool> m_action_proxies;

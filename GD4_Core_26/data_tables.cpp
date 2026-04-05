@@ -47,7 +47,6 @@ std::vector<TankData> InitializeTankData()
 	tank.m_fire_interval = sf::seconds(2.5);
 	tank.m_texture = TextureID::kEntities;
 	tank.m_texture_rect = sf::IntRect({ 0, 0 }, { 40, 38 });
-	tank.m_colour = sf::Color(240, 70, 90);
 
 	return data;
 }
@@ -63,7 +62,6 @@ std::vector<TurretData> InitializeTurretData()
 	auto& turret = data[0];
 	turret.m_texture = TextureID::kEntities;
 	turret.m_texture_rect = sf::IntRect({ 41, 9 }, { 50, 16 });
-	turret.m_colour = sf::Color(240, 70, 90);
 
 	return data;
 }
@@ -83,7 +81,6 @@ std::vector<ProjectileData> InitializeProjectileData()
 	bullet.m_max_bounces = 2;
 	bullet.m_texture = TextureID::kEntities;
 	bullet.m_texture_rect = sf::IntRect({ 41, 0 }, { 14, 8 });
-	bullet.m_colour = sf::Color(240, 70, 90);
 	
 	return data;
 }

@@ -137,8 +137,6 @@ void SceneNode::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	DrawChildren(target, states);
 }
 
-
-
 void SceneNode::DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const
 {
 	// Do nothing
