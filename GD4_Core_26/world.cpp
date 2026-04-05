@@ -32,6 +32,7 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	// Set scroll speed to 0 as a temporary solution to removing scrolling
 	, m_scroll_speed(0.f)
 	, m_tanks()
+	, m_tank_count(0.f)
 {
 	m_scene_texture.resize({ m_target.getSize().x, m_target.getSize().y });
 	LoadTextures();
@@ -168,9 +169,9 @@ void World::BuildScene()
 
 	std::vector<TankData> data(static_cast<int>(TankType::kTankCount));
 
-	for (int i = 0; i <= static_cast<int>(TankType::kTanTank); ++i)
+	for (int i = 0; i < 16; ++i)
 	{
-		m_tanks[i] = SpawnTank(static_cast<TankType>(i));
+		m_tanks[i] = SpawnTank(TankType::kTank);
 	}
 
 	//m_red_tank = SpawnTank(TankType::kRedTank);
@@ -194,10 +195,12 @@ Tank* World::SpawnTank(TankType type)
 
 	std::unique_ptr<Tank> tank(new Tank(type, m_textures, m_fonts));
 	tank_ptr = tank.get();
-	tank_ptr->setPosition(spawnpoints[static_cast<int>(type)]);
+	tank_ptr->setPosition(spawnpoints[static_cast<int>(type) + m_tank_count]);
 	tank_ptr->setRotation(sf::degrees(-90.f));
 	tank_ptr->SetVelocity(40.f, 0.f);
 	m_scene_layers[static_cast<int>(SceneLayers::kTanks)]->AttachChild(std::move(tank));
+
+	m_tank_count++;
 
 	return tank_ptr;
 }
@@ -208,52 +211,58 @@ Tank* World::SpawnTank(TankType type)
 /// </summary>
 void World::AddWalls()
 {
-	//// Left side wall
-	//SpawnWall(WallType::kMetalWall, m_center.x - 340, m_center.y - 140, 90);
-	//SpawnWall(WallType::kMetalWall, m_center.x - 340, m_center.y - 84, 90);
-	//SpawnWall(WallType::kMetalWall, m_center.x - 340, m_center.y - 28, 90);
-	//SpawnWall(WallType::kMetalWall, m_center.x - 340, m_center.y + 28, 90);
-	//SpawnWall(WallType::kMetalWall, m_center.x - 326, m_center.y + 42, 0);
-	//SpawnWall(WallType::kWoodWall, m_center.x - 284, m_center.y + 42, 0);
-	//SpawnWall(WallType::kWoodWall, m_center.x - 256, m_center.y + 42, 0);
-	//SpawnWall(WallType::kWoodWall, m_center.x - 228, m_center.y + 42, 0);
-	//SpawnWall(WallType::kMetalWall, m_center.x - 186, m_center.y + 42, 0);
-	//SpawnWall(WallType::kMetalWall, m_center.x - 172, m_center.y + 84, 90);
-	//SpawnWall(WallType::kMetalWall, m_center.x - 172, m_center.y + 140, 90);
-	//SpawnWall(WallType::kMetalWall, m_center.x - 130, m_center.y + 154, 0);
-	//SpawnWall(WallType::kWoodWall, m_center.x - 88, m_center.y + 154, 0);
-	//SpawnWall(WallType::kMetalWall, m_center.x - 46, m_center.y + 154, 0);
-	//SpawnWall(WallType::kWoodWall, m_center.x - 4, m_center.y + 154, 0);
-	//SpawnWall(WallType::kMetalWall, m_center.x + 38, m_center.y + 154, 0);
-	//SpawnWall(WallType::kWoodWall, m_center.x + 80, m_center.y + 154, 0);
-	//SpawnWall(WallType::kMetalWall, m_center.x + 122, m_center.y + 154, 0);
+	 
+	// Left side wall
+	SpawnWall(WallType::kMetalWall, m_center.x - 340, m_center.y - 140, 90);
+	SpawnWall(WallType::kWoodWall, m_center.x - 284, m_center.y + 42, 0);
+	/*
+	SpawnWall(WallType::kMetalWall, m_center.x - 340, m_center.y - 140, 90);
+	SpawnWall(WallType::kMetalWall, m_center.x - 340, m_center.y - 84, 90);
+	SpawnWall(WallType::kMetalWall, m_center.x - 340, m_center.y - 28, 90);
+	SpawnWall(WallType::kMetalWall, m_center.x - 340, m_center.y + 28, 90);
+	SpawnWall(WallType::kMetalWall, m_center.x - 326, m_center.y + 42, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 284, m_center.y + 42, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 256, m_center.y + 42, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 228, m_center.y + 42, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x - 186, m_center.y + 42, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x - 172, m_center.y + 84, 90);
+	SpawnWall(WallType::kMetalWall, m_center.x - 172, m_center.y + 140, 90);
+	SpawnWall(WallType::kMetalWall, m_center.x - 130, m_center.y + 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 88, m_center.y + 154, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x - 46, m_center.y + 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 4, m_center.y + 154, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x + 38, m_center.y + 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 80, m_center.y + 154, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x + 122, m_center.y + 154, 0);
 
 	//// Right side wall
-	//SpawnWall(WallType::kMetalWall, m_center.x + 340, m_center.y + 140, 90);
-	//SpawnWall(WallType::kMetalWall, m_center.x + 340, m_center.y + 84, 90);
-	//SpawnWall(WallType::kMetalWall, m_center.x + 340, m_center.y + 28, 90);
-	//SpawnWall(WallType::kMetalWall, m_center.x + 340, m_center.y - 28, 90);
-	//SpawnWall(WallType::kMetalWall, m_center.x + 326, m_center.y - 42, 0);
-	//SpawnWall(WallType::kWoodWall, m_center.x + 284, m_center.y - 42, 0);
-	//SpawnWall(WallType::kWoodWall, m_center.x + 256, m_center.y - 42, 0);
-	//SpawnWall(WallType::kWoodWall, m_center.x + 228, m_center.y - 42, 0);
-	//SpawnWall(WallType::kMetalWall, m_center.x + 186, m_center.y - 42, 0);
-	//SpawnWall(WallType::kMetalWall, m_center.x + 172, m_center.y - 84, 90);
-	//SpawnWall(WallType::kMetalWall, m_center.x + 172, m_center.y - 140, 90);
-	//SpawnWall(WallType::kMetalWall, m_center.x + 130, m_center.y - 154, 0);
-	//SpawnWall(WallType::kWoodWall, m_center.x + 88, m_center.y - 154, 0);
-	//SpawnWall(WallType::kMetalWall, m_center.x + 46, m_center.y - 154, 0);
-	//SpawnWall(WallType::kWoodWall, m_center.x + 4, m_center.y - 154, 0);
-	//SpawnWall(WallType::kMetalWall, m_center.x - 38, m_center.y - 154, 0);
-	//SpawnWall(WallType::kWoodWall, m_center.x - 80, m_center.y - 154, 0);
-	//SpawnWall(WallType::kMetalWall, m_center.x - 122, m_center.y - 154, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x + 340, m_center.y + 140, 90);
+	SpawnWall(WallType::kMetalWall, m_center.x + 340, m_center.y + 84, 90);
+	SpawnWall(WallType::kMetalWall, m_center.x + 340, m_center.y + 28, 90);
+	SpawnWall(WallType::kMetalWall, m_center.x + 340, m_center.y - 28, 90);
+	SpawnWall(WallType::kMetalWall, m_center.x + 326, m_center.y - 42, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 284, m_center.y - 42, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 256, m_center.y - 42, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 228, m_center.y - 42, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x + 186, m_center.y - 42, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x + 172, m_center.y - 84, 90);
+	SpawnWall(WallType::kMetalWall, m_center.x + 172, m_center.y - 140, 90);
+	SpawnWall(WallType::kMetalWall, m_center.x + 130, m_center.y - 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 88, m_center.y - 154, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x + 46, m_center.y - 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 4, m_center.y - 154, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x - 38, m_center.y - 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 80, m_center.y - 154, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x - 122, m_center.y - 154, 0);
 
-	//// Add Exterior Walls
-	//SpawnWall(WallType::kExterior, m_center.x + 526, m_center.y, 90);
-	//SpawnWall(WallType::kExterior, m_center.x - 526, m_center.y, 90);
-	//SpawnWall(WallType::kExterior, m_center.x, m_center.y + 302, 0);
-	//SpawnWall(WallType::kExterior, m_center.x, m_center.y - 302, 0);
+	// Add Exterior Walls
+	SpawnWall(WallType::kExterior, m_center.x + 526, m_center.y, 90);
+	SpawnWall(WallType::kExterior, m_center.x - 526, m_center.y, 90);
+	SpawnWall(WallType::kExterior, m_center.x, m_center.y + 302, 0);
+	SpawnWall(WallType::kExterior, m_center.x, m_center.y - 302, 0);
+	*/
 }
+
 /// <summary>
 /// Authored: Kaylon Riordan D00255039
 /// Spawn a wall, on the wall layer, based on specified type, position quordinates, and rotation given in degrees
@@ -315,38 +324,27 @@ void World::HandleCollisions()
 
 		// Handle collision for 2 tanks
 		// destroy both tnaks on collision
-		if (MatchesCategories(pair, ReceiverCategories::kRedTank, ReceiverCategories::kBlueTank))
+		if (MatchesCategories(pair, ReceiverCategories::kTank, ReceiverCategories::kTank))
 		{
-			auto& red = static_cast<Tank&>(*pair.first);
-			auto& blue = static_cast<Tank&>(*pair.second);
+			auto& one = static_cast<Tank&>(*pair.first);
+			auto& two = static_cast<Tank&>(*pair.second);
 
-			red.Destroy();
-			blue.Destroy();
+			one.Destroy();
+			two.Destroy();
 		}
-		// Handle collision for enemy projectiles
-		// Damage the player based on the projectiles damage value
-		else if (MatchesCategories(pair, ReceiverCategories::kRedTank, ReceiverCategories::kBlueProjectile) || MatchesCategories(pair, ReceiverCategories::kBlueTank, ReceiverCategories::kRedProjectile))
+		// Handle projectile/tank collision
+		// If its the player's own bullet then only deal damage if the bullet has already bounced once, stops bullet imediately killing player as it can spawn inside the players bounding box depending on rotation
+		else if (MatchesCategories(pair, ReceiverCategories::kTank, ReceiverCategories::kProjectile))
 		{
 			auto& tank = static_cast<Tank&>(*pair.first);
 			auto& projectile = static_cast<Projectile&>(*pair.second);
-			// Collision response
-			tank.Damage(projectile.GetDamage());
-			projectile.Destroy();
-		}
-		// Handle collision for friendly projectiles
-		// Only deal damage if the bullet ahs already bounced once, stops bullet imediately killing player as it can spawn inside the players bounding box depending on rotation
-		else if (MatchesCategories(pair, ReceiverCategories::kRedTank, ReceiverCategories::kRedProjectile) || MatchesCategories(pair, ReceiverCategories::kBlueTank, ReceiverCategories::kBlueProjectile))
-		{
-			auto& tank = static_cast<Tank&>(*pair.first);
-			auto& projectile = static_cast<Projectile&>(*pair.second);
-			if (projectile.GetBounces() > 0)
+			if (&tank != &projectile.GetOwner() || projectile.GetBounces() != 0)
 			{
 				// Collision response
 				tank.Damage(projectile.GetDamage());
 				projectile.Destroy();
 			}
 		}
-
 		// Handle player/wall collisions
 		else if (MatchesCategories(pair, ReceiverCategories::kTank, ReceiverCategories::kWall))
 		{
@@ -380,7 +378,15 @@ void World::HandleCollisions()
 			// Update position to one with no wall collision
 			tank.setPosition(sf::Vector2f(currentPosition.x, currentPosition.y));
 		}
-		// Handle projectile/wall collisions
+		// Handle projectile/breakable wall collisions
+		else if (MatchesCategories(pair, ReceiverCategories::kProjectile, ReceiverCategories::kWoodWall))
+		{
+			auto& projectile = static_cast<Projectile&>(*pair.first);
+			auto& wall = static_cast<Wall&>(*pair.second);
+			wall.Damage(projectile.GetDamage());
+			projectile.Destroy();
+		}
+		// Handle projectile/durable wall collisions
 		else if (MatchesCategories(pair, ReceiverCategories::kProjectile, ReceiverCategories::kWall))
 		{
 			auto& projectile = static_cast<Projectile&>(*pair.first);

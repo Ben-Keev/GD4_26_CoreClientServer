@@ -8,6 +8,7 @@
 /// Reordered to group tanks, turrets, and projectiles together
 /// </summary>
 
+/*
 enum class ReceiverCategories : std::uint64_t
 {
     kNone = 0,
@@ -93,5 +94,32 @@ enum class ReceiverCategories : std::uint64_t
     kOrangeProjectile | kPinkProjectile | kCyanProjectile | kLimeProjectile |
     kNavyProjectile | kPeachProjectile | kGoldProjectile | kTanProjectile,
 
+    kWall = kMetalWall | kWoodWall | kExteriorWall
+};
+*/
+
+enum class ReceiverCategories : std::uint64_t
+{
+    kNone = 0,
+    kScene = 1 << 0,
+
+    // Tanks (Red/Blue first, then remaining colours)
+    kTank = 1 << 1,
+
+    // Turrets (Red/Blue first, then remaining colours)
+    kTurret = 1 << 2,
+
+    // Projectiles (Red/Blue first, then remaining colours)
+    kProjectile = 1 << 3,
+
+    // Walls / Others
+    kMetalWall = 1 << 4,
+    kWoodWall = 1 << 5,
+    kExteriorWall = 1 << 6,
+    kParticleSystem = 1 << 7,
+    kSoundEffect = 1 << 8,
+    
+
+    // Groups
     kWall = kMetalWall | kWoodWall | kExteriorWall
 };

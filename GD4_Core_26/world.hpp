@@ -71,6 +71,7 @@ private:
 	float m_scroll_speed;
 	
 	std::array<Tank*, kMaxPlayers> m_tanks;
+	int m_tank_count;
 
 	CommandQueue m_command_queue;
 

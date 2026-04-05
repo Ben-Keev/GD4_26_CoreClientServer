@@ -293,9 +293,6 @@
     <ClInclude Include="projectile.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="projectile_type.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="receiver_categories.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -344,9 +341,6 @@
     <ClInclude Include="tank.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tank_type.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="TCPSocket.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -365,9 +359,6 @@
     <ClInclude Include="turret.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="turret_type.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="utility.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -381,6 +372,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="xbox_layout.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="turret_type.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tank_type.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="projectile_type.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

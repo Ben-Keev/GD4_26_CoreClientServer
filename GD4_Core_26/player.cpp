@@ -167,20 +167,10 @@ Player::Player(int player_number) :
     m_joystick_binding[XboxLayout::RB] = Action::kBulletFire;
 
     InitialiseActions();
-
-    if (player_number >= 0 && player_number < 16)
-    {
-        // Compute tank and turret category directly
-        tankCategory = static_cast<ReceiverCategories>(1ULL << (12 + player_number));
-        turretCategory = static_cast<ReceiverCategories>(1ULL << (28 + player_number));
-    }
-    else
-    {
-		std::cout << "Warning: Player number " << player_number << " is out of range. Defaulting to Red Tank and Turret categories." << std::endl;
-        // Fallback
-        tankCategory = ReceiverCategories::kRedTank;
-        turretCategory = ReceiverCategories::kRedTurret;
-    }
+	std::cout << "Warning: Player number " << player_number << " is out of range. Defaulting to Red Tank and Turret categories." << std::endl;
+    // Fallback
+    tankCategory = ReceiverCategories::kTank;
+    turretCategory = ReceiverCategories::kTurret;
 
     // Apply tank category to all action bindings (GPT)
     for (auto& pair : m_action_binding)

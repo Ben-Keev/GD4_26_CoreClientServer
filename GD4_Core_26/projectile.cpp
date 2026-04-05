@@ -13,8 +13,8 @@ namespace
     const std::vector<ProjectileData> Table = InitializeProjectileData();
 }
 
-Projectile::Projectile(ProjectileType type, const TextureHolder& textures) : Entity(1), m_type(type), 
-    m_sprite(textures.Get(Table[static_cast<int>(type)].m_texture), Table[static_cast<int>(type)].m_texture_rect)
+Projectile::Projectile(ProjectileType type, const TextureHolder& textures, Tank* owner) : Entity(1), m_type(type),
+    m_sprite(textures.Get(Table[static_cast<int>(type)].m_texture), Table[static_cast<int>(type)].m_texture_rect), m_owner(owner)
 {
     Utility::CentreOrigin(m_sprite);
 
@@ -30,12 +30,7 @@ Projectile::Projectile(ProjectileType type, const TextureHolder& textures) : Ent
 
 unsigned int Projectile::GetCategory() const
 {
-    if (m_type == ProjectileType::kBlueBullet)
-    {
-        return static_cast<int>(ReceiverCategories::kBlueProjectile);
-    }
-    else
-        return static_cast<int>(ReceiverCategories::kRedProjectile);
+    return static_cast<int>(ReceiverCategories::kProjectile);
 }
 
 sf::FloatRect Projectile::GetBoundingRect() const
@@ -51,6 +46,11 @@ float Projectile::GetMaxSpeed() const
 float Projectile::GetDamage() const
 {
     return Table[static_cast<int>(m_type)].m_damage;
+}
+
+Tank& Projectile::GetOwner() const
+{
+    return *m_owner;
 }
 
 /// <summary>

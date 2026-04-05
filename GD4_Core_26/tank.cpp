@@ -61,14 +61,7 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 	// Create a pointer to a turret and set the type of turrent, based off type of tank, then attach to tank as child
 	/// <summary>
 	std::unique_ptr<Turret> turret;
-	if (type == TankType::kRedTank)
-	{
-		turret = std::unique_ptr<Turret>(new Turret(TurretType::kRedTurret, textures));
-	}
-	else
-	{
-		turret = std::unique_ptr<Turret>(new Turret(TurretType::kBlueTurret, textures));
-	}
+	turret = std::unique_ptr<Turret>(new Turret(TurretType::kTurret, textures));
 	m_turret = turret.get();
 	AttachChild(std::move(turret));
 }
@@ -78,11 +71,7 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 /// </summary>
 unsigned int Tank::GetCategory() const
 {
-	if (IsAllied())
-	{
-		return static_cast<unsigned int>(ReceiverCategories::kRedTank);
-	}
-	return static_cast<unsigned int>(ReceiverCategories::kBlueTank);
+	return static_cast<unsigned int>(ReceiverCategories::kTank);
 }
 
 /// <summary>
@@ -102,7 +91,7 @@ void Tank::Fire()
 void Tank::CreateBullet(SceneNode& node, const TextureHolder& textures)
 {
 	// It may be an enemy bullet or an allied bullet.
-	ProjectileType type = IsAllied() ? ProjectileType::kRedBullet : ProjectileType::kBlueBullet;
+	ProjectileType type = ProjectileType::kBullet;
 
 	// How many bullets are fired based on the level accquired
 	switch (m_spread_level)
@@ -141,11 +130,11 @@ void Tank::CreateBullet(SceneNode& node, const TextureHolder& textures)
 /// Modified: Kaylon Riordan D00255039
 /// Changed projectiles rotation to check turret instead of tank
 /// </summary>
-void Tank::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset, float y_offset, const TextureHolder& textures) const
+void Tank::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset, float y_offset, const TextureHolder& textures)
 {
 	if (m_is_firing)
 	{
-		std::unique_ptr<Projectile> projectile(new Projectile(type, textures));
+		std::unique_ptr<Projectile> projectile(new Projectile(type, textures, this));
 
 		sf::Vector2f offset(x_offset * m_sprite.getGlobalBounds().size.x, y_offset * m_sprite.getGlobalBounds().size.y);
 
@@ -246,7 +235,7 @@ void Tank::CheckProjectileLaunch(sf::Time dt, CommandQueue& commands)
 /// </summary>
 bool Tank::IsAllied() const
 {
-	return m_type == TankType::kRedTank;
+	return m_type == TankType::kTank;
 }
 
 /// <summary>
