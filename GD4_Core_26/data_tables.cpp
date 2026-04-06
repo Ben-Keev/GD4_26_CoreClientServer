@@ -9,7 +9,7 @@
 #include "turret_type.hpp"
 
 
-std::vector<sf::Vector2f> InitializeTankPositions() 
+std::vector<sf::Vector2f> InitializeTankPositions()
 {
 	std::vector<sf::Vector2f>;
 
@@ -61,7 +61,7 @@ std::vector<TurretData> InitializeTurretData()
 
 	auto& turret = data[0];
 	turret.m_texture = TextureID::kEntities;
-	turret.m_texture_rect = sf::IntRect({ 41, 9 }, { 50, 16 });
+	turret.m_texture_rect = sf::IntRect({ 40, 8 }, { 50, 16 });
 
 	return data;
 }
@@ -80,8 +80,8 @@ std::vector<ProjectileData> InitializeProjectileData()
 	bullet.m_speed = 300;
 	bullet.m_max_bounces = 2;
 	bullet.m_texture = TextureID::kEntities;
-	bullet.m_texture_rect = sf::IntRect({ 41, 0 }, { 14, 8 });
-	
+	bullet.m_texture_rect = sf::IntRect({ 40, 0 }, { 14, 8 });
+
 	return data;
 }
 
@@ -94,9 +94,9 @@ std::vector<WallData> InitializeWallData()
 	std::vector<WallData> data(static_cast<int>(WallType::kWallCount));
 
 	data[static_cast<int>(WallType::kMetalWall)].m_texture = TextureID::kEntities;
-	data[static_cast<int>(WallType::kMetalWall)].m_texture_rect = sf::IntRect({ 0, 39 }, { 122, 28 });
+	data[static_cast<int>(WallType::kMetalWall)].m_texture_rect = sf::IntRect({ 0, 38 }, { 112, 28 });
 	data[static_cast<int>(WallType::kWoodWall)].m_texture = TextureID::kEntities;
-	data[static_cast<int>(WallType::kWoodWall)].m_texture_rect = sf::IntRect({ 0, 67 }, { 28, 28 });
+	data[static_cast<int>(WallType::kWoodWall)].m_texture_rect = sf::IntRect({ 0, 66 }, { 28, 28 });
 	data[static_cast<int>(WallType::kExterior)].m_texture = TextureID::kExterior;
 	data[static_cast<int>(WallType::kExterior)].m_texture_rect = sf::IntRect({ 0, 0 }, { 1920, 28 });
 	return data;
