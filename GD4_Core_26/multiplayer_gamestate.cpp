@@ -387,9 +387,9 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 		sf::Vector2f aircraft_position;
 		packet >> aircraft_identifier >> aircraft_position.x >> aircraft_position.y;
 		std::cout << "Client kSpawnSelf" << +aircraft_identifier << std::endl;
+		m_players[aircraft_identifier].reset(new Player(&m_socket, aircraft_identifier, GetContext().keys1, GetContext().window));
 		Tank* aircraft = m_world.AddAircraft(aircraft_identifier, m_players[aircraft_identifier]->GetDetails().m_colour, { 512, 288 });
 		aircraft->setPosition(aircraft_position);
-		m_players[aircraft_identifier].reset(new Player(&m_socket, aircraft_identifier, GetContext().keys1, GetContext().window));
 		m_local_player_identifiers.push_back(aircraft_identifier);
 		m_game_started = true;
 	}
@@ -401,9 +401,9 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 		sf::Vector2f aircraft_position;
 		packet >> aircraft_identifier >> aircraft_position.x >> aircraft_position.y;
 
+		m_players[aircraft_identifier].reset(new Player(&m_socket, aircraft_identifier, nullptr, GetContext().window));
 		Tank* aircraft = m_world.AddAircraft(aircraft_identifier, m_players[aircraft_identifier]->GetDetails().m_colour, { 512, 288 });
 		aircraft->setPosition(aircraft_position);
-		m_players[aircraft_identifier].reset(new Player(&m_socket, aircraft_identifier, nullptr, GetContext().window));
 	}
 	break;
 
@@ -436,6 +436,8 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 			float turret_rotation;
 			float aircraft_rotation; // This is only needed for initial state
 			packet >> aircraft_identifier >> aircraft_position.x >> aircraft_position.y >> hitpoints >> missile_ammo >> turret_rotation >> aircraft_rotation;
+			
+			m_players[aircraft_identifier].reset(new Player(&m_socket, aircraft_identifier, nullptr, GetContext().window));
 
 			Tank* aircraft = m_world.AddAircraft(aircraft_identifier, m_players[aircraft_identifier]->GetDetails().m_colour, { 512, 288 });
 			aircraft->setPosition(aircraft_position);
@@ -444,8 +446,6 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 
 			//aircraft->SetHitpoints(hitpoints); // TODO
 			//aircraft->SetMissileAmmo(missile_ammo);
-
-			m_players[aircraft_identifier].reset(new Player(&m_socket, aircraft_identifier, nullptr, GetContext().window));
 		}
 	}
 	break;

@@ -237,10 +237,9 @@ void Tank::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset
 {
 	std::unique_ptr<Projectile> projectile(new Projectile(type, textures, m_colour, this));
 
-	sf::Vector2f offset(x_offset * m_sprite.getGlobalBounds().size.x, y_offset * m_sprite.getGlobalBounds().size.y);
+	//sf::Vector2f offset(x_offset * m_sprite.getGlobalBounds().size.x, y_offset * m_sprite.getGlobalBounds().size.y);
 
-	// Subtract 90 degrees but keep the format in radians
-	float radians = (m_turret->GetWorldRotation() - sf::degrees(-90.f)).asRadians();
+	float radians = (m_turret->GetWorldRotation()).asRadians();
 
 	// Create the unit vector pointing in the angle of our direction
 	// https://gamedev.stackexchange.com/questions/117583/how-do-i-get-a-vector-from-an-angle
@@ -249,8 +248,8 @@ void Tank::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset
 		std::sin(radians)
 	);
 
-	projectile->setPosition(GetWorldPosition() + offset + (direction * 25.0f));
-	projectile->setRotation(m_turret->GetWorldRotation() - sf::degrees(180.f));
+	projectile->setPosition(GetWorldPosition()  + (direction * 25.0f));
+	projectile->setRotation(m_turret->GetWorldRotation());
 	projectile->SetVelocity(direction * projectile->GetMaxSpeed());
 	node.AttachChild(std::move(projectile));
 }

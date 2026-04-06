@@ -9,20 +9,20 @@ KeyBinding::KeyBinding(int control_preconfiguration)
 	// Set initial key bindings for player 1
 	if (control_preconfiguration == 1)
 	{
-		m_key_map[sf::Keyboard::Scancode::Left] = Action::kMoveLeft;
-		m_key_map[sf::Keyboard::Scancode::Right] = Action::kMoveRight;
-		m_key_map[sf::Keyboard::Scancode::Up] = Action::kMoveUp;
-		m_key_map[sf::Keyboard::Scancode::Down] = Action::kMoveDown;
-		m_key_map[sf::Keyboard::Scancode::Space] = Action::kBulletFire;
-	}
-	else if (control_preconfiguration == 2)
-	{
 		// Player 2
 		m_key_map[sf::Keyboard::Scancode::A] = Action::kMoveLeft;
 		m_key_map[sf::Keyboard::Scancode::D] = Action::kMoveRight;
 		m_key_map[sf::Keyboard::Scancode::W] = Action::kMoveUp;
 		m_key_map[sf::Keyboard::Scancode::S] = Action::kMoveDown;
-		m_key_map[sf::Keyboard::Scancode::F] = Action::kBulletFire;
+		m_key_map[sf::Keyboard::Scancode::E] = Action::kBulletFire;
+	}
+	else if (control_preconfiguration == 2)
+	{
+		m_key_map[sf::Keyboard::Scancode::Left] = Action::kMoveLeft;
+		m_key_map[sf::Keyboard::Scancode::Right] = Action::kMoveRight;
+		m_key_map[sf::Keyboard::Scancode::Up] = Action::kMoveUp;
+		m_key_map[sf::Keyboard::Scancode::Down] = Action::kMoveDown;
+		m_key_map[sf::Keyboard::Scancode::Space] = Action::kBulletFire;
 	}
 }
 

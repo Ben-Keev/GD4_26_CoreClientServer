@@ -17,8 +17,7 @@ sf::Angle CalculateRotation(float x, float y)
     // Returns radians
     float radians = std::atan2(y, x);
 
-    // Rotate an added 90 degrees so that the sprite renders upright
-    return sf::radians(radians) + sf::degrees(-90.f);
+    return sf::radians(radians);
 }
 
 // Modified heavily to work with mouses
@@ -95,7 +94,10 @@ Player::Player(sf::TcpSocket* socket, uint8_t identifier, const KeyBinding* bind
     , m_identifier(identifier)               // Player ID
     , m_socket(socket)                       // Network socket (nullptr if local game)
     , m_window(window)
-    , m_details{ "", sf::Color(240, 70, 90), 0}
+    , m_details{ "", sf::Color::Cyan, 0}
+
+    // red
+    // sf::Color(240, 70, 90)
 {
     InitialiseActions(); // Setup all action -> command mappings
 

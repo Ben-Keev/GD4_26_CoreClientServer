@@ -457,7 +457,7 @@ void World::HandleCollisions()
 				}
 
 				// Rotate projectile to face the direction they are moving after bounce
-				projectile.setRotation(sf::degrees((std::atan2(projectile.GetVelocity().y, projectile.GetVelocity().x) * 180 / 3.14159265f) + 90));
+				projectile.setRotation(sf::degrees((std::atan2(projectile.GetVelocity().y, projectile.GetVelocity().x) * 180 / 3.14159265f)));
 				projectile.setPosition(sf::Vector2f(currentPosition.x, currentPosition.y));
 
 				// If the wall is wooden, break it after bounce
