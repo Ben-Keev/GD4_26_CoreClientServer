@@ -105,8 +105,9 @@ void World::RemoveAircraft(uint8_t identifier)
 Tank* World::AddAircraft(uint8_t identifier, sf::Color colour, sf::Vector2f position)
 {
 	std::unique_ptr<Tank> player(new Tank(TankType::kTank, m_textures, m_fonts, colour));
-	player->setPosition(m_camera.getCenter());
-	std::cout << "World::AddTank " << +identifier << std::endl;
+	player->setPosition(position);
+	std::cout << "Spawning player at position " << player->getPosition().x << ", " << player->getPosition().y << std::endl;
+	//std::cout << "World::AddTank " << +identifier << std::endl;
 	player->SetIdentifier(identifier);
 
 	m_player_tank.emplace_back(player.get());

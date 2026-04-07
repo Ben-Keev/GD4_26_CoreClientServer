@@ -6,6 +6,12 @@
 #include <SFML/Network/Packet.hpp>
 #include <SFML/System/Sleep.hpp>
 #include <iostream>
+#include "data_tables.hpp"
+
+namespace
+{
+    const std::vector<sf::Vector2f> SpawnPositions = InitializeTankPositions();
+}
 
 GameServer::GameServer(sf::Vector2f battlefield_size)
     : m_thread(&GameServer::ExecutionThread, this)
@@ -369,9 +375,11 @@ void GameServer::HandleIncomingConnections()
     if (m_listener_socket.accept(m_peers[m_connected_players]->m_socket) == sf::TcpListener::Status::Done)
     {
         //Order the new client to spawn its player 1
-        m_aircraft_info[m_aircraft_identifier_counter].m_position = sf::Vector2f(m_battlefield_rect.size.x / 2, m_battlefield_rect.position.y + m_battlefield_rect.size.y / 2);
+        m_aircraft_info[m_aircraft_identifier_counter].m_position = SpawnPositions[m_connected_players];
         m_aircraft_info[m_aircraft_identifier_counter].m_hitpoints = 100;
         m_aircraft_info[m_aircraft_identifier_counter].m_missile_ammo = 2;
+
+        std::cout << "The counter for spawn position is here: " << m_aircraft_identifier_counter << std::endl;
 
         sf::Packet packet;
         packet << static_cast<uint8_t>(Server::PacketType::kSpawnSelf);

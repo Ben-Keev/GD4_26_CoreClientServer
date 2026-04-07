@@ -2,6 +2,7 @@
 #include "multiplayer_gamestate.hpp"
 #include "music_player.hpp"
 #include "utility.hpp"
+#include "data_tables.hpp"
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Network/Packet.hpp>
@@ -217,13 +218,6 @@ bool MultiplayerGameState::Update(sf::Time dt)
 
 		UpdateBroadcastMessage(dt);
 
-		//Time counter for blinking second player text
-		m_player_invitation_time += dt;
-		if (m_player_invitation_time > sf::seconds(1.f))
-		{
-			m_player_invitation_time = sf::Time::Zero;
-		}
-
 		//Events occurring in the game
 		GameActions::Action game_action;
 		while (m_world.PollGameAction(game_action))
@@ -385,8 +379,11 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 	{
 		uint8_t aircraft_identifier;
 		sf::Vector2f aircraft_position;
+
 		packet >> aircraft_identifier >> aircraft_position.x >> aircraft_position.y;
+
 		std::cout << "Client kSpawnSelf" << +aircraft_identifier << std::endl;
+
 		m_players[aircraft_identifier].reset(new Player(&m_socket, aircraft_identifier, GetContext().keys1, GetContext().window));
 		Tank* aircraft = m_world.AddAircraft(aircraft_identifier, m_players[aircraft_identifier]->GetDetails().m_colour, { 512, 288 });
 		aircraft->setPosition(aircraft_position);
@@ -435,6 +432,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 			sf::Vector2f aircraft_position;
 			float turret_rotation;
 			float aircraft_rotation; // This is only needed for initial state
+
 			packet >> aircraft_identifier >> aircraft_position.x >> aircraft_position.y >> hitpoints >> missile_ammo >> turret_rotation >> aircraft_rotation;
 			
 			m_players[aircraft_identifier].reset(new Player(&m_socket, aircraft_identifier, nullptr, GetContext().window));
@@ -443,21 +441,14 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 			aircraft->setPosition(aircraft_position);
 			aircraft->setRotation(sf::degrees(aircraft_rotation));
 			aircraft->GetTurret()->setRotation(sf::degrees(turret_rotation));
-
-			//aircraft->SetHitpoints(hitpoints); // TODO
-			//aircraft->SetMissileAmmo(missile_ammo);
 		}
 	}
 	break;
 
 	case Server::PacketType::kAcceptCoopPartner:
 	{
-		uint8_t aircraft_identifier;
-		packet >> aircraft_identifier;
-
-		m_world.AddAircraft(aircraft_identifier, m_players[aircraft_identifier]->GetDetails().m_colour, { 512, 288 });
-		m_players[aircraft_identifier].reset(new Player(&m_socket, aircraft_identifier, GetContext().keys2, GetContext().window));
-		m_local_player_identifiers.emplace_back(aircraft_identifier);
+		// This feature is removed.
+		break;
 	}
 	break;
 
@@ -544,8 +535,6 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 				aircraft->setPosition(interpolated_position);
 
 				aircraft->GetTurret()->setRotation(sf::degrees(turret_rotation));
-				//aircraft->SetHitpoints(hitpoints);
-				//aircraft->SetMissileAmmo(ammo);
 			}
 		}
 	}

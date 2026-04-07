@@ -8,24 +8,26 @@
 #include "particle_type.hpp"
 #include "turret_type.hpp"
 
-
+// Chat-GPT generated function to generate based on spacing & start positions
 std::vector<sf::Vector2f> InitializeTankPositions()
 {
-	std::vector<sf::Vector2f>;
+	std::vector<sf::Vector2f> data;
 
-	std::vector<sf::Vector2f> data = {
-		// Row 1
-		{312.f, 2512.f}, {445.f, 2512.f}, {578.f, 2512.f}, {712.f, 2512.f},
+	float startX = 400.f;
+	float startY = 200.f;
+	float spacingX = 300.f;
+	float spacingY = 150.f;
 
-		// Row 2
-		{312.f, 2645.f}, {445.f, 2645.f}, {578.f, 2645.f}, {712.f, 2645.f},
-
-		// Row 3
-		{312.f, 2778.f}, {445.f, 2778.f}, {578.f, 2778.f}, {712.f, 2778.f},
-
-		// Row 4
-		{312.f, 2912.f}, {445.f, 2912.f}, {578.f, 2912.f}, {712.f, 2912.f}
-	};
+	for (int row = 0; row < 4; ++row)
+	{
+		for (int col = 0; col < 4; ++col)
+		{
+			data.emplace_back(
+				startX + col * spacingX,
+				startY + row * spacingY
+			);
+		}
+	}
 
 	return data;
 }
