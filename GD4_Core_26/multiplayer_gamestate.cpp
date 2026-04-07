@@ -51,10 +51,10 @@ MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context, b
 {
 	m_broadcast_text.setPosition(sf::Vector2f(1024.f / 2, 100.f));
 
-	m_player_invitation_text.setCharacterSize(20);
-	m_player_invitation_text.setFillColor(sf::Color::White);
-	m_player_invitation_text.setString("Press Enter to spawn player 2");
-	m_player_invitation_text.setPosition(sf::Vector2f(1000 - m_player_invitation_text.getLocalBounds().size.x, 760 - m_player_invitation_text.getLocalBounds().size.y));
+	//m_player_invitation_text.setCharacterSize(20);
+	//m_player_invitation_text.setFillColor(sf::Color::White);
+	//m_player_invitation_text.setString("Press Enter to spawn player 2");
+	//m_player_invitation_text.setPosition(sf::Vector2f(1000 - m_player_invitation_text.getLocalBounds().size.x, 760 - m_player_invitation_text.getLocalBounds().size.y));
 
 	//Use this for "Attempt to connect" and "Failed to connect" messages
 	m_failed_connection_text.setCharacterSize(35);
@@ -285,15 +285,15 @@ bool MultiplayerGameState::HandleEvent(const sf::Event& event)
 	const auto* key_pressed = event.getIf<sf::Event::KeyPressed>();
 	if (key_pressed)
 	{
-		//If enter pressed, add second player co-op only if there is only 1 player
-		if (key_pressed->scancode == sf::Keyboard::Scancode::Enter && m_local_player_identifiers.size() == 1)
-		{
-			sf::Packet packet;
-			packet << static_cast<uint8_t>(Client::PacketType::kRequestCoopPartner);
-			m_socket.send(packet);
-		}
+		// Disable the co-op functionality
+		//if (key_pressed->scancode == sf::Keyboard::Scancode::Enter && m_local_player_identifiers.size() == 1)
+		//{
+		//	sf::Packet packet;
+		//	packet << static_cast<uint8_t>(Client::PacketType::kRequestCoopPartner);
+		//	m_socket.send(packet);
+		//}
 		//If escape is pressed, show the pause screen
-		else if (key_pressed->scancode == sf::Keyboard::Scancode::Escape)
+		if (key_pressed->scancode == sf::Keyboard::Scancode::Escape)
 		{
 			DisableAllRealtimeActions(false);
 			RequestStackPush(StateID::kNetworkPause);
