@@ -32,6 +32,30 @@ std::vector<sf::Vector2f> InitializeTankPositions()
 	return data;
 }
 
+std::vector<sf::Color> InitializeTankColours()
+{
+	std::vector<sf::Color> data(16);
+
+	data[0] = sf::Color::Red;
+	data[1] = sf::Color::Green;
+	data[2] = sf::Color::Blue;
+	data[3] = sf::Color::Yellow;
+	data[4] = sf::Color::Magenta;
+	data[5] = sf::Color::Cyan;
+	data[6] = sf::Color(255, 128, 0); // Orange
+	data[7] = sf::Color(128, 0, 255); // Purple
+	data[8] = sf::Color(0, 255, 128); // Aqua
+	data[9] = sf::Color(255, 0, 128); // Pink
+	data[10] = sf::Color(128, 255, 0); // Lime
+	data[11] = sf::Color(255, 255, 0); // Yellow
+	data[12] = sf::Color(0, 128, 255); // Sky Blue
+	data[13] = sf::Color(128, 255, 255); // Light Cyan
+	data[14] = sf::Color(255, 128, 128); // Light Red
+	data[15] = sf::Color(128, 128, 255); // Light Blue
+
+	return data;
+}
+
 /// <summary>
 /// Modified: Ben Mc Keever D00254413
 /// 

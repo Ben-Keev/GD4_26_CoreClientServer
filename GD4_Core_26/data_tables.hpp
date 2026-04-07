@@ -64,6 +64,7 @@ struct ParticleData
 /// </summary>
 
 std::vector<sf::Vector2f> InitializeTankPositions();
+std::vector<sf::Color> InitializeTankColours();
 std::vector<TankData> InitializeTankData();
 std::vector<TurretData> InitializeTurretData();
 std::vector<ProjectileData> InitializeProjectileData();

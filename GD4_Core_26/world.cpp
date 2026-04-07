@@ -8,6 +8,12 @@
 #include "particle_node.hpp"
 #include "particletype.hpp"
 #include "sound_node.hpp"
+#include "data_tables.hpp"
+
+namespace
+{
+	const std::vector<sf::Color> TankColours = InitializeTankColours();
+}
 
 World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sounds, bool networked)
 	: m_target(output_target)
@@ -104,7 +110,7 @@ void World::RemoveAircraft(uint8_t identifier)
 
 Tank* World::AddAircraft(uint8_t identifier, sf::Color colour, sf::Vector2f position)
 {
-	std::unique_ptr<Tank> player(new Tank(TankType::kTank, m_textures, m_fonts, colour));
+	std::unique_ptr<Tank> player(new Tank(TankType::kTank, m_textures, m_fonts, TankColours[identifier-1]));
 	player->setPosition(position);
 	std::cout << "Spawning player at position " << player->getPosition().x << ", " << player->getPosition().y << std::endl;
 	//std::cout << "World::AddTank " << +identifier << std::endl;
