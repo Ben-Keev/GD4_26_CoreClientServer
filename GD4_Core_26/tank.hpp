@@ -7,11 +7,12 @@
 #include "command_queue.hpp"
 #include "animation.hpp"
 #include "turret.hpp"
+#include "player.hpp"
 
 class Tank : public Entity
 {
 public:
-	Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts, sf::Color colour);
+	Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts, PlayerDetails details);
 	unsigned int GetCategory() const override;
 
 	void DisablePickups();

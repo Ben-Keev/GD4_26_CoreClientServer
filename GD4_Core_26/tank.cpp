@@ -23,11 +23,11 @@ TextureID ToTextureID(TankType type)
 	return TextureID::kEntities;
 }
 
-Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts, sf::Color colour)
+Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts, PlayerDetails details)
 	: Entity(Table[static_cast<int>(type)].m_hitpoints)
 	, m_type(type)
 	, m_sprite(textures.Get(Table[static_cast<int>(type)].m_texture), Table[static_cast<int>(type)].m_texture_rect)
-	, m_colour(colour)
+	, m_colour(details.m_colour)
 	, m_name_display(nullptr)
 	, m_distance_travelled(0.f)
 	, m_directions_index(0)
@@ -45,7 +45,7 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 	, m_pickups_enabled(true)
 	, m_identifier(0)
 {
-	m_sprite.setColor(colour);
+	m_sprite.setColor(details.m_colour);
 	m_explosion.SetFrameSize(sf::Vector2i(256, 256));
 	m_explosion.SetNumFrames(16);
 	m_explosion.SetDuration(sf::seconds(1));
@@ -67,7 +67,7 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 		};
 
 	std::unique_ptr<Turret> turret;
-	turret = std::unique_ptr<Turret>(new Turret(TurretType::kTurret, textures, colour));
+	turret = std::unique_ptr<Turret>(new Turret(TurretType::kTurret, textures, details.m_colour));
 	m_turret = turret.get();
 	AttachChild(std::move(turret));
 
@@ -82,10 +82,10 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 	//		CreatePickup(node, textures);
 	//	};
 
-	std::string* health = new std::string("");
-	std::unique_ptr<TextNode> health_display(new TextNode(fonts, *health));
-	m_name_display = health_display.get();
-	AttachChild(std::move(health_display));
+	std::unique_ptr<TextNode> name_display(new TextNode(fonts, details.m_name));
+	m_name_display = name_display.get();
+	m_name_display->SetString(details.m_name);
+	AttachChild(std::move(name_display));
 	UpdateTexts();
 }
 
@@ -136,12 +136,11 @@ void Tank::UpdateTexts()
 	}
 	else
 	{
-		m_name_display->SetString(std::to_string(GetHitPoints()) + "HP");
+		// Set the texts position relative to the world position to stay below the tank
+		float worldAngle = GetWorldRotation().asRadians();
+		m_name_display->setPosition(sf::Vector2f(50.f * std::sin(worldAngle), 50.f * std::cos(worldAngle)));
+		m_name_display->setRotation(-getRotation());
 	}
-	// Set the texts position relative to the world position to stay below the tank
-	float worldAngle = GetWorldRotation().asRadians(); 
-	m_name_display->setPosition(sf::Vector2f(50.f * std::sin(worldAngle), 50.f * std::cos(worldAngle)));
-	m_name_display->setRotation(-getRotation());
 }
 
 void Tank::UpdateMovementPattern(sf::Time dt)

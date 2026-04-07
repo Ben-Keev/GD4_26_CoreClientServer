@@ -102,9 +102,9 @@ void World::RemoveAircraft(uint8_t identifier)
 	}
 }
 
-Tank* World::AddAircraft(uint8_t identifier, sf::Color colour, sf::Vector2f position)
+Tank* World::AddAircraft(uint8_t identifier, PlayerDetails details, sf::Vector2f position)
 {
-	std::unique_ptr<Tank> player(new Tank(TankType::kTank, m_textures, m_fonts, colour));
+	std::unique_ptr<Tank> player(new Tank(TankType::kTank, m_textures, m_fonts, details));
 	player->setPosition(m_camera.getCenter());
 	std::cout << "World::AddTank " << +identifier << std::endl;
 	player->SetIdentifier(identifier);
