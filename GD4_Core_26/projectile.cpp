@@ -21,11 +21,11 @@ Projectile::Projectile(ProjectileType type, const TextureHolder& textures, sf::C
 
     //Add particle system
     std::unique_ptr<EmitterNode> smoke(new EmitterNode(ParticleType::kSmoke));
-    smoke->setPosition(sf::Vector2f(0.f, GetBoundingRect().size.y / 2.f));
+    smoke->setPosition(sf::Vector2f(-GetBoundingRect().size.x / 2.f, 0.f));
     AttachChild(std::move(smoke));
 
     std::unique_ptr<EmitterNode> propellant(new EmitterNode(ParticleType::kPropellant));
-    propellant->setPosition(sf::Vector2f(0.f, GetBoundingRect().size.y / 2.f));
+    propellant->setPosition(sf::Vector2f(-GetBoundingRect().size.x / 2.f, 0.f));
     AttachChild(std::move(propellant));
 }
 

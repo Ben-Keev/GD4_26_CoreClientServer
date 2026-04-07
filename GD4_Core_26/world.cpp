@@ -195,6 +195,13 @@ void World::BuildScene()
 		m_scene_graph.AttachChild(std::move(network_node));
 	}
 	AddEnemies();
+
+	//Add the particle nodes to the scene
+	std::unique_ptr<ParticleNode> smokeNode(new ParticleNode(ParticleType::kSmoke, m_textures));
+	m_scene_layers[static_cast<int>(SceneLayers::kParticles)]->AttachChild(std::move(smokeNode));
+
+	std::unique_ptr<ParticleNode> propellantNode(new ParticleNode(ParticleType::kPropellant, m_textures));
+	m_scene_layers[static_cast<int>(SceneLayers::kParticles)]->AttachChild(std::move(propellantNode));
 }
 
 void World::AdaptPlayerVelocity()
