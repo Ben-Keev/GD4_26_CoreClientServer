@@ -28,8 +28,7 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 	, m_type(type)
 	, m_sprite(textures.Get(Table[static_cast<int>(type)].m_texture), Table[static_cast<int>(type)].m_texture_rect)
 	, m_colour(colour)
-	, m_health_display(nullptr)
-	, m_missile_display(nullptr)
+	, m_name_display(nullptr)
 	, m_distance_travelled(0.f)
 	, m_directions_index(0)
 	, m_fire_rate(1)
@@ -85,17 +84,8 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 
 	std::string* health = new std::string("");
 	std::unique_ptr<TextNode> health_display(new TextNode(fonts, *health));
-	m_health_display = health_display.get();
+	m_name_display = health_display.get();
 	AttachChild(std::move(health_display));
-
-	if (Tank::GetCategory() == static_cast<int>(ReceiverCategories::kTank))
-	{
-		std::string* missile_ammo = new std::string("");
-		std::unique_ptr<TextNode> missile_display(new TextNode(fonts, *missile_ammo));
-		missile_display->setPosition(sf::Vector2f(0.f, 70.f));
-		m_missile_display = missile_display.get();
-		AttachChild(std::move(missile_display));
-	}
 	UpdateTexts();
 }
 
@@ -142,26 +132,16 @@ void Tank::UpdateTexts()
 {
 	if (IsDestroyed())
 	{
-		m_health_display->SetString("");
+		m_name_display->SetString("");
 	}
 	else
 	{
-		m_health_display->SetString(std::to_string(GetHitPoints()) + "HP");
+		m_name_display->SetString(std::to_string(GetHitPoints()) + "HP");
 	}
-	m_health_display->setPosition(sf::Vector2f(0.f, 50.f));
-	m_health_display->setRotation(-getRotation());
-
-	if (m_missile_display)
-	{
-		if (m_missile_ammo == 0)
-		{
-			m_missile_display->SetString("");
-		}
-		else
-		{
-			m_missile_display->SetString("M: " + std::to_string(m_missile_ammo));
-		}
-	}
+	// Set the texts position relative to the world position to stay below the tank
+	float worldAngle = GetWorldRotation().asRadians(); 
+	m_name_display->setPosition(sf::Vector2f(50.f * std::sin(worldAngle), 50.f * std::cos(worldAngle)));
+	m_name_display->setRotation(-getRotation());
 }
 
 void Tank::UpdateMovementPattern(sf::Time dt)

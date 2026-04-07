@@ -55,8 +55,7 @@ private:
 	sf::Color m_colour;
 	Animation m_explosion;
 
-	TextNode* m_health_display;
-	TextNode* m_missile_display;
+	TextNode* m_name_display;
 
 	float m_distance_travelled;
 	int m_directions_index;
