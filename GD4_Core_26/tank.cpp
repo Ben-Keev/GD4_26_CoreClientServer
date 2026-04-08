@@ -46,25 +46,18 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 	, m_identifier(0)
 {
 	m_sprite.setColor(details.m_colour);
-	m_explosion.SetFrameSize(sf::Vector2i(256, 256));
-	m_explosion.SetNumFrames(16);
-	m_explosion.SetDuration(sf::seconds(1));
+	m_explosion.SetFrameSize(sf::Vector2i(200, 200));
+	m_explosion.SetNumFrames(9);
+	m_explosion.SetDuration(sf::seconds(0.5));
+	// Center sprite origins for correct rotation/positioning (GPT)
 	Utility::CentreOrigin(m_sprite);
-	Utility::CentreOrigin(m_explosion);
+	Utility::CentreOrigin(m_explosion);;
 
 	m_fire_command.category = static_cast<int>(ReceiverCategories::kScene);
 	m_fire_command.action = [this, &textures](SceneNode& node, sf::Time dt)
-		{
-			m_explosion.SetFrameSize(sf::Vector2i(200, 200));
-			m_explosion.SetNumFrames(9);
-			m_explosion.SetDuration(sf::seconds(0.5));
-
-			// Center sprite origins for correct rotation/positioning (GPT)
-			Utility::CentreOrigin(m_sprite);
-			Utility::CentreOrigin(m_explosion);
-
-			CreateBullet(node, textures);
-		};
+	{
+		CreateBullet(node, textures);
+	};
 
 	std::unique_ptr<Turret> turret;
 	turret = std::unique_ptr<Turret>(new Turret(TurretType::kTurret, textures, details.m_colour));
@@ -271,8 +264,10 @@ void Tank::DrawCurrent(sf::RenderTarget & target, sf::RenderStates states) const
 
 void Tank::UpdateCurrent(sf::Time dt, CommandQueue & commands)
 {
+	UpdateTexts();
 	if (IsDestroyed())
 	{
+		m_turret->Hide();
 		m_explosion.Update(dt);
 		//Play explosion sound only once
 		if (!m_explosion_began)
@@ -299,11 +294,7 @@ void Tank::UpdateCurrent(sf::Time dt, CommandQueue & commands)
 		return;
 	}
 	Entity::UpdateCurrent(dt, commands);
-	UpdateTexts();
 	UpdateMovementPattern(dt);
-
-	//UpdateRollAnimation();
-
 	//Check if bullets or missiles were fired
 	CheckProjectileLaunch(dt, commands);
 }

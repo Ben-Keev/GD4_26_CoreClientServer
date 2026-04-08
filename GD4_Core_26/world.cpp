@@ -98,7 +98,7 @@ void World::RemoveAircraft(uint8_t identifier)
 	if (tank)
 	{
 		tank->Destroy();
-		m_player_tank.erase(std::find(m_player_tank.begin(), m_player_tank.end(), tank));
+		//m_player_tank.erase(std::find(m_player_tank.begin(), m_player_tank.end(), tank));
 	}
 }
 
