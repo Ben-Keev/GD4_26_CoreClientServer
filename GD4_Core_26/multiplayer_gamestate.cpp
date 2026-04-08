@@ -242,12 +242,14 @@ bool MultiplayerGameState::Update(sf::Time dt)
 			{
 				if (Tank* aircraft = m_world.GetAircraft(identifier))
 				{
+					// Compress turret rotation
+
 					position_update_packet << identifier 
 						<< aircraft->getPosition().x 
 						<< aircraft->getPosition().y 
 						<< static_cast<uint8_t>(aircraft->GetHitPoints())
 						<< static_cast<uint8_t>(0) // missile placeholder
-						<< aircraft->GetTurret()->getRotation().asDegrees()
+						<< static_cast<uint8_t>(aircraft->GetTurret()->getRotation().asDegrees() / 360.f * 255.f)
 						<< aircraft->getRotation().asDegrees();
 				}
 			}
