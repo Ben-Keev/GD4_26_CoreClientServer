@@ -215,12 +215,13 @@ void GameServer::Tick()
     if (m_heartbeat_timer >= sf::seconds(0.5f))
     {
         sf::Packet heartbeat;
-        heartbeat << static_cast<uint8_t>(Server::PacketType::kHeartbeat);
+        heartbeat << static_cast<uint8_t>(Server::PacketType::kLobbyPing);
+		heartbeat << static_cast<float>(m_lobby_countdown.asSeconds());
         SendToAll(heartbeat);
         m_heartbeat_timer = sf::Time::Zero;
     }
 
-    if (m_lobby_active && m_connected_players > 2)
+    if (m_lobby_active && m_connected_players >= 2)
     {
         m_lobby_countdown -= sf::seconds(1.f / 20.f); // Decrease countdown by tick duration
 

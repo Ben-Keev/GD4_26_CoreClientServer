@@ -18,7 +18,7 @@ namespace Server
 		kMissionSuccess, // This has no arguments. It just informs the client that the game is over and the client can show the appropriate state
 		kGameStart, // This has no arguments. It informs the client that the game is starting
 		kLobbyCountdownReset,
-		kHeartbeat // This is a keep-alive packet sent periodically by the server to prevent client timeout in the lobby. No parameters.
+		kLobbyPing // This is a keep-alive packet that also carries info on the lobby countdown. It is sent by the server every 500ms to prevent timeout in the lobby, and contains a float with the current countdown time and a sf::Int32 with the number of connected players.
 	};
 }
 

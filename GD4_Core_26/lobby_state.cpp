@@ -39,6 +39,7 @@ sf::IpAddress GetAddressFromFile()
 LobbyState::LobbyState(StateStack& stack, Context context)
 	: State(stack, context)
 	, m_broadcast_text(context.fonts->Get(FontID::kMain))
+	, m_lobby_countdown_text(context.fonts->Get(FontID::kMain))
 	, m_failed_connection_text(context.fonts->Get(FontID::kMain))
 	, m_players_connected_text(context.fonts->Get(FontID::kMain))
 	, m_window(*context.window)
@@ -60,6 +61,13 @@ LobbyState::LobbyState(StateStack& stack, Context context)
 	m_players_connected_text.setPosition(
 		sf::Vector2f(m_window.getSize().x / 2.f, m_window.getSize().y / 2.f));
 
+	m_lobby_countdown_text.setCharacterSize(35);
+	m_lobby_countdown_text.setFillColor(sf::Color::White);
+	m_lobby_countdown_text.setString("Waiting for players...");
+	Utility::CentreOrigin(m_lobby_countdown_text);
+	m_lobby_countdown_text.setPosition(
+		sf::Vector2f(m_window.getSize().x / 2.f, m_window.getSize().y / 2.f - 50.f));
+
 	// Configure the connection-status text shown while connecting / on failure
 	m_failed_connection_text.setCharacterSize(35);
 	m_failed_connection_text.setFillColor(sf::Color::White);
@@ -75,7 +83,7 @@ LobbyState::LobbyState(StateStack& stack, Context context)
 	m_window.display();
 
 	// Pre-set the failure string now; it will be shown if connect() fails
-	m_failed_connection_text.setString("Yo ass being booted out of the lobby");
+	m_failed_connection_text.setString("Failed to connect");
 	Utility::CentreOrigin(m_failed_connection_text);
 
 	// Read the server address from disk
@@ -106,8 +114,6 @@ LobbyState::LobbyState(StateStack& stack, Context context)
 	// Switch to non-blocking mode now that the (blocking) connect() is done.
 	// All subsequent receive() calls must return immediately so Update() doesn't stall.
 	m_socket.setBlocking(false);
-
-
 }
 
 bool LobbyState::Update(sf::Time delta_time)
@@ -118,14 +124,14 @@ bool LobbyState::Update(sf::Time delta_time)
 		if (m_socket.receive(packet) == sf::Socket::Status::Done)
 		{
 
-			std::cout << "Packet received!" << std::endl;
+			//std::cout << "Packet received!" << std::endl;
 
 			// Reset the timeout accumulator — server is still alive
 			m_time_since_last_packet = sf::seconds(0.f);
 			uint8_t packet_type;
 			packet >> packet_type;
 
-			std::cout << "Packet type: " << (int)packet_type << std::endl;
+			//std::cout << "Packet type: " << (int)packet_type << std::endl;
 
 			HandlePacket(packet_type, packet);
 		}
@@ -178,6 +184,7 @@ void LobbyState::Draw()
 	if (m_connected) 
 	{
 		m_window.draw(m_players_connected_text);
+		m_window.draw(m_lobby_countdown_text);
 
 		// Show the current broadcast message if the queue is non-empty
 		if (!m_broadcasts.empty())
@@ -212,6 +219,20 @@ void LobbyState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 		packet >> countdown >> connected_players;
 		m_players_connected_text.setString(std::to_string(connected_players) + " players are connected");
 		Utility::CentreOrigin(m_players_connected_text);
+
+		m_connected_players = connected_players;
+
+		UpdateCountdownText(countdown);
+	}
+	break;
+	case Server::PacketType::kLobbyPing:
+	{
+		float countdown;
+
+		// Server has reset the lobby countdown (e.g. a new player joined)
+		packet >> countdown;
+
+		UpdateCountdownText(countdown);
 	}
 	break;
 	case Server::PacketType::kBroadcastMessage:
@@ -231,7 +252,7 @@ void LobbyState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 	break;
 	case Server::PacketType::kGameStart:
 	{
-		std::cout << "Game start packet was sent" << std::endl;
+		std::cout << "Game start packet was received" << std::endl;
 
 		RequestStackPop();
 		// Server has started the game — transition to the multiplayer game state
@@ -239,7 +260,20 @@ void LobbyState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 	}
 	break;
 	}
+}
 
+void LobbyState::UpdateCountdownText(float countdown) 
+{
+	if (m_connected_players > 1)
+	{
+		m_lobby_countdown_text.setString(std::to_string(countdown) + " seconds remaining");
+		Utility::CentreOrigin(m_lobby_countdown_text);
+	}
+	else
+	{
+		m_lobby_countdown_text.setString("Waiting for players...");
+		Utility::CentreOrigin(m_lobby_countdown_text);
+	}
 }
 
 // ---------------------------------------------------------------------------

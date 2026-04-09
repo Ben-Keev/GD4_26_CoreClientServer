@@ -13,6 +13,8 @@ public:
 private:
 	void HandlePacket(uint8_t packet_type, sf::Packet& packet);
 
+	void UpdateCountdownText(float countdown);
+
 	void UpdateBroadcastMessage(sf::Time elapsed_time);
 
 	sf::RenderWindow& m_window;
@@ -21,6 +23,7 @@ private:
 	sf::Text m_broadcast_text;
 	sf::Time m_broadcast_elapsed_time;
 
+	sf::Text m_lobby_countdown_text;
 	sf::Text m_failed_connection_text;
 	sf::Text m_players_connected_text;
 
