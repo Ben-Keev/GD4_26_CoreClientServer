@@ -190,6 +190,11 @@ PlayerDetails Player::GetDetails()
     return m_details;
 }
 
+void Player::SetScore(int score)
+{
+    m_details.m_score = score;
+}
+
 // Enables/disables all realtime actions over network
 void Player::DisableAllRealtimeActions(bool enable)
 {

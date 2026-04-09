@@ -37,6 +37,7 @@ public:
 	bool IsLocal() const;
 
 	PlayerDetails GetDetails();
+	void SetScore(int score);
 
 private:
 	void InitialiseActions();

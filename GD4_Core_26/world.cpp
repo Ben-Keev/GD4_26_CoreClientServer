@@ -108,19 +108,19 @@ void World::RemoveAircraft(uint8_t identifier)
 	}
 }
 
-Tank* World::AddAircraft(uint8_t identifier, PlayerDetails details, sf::Vector2f position)
+Tank* World::AddAircraft(uint8_t identifier, Player* player, sf::Vector2f position)
 {
-	std::unique_ptr<Tank> player(new Tank(TankType::kTank, m_textures, m_fonts, details));
+	std::unique_ptr<Tank> tank(new Tank(TankType::kTank, m_textures, m_fonts, player));
 
-	player->setPosition(position);
+	tank->setPosition(position);
 
 	// std::cout << "Spawning player at position " << player->getPosition().x << ", " << player->getPosition().y << std::endl;
 	std::cout << "World::AddTank " << +identifier << std::endl;
 	
-    player->SetIdentifier(identifier);
+    tank->SetIdentifier(identifier);
 
-	m_player_tank.emplace_back(player.get());
-	m_scene_layers[static_cast<int>(SceneLayers::kTanks)]->AttachChild(std::move(player));
+	m_player_tank.emplace_back(tank.get());
+	m_scene_layers[static_cast<int>(SceneLayers::kTanks)]->AttachChild(std::move(tank));
 	return m_player_tank.back();
 }
 

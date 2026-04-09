@@ -12,7 +12,7 @@
 class Tank : public Entity
 {
 public:
-	Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts, PlayerDetails details);
+	Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts, Player* player);
 	unsigned int GetCategory() const override;
 
 	void DisablePickups();
@@ -53,6 +53,8 @@ private:
 private:
 	TankType m_type;
 	sf::Sprite m_sprite;
+	Player* m_player;
+	string m_name;
 	sf::Color m_colour;
 	Animation m_explosion;
 
