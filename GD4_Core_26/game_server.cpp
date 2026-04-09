@@ -49,7 +49,8 @@ GameServer::GameServer(sf::Vector2f battlefield_size)
     , m_aircraft_identifier_counter(1)                // Unique IDs start at 1 (0 = invalid)
     , m_waiting_thread_end(false)                     // Flag that tells ExecutionThread to quit
 	, m_lobby_active(true)                            // Lobby is active until the first player spawns
-	, m_lobby_countdown(sf::seconds(10.f))           // Countdown timer for lobby (starts at 10 seconds)
+	, m_lobby_countdown(sf::seconds(kLobbyCountdown))           // Countdown timer for lobby (starts at 10 seconds)
+	, m_total_skip_countdown(0)                      // Number of "skip countdown" votes received from clients
 {
     // Non-blocking so accept() returns immediately when no client is pending
     m_listener_socket.setBlocking(false);
@@ -365,6 +366,28 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
     }
     break;
 
+    case Client::PacketType::kVoteSkipCountdown:
+    {
+        bool wants_to_skip;
+        packet >> wants_to_skip;
+        if (wants_to_skip)
+        {
+            m_total_skip_countdown++; // Increment the count of "skip countdown" votes
+            BroadcastMessage(std::to_string(m_total_skip_countdown) + " players have voted to skip the countdown! (++)");
+
+            if (m_total_skip_countdown >= m_connected_players)
+            {
+                BroadcastMessage("The countdown was skipped!");
+                m_lobby_countdown = sf::Time::Zero; // End the countdown immediately
+            }
+        }
+        else 
+        {
+            BroadcastMessage(std::to_string(m_total_skip_countdown) + " players have voted to skip the countdown! (--)");
+            m_total_skip_countdown--; // Decrement the count of "skip countdown" votes
+        }
+	}
+
     // Client reports a one-shot input event (e.g. missile fired).
     // The server relays this to all other clients via NotifyPlayerEvent.
     case Client::PacketType::kPlayerEvent:
@@ -525,12 +548,12 @@ void GameServer::SendPlayerList()
 
 void GameServer::SendLobbyPacket(bool connected) 
 {
-    m_lobby_countdown = sf::seconds(10.f); // Reset lobby countdown if a new player joins
+    m_lobby_countdown = sf::seconds(kLobbyCountdown); // Reset lobby countdown if a new player joins
     // Build kSpawnSelf — tells each client the new countdown and how many players are connected.
     sf::Packet packet;
     packet << static_cast<uint8_t>(Server::PacketType::kLobbyCountdownReset);
 
-    packet << 10.f
+    packet << kLobbyCountdown
         << static_cast<uint8_t>(m_connected_players)
         << "Placeholder name"
         << connected;

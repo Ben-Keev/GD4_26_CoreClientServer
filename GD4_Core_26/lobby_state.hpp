@@ -8,6 +8,7 @@ public:
 	LobbyState(StateStack& stack, Context context);
 	virtual bool Update(sf::Time delta_time) override;
 	virtual void Draw() override;
+	void ToggleVoteSkipCountdown();
 	virtual bool HandleEvent(const sf::Event& event) override;
 
 private:
@@ -40,4 +41,7 @@ private:
 	sf::Time m_time_since_last_packet;
 
 	std::vector<std::pair<uint8_t, std::string>> m_ids_players;
+
+	// Does this client wants to skip the countdown??
+	bool m_vote_skip_countdown;
 };

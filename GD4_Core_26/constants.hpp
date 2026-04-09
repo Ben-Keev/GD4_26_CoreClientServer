@@ -4,3 +4,4 @@ constexpr auto kTimePerFrame = 1.f / 60.f;
 constexpr auto kGameOverToMenuPause = 6;
 constexpr int kMaxPacketSize = 1300;
 constexpr int kMaxPlayers = 16;
+constexpr float kLobbyCountdown = 15.f;

@@ -34,6 +34,7 @@ namespace Client
 		kGameEvent, //This is for explosions
 		kQuit,
 		kHeartbeat, // This is a keep-alive packet sent periodically by the client to prevent server timeout in the lobby. No parameters
+		kVoteSkipCountdown // This is sent by the client when the user presses the "Skip Countdown" button in the lobby. The parameter is a boolean indicating whether the user wants to skip the countdown or not.
 	};
 }
 

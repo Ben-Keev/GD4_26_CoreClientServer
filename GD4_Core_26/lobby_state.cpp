@@ -81,7 +81,7 @@ LobbyState::LobbyState(StateStack& stack, Context context)
 	// We'll need the server to tell us who's connected for those that just joined...
 	m_players_list_text.setCharacterSize(25);
 	m_players_list_text.setFillColor(sf::Color::White);
-	m_players_list_text.setString("Players:\n- Alice\n- Bob\n- Charlie");
+	m_players_list_text.setString("Players:\n");
 	Utility::CentreOrigin(m_players_list_text);
 	m_players_list_text.setPosition(
 		sf::Vector2f(100, m_window.getSize().y / 2.f));
@@ -211,6 +211,14 @@ void LobbyState::Draw()
 	}
 }
 
+void LobbyState::ToggleVoteSkipCountdown() 
+{
+	m_vote_skip_countdown = !m_vote_skip_countdown;
+	sf::Packet packet;
+	packet << static_cast<uint8_t>(Client::PacketType::kVoteSkipCountdown) << m_vote_skip_countdown;
+	GetContext().socket->send(packet);
+}
+
 bool LobbyState::HandleEvent(const sf::Event& event)
 {
 
@@ -222,6 +230,12 @@ bool LobbyState::HandleEvent(const sf::Event& event)
 		{
 			RequestStackClear();
 			RequestStackPush(StateID::kMenu);
+		}
+
+		// Toggle vote skip countdown with enter
+		if (key_pressed->scancode == sf::Keyboard::Scancode::Enter)
+		{
+			ToggleVoteSkipCountdown();
 		}
 	}
 

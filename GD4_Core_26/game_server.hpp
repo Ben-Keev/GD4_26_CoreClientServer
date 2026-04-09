@@ -69,6 +69,7 @@ private:
 
 	std::size_t m_max_connected_players;
 	std::size_t m_connected_players;
+	std::size_t m_total_skip_countdown;
 
 	float m_world_height;
 	sf::FloatRect m_battlefield_rect;
