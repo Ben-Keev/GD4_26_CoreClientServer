@@ -229,6 +229,10 @@ void GameServer::Tick()
         {
             m_lobby_active = false;
 
+            sf::Packet game_start_packet;
+            game_start_packet << static_cast<uint8_t>(Server::PacketType::kGameStart);
+            SendToAll(game_start_packet);
+
             // Send each peer their own spawn packet now that the lobby is over
             for (std::size_t i = 0; i < m_connected_players; ++i)
             {
@@ -246,16 +250,19 @@ void GameServer::Tick()
                 }
             }
 
-            sf::Packet game_start_packet;
-            game_start_packet << static_cast<uint8_t>(Server::PacketType::kGameStart);
-            SendToAll(game_start_packet);
+            // Send each peer their own spawn packet now that the lobby is over
+            for (std::size_t i = 0; i < m_connected_players; ++i)
+            {
+				InformWorldState(m_peers[i]->m_socket);
+            }
+
         }
     }
 
     if (!m_lobby_active) 
     {
         // --- Win condition check ---
-        bool all_aircraft_done = true;
+        bool all_aircraft_done = false;
         for (const auto& current : m_aircraft_info)
         {
             // Check condition for aircraft being done here

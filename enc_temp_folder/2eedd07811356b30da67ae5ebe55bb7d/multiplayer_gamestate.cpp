@@ -105,11 +105,9 @@ MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context)
         Utility::CentreOrigin(m_failed_connection_text);
         m_failed_connection_clock.restart();
 
-        std::cout << "Failed to connect Buddy" << std::endl;
     }
     else 
     {
-        std::cout << "Succeeded haheaehaehe" << std::endl;
 		m_connected = true;  // Assume the socket is already connected (handshake done in LobbyState)
     }
 
@@ -542,6 +540,15 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
                 >> missile_ammo
                 >> turret_rotation
                 >> aircraft_rotation;
+
+            // Skip if this is our own aircraft — already spawned via kSpawnSelf
+            if (m_local_player_identifiers.end() != std::find(
+                m_local_player_identifiers.begin(),
+                m_local_player_identifiers.end(),
+                aircraft_identifier))
+            {
+                continue;
+            }
 
             // All existing players are remote from this client's perspective (nullptr keys)
             m_players[aircraft_identifier].reset(

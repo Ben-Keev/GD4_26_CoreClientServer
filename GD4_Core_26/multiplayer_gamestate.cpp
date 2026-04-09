@@ -541,6 +541,15 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
                 >> turret_rotation
                 >> aircraft_rotation;
 
+            // Skip if this is our own aircraft — already spawned via kSpawnSelf (Claude)
+            if (m_local_player_identifiers.end() != std::find(
+                m_local_player_identifiers.begin(),
+                m_local_player_identifiers.end(),
+                aircraft_identifier))
+            {
+                continue;
+            }
+
             // All existing players are remote from this client's perspective (nullptr keys)
             m_players[aircraft_identifier].reset(
                 new Player(GetContext().socket, aircraft_identifier, nullptr, GetContext().window));
