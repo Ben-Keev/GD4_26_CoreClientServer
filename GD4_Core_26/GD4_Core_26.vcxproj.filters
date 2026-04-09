@@ -180,6 +180,9 @@
     <ClCompile Include="posteffect.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="lobby_state.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SocketUtil.hpp">
@@ -427,6 +430,9 @@
     </ClInclude>
     <ClInclude Include="TCPSocket.hpp">
       <Filter>Header Files\ClientCoreServer HPPs</Filter>
+    </ClInclude>
+    <ClInclude Include="lobby_state.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

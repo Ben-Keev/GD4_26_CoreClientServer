@@ -51,6 +51,7 @@ private:
 	void HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving_peer, bool& detected_timeout);
 
 	void HandleIncomingConnections();
+	void SendLobbyPacket();
 	void HandleDisconnections();
 
 	void InformWorldState(sf::TcpSocket& socket);
@@ -79,7 +80,7 @@ private:
 	uint8_t m_aircraft_identifier_counter;
 	bool m_waiting_thread_end;
 
-	sf::Time m_last_spawn_time;
-	sf::Time m_time_for_next_spawn;
+	bool m_lobby_active;
+	sf::Time m_lobby_countdown;
 };
 

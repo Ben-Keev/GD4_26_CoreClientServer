@@ -152,6 +152,7 @@
     <ClCompile Include="game_state.cpp" />
     <ClCompile Include="key_binding.cpp" />
     <ClCompile Include="label.cpp" />
+    <ClCompile Include="lobby_state.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MemoryBitStream.cpp" />
     <ClCompile Include="MemoryStream.cpp" />
@@ -213,6 +214,7 @@
     <ClInclude Include="game_state.hpp" />
     <ClInclude Include="key_binding.hpp" />
     <ClInclude Include="label.hpp" />
+    <ClInclude Include="lobby_state.hpp" />
     <ClInclude Include="Math.hpp" />
     <ClInclude Include="MemoryBitStream.hpp" />
     <ClInclude Include="MemoryStream.hpp" />

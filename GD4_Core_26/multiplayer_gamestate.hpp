@@ -1,4 +1,5 @@
 #pragma once
+#include "SocketWrapperPCH.hpp"       // Pre-compiled header wrapping SFML network types
 #include "state.hpp"
 #include "world.hpp"
 #include "player.hpp"
@@ -30,7 +31,7 @@ private:
 
 	std::map<uint8_t, PlayerPtr> m_players;
 	std::vector<uint8_t> m_local_player_identifiers;
-	sf::TcpSocket m_socket;
+
 	bool m_connected;
 	std::unique_ptr<GameServer> m_game_server;
 	sf::Clock m_tick_clock;
@@ -44,6 +45,8 @@ private:
 
 	sf::Text m_failed_connection_text;
 	sf::Clock m_failed_connection_clock;
+
+	sf::TcpSocket m_socket;
 
 	bool m_active_state;
 	bool m_has_focus;
