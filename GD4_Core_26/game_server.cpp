@@ -230,6 +230,7 @@ void GameServer::Tick()
             m_lobby_active = false; // End the lobby phase
             sf::Packet game_start_packet;
             game_start_packet << static_cast<uint8_t>(Server::PacketType::kGameStart);
+			SendToAll(game_start_packet);
         }
     }
 
@@ -367,31 +368,7 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
     // the server still allocates the aircraft and notifies other peers.
     case Client::PacketType::kRequestCoopPartner:
     {
-        //// Register the new aircraft under the requesting peer
-        //receiving_peer.m_aircraft_identifiers.emplace_back(m_aircraft_identifier_counter);
 
-        //// Spawn the co-op partner at the centre of the visible battlefield area
-        //m_aircraft_info[m_aircraft_identifier_counter].m_position =
-        //    sf::Vector2f(m_battlefield_rect.size.x / 2,
-        //        m_battlefield_rect.position.y + m_battlefield_rect.size.y / 2);
-        //m_aircraft_info[m_aircraft_identifier_counter].m_hitpoints = 100;
-        //m_aircraft_info[m_aircraft_identifier_counter].m_missile_ammo = 2;
-
-        //// Notify all OTHER peers about the new aircraft
-        //sf::Packet notify_packet;
-        //notify_packet << static_cast<uint8_t>(Server::PacketType::kPlayerConnect);
-        //notify_packet << m_aircraft_identifier_counter;
-        //notify_packet << m_aircraft_info[m_aircraft_identifier_counter].m_position.x;
-        //notify_packet << m_aircraft_info[m_aircraft_identifier_counter].m_position.y;
-
-        //for (PeerPtr& peer : m_peers)
-        //{
-        //    if (peer.get() != &receiving_peer && peer->m_ready)
-        //    {
-        //        peer->m_socket.send(notify_packet);
-        //    }
-        //}
-        //m_aircraft_identifier_counter++;  // Advance ID so the next aircraft gets a unique one
     }
     break;
 
@@ -448,13 +425,7 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
             && Utility::RandomInt(3) == 0          // 33% chance of a pickup
             && &receiving_peer == m_peers[0].get())
         {
-            // Pickup spawning disabled — packets are commented out for now.
-            // sf::Packet packet;
-            // packet << static_cast<uint8_t>(Server::PacketType::kSpawnPickup);
-            // packet << static_cast<uint8_t>(Utility::RandomInt(static_cast<int>(PickupType::kPickupCount)));
-            // packet << x;
-            // packet << y;
-            // SendToAll(packet);
+            
         }
     }
     } // end switch
@@ -476,7 +447,7 @@ void GameServer::HandleIncomingConnections()
         return;  // Not accepting connections right now
 
     // accept() is non-blocking — returns immediately if no client is waiting
-    if (m_listener_socket.accept(m_peers[m_connected_players]->m_socket) == sf::TcpListener::Status::Done)
+    if (m_listener_socket.accept(m_peers[m_connected_players]->m_socket) == sf::TcpListener::Status::Done && m_lobby_active)
     {
         // Initialise the new aircraft's authoritative server state
         m_aircraft_info[m_aircraft_identifier_counter].m_position = SpawnPositions[m_connected_players];
@@ -523,10 +494,11 @@ void GameServer::HandleIncomingConnections()
             m_peers.emplace_back(PeerPtr(new RemotePeer()));
         }
 
-        if (m_lobby_active)
-        {
-			SendLobbyPacket(); // Send lobby countdown update to all clients when a new player joins
-        }
+        SendLobbyPacket(); // Send lobby countdown update to all clients when a new player joins
+    }
+    else 
+    {
+		// some other logic
     }
 }
 

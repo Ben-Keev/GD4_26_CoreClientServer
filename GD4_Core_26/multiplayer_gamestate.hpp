@@ -46,7 +46,6 @@ private:
 	sf::Text m_failed_connection_text;
 	sf::Clock m_failed_connection_clock;
 
-	// Use a reference to the shared socket from Context to avoid attempting to copy sf::TcpSocket
 	sf::TcpSocket& m_socket;
 
 	bool m_active_state;
