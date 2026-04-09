@@ -17,7 +17,8 @@ namespace Server
 		kUpdateClientState, //This takes one float with the current scrolling of the world in the server, and then a sf::Int32 for the number of aircraft. For each aircraft, it packs one sf::Int32 value with the identifier, two floats for position, health, and ammo. Think about enemies. If we don't send anything they will be locally tracked
 		kMissionSuccess, // This has no arguments. It just informs the client that the game is over and the client can show the appropriate state
 		kGameStart, // This has no arguments. It informs the client that the game is starting
-		kLobbyCountdownReset
+		kLobbyCountdownReset,
+		kHeartbeat // This is a keep-alive packet sent periodically by the server to prevent client timeout in the lobby. No parameters.
 	};
 }
 

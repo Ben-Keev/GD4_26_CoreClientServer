@@ -80,6 +80,8 @@ private:
 	uint8_t m_aircraft_identifier_counter;
 	bool m_waiting_thread_end;
 
+	sf::Time m_heartbeat_timer;
+
 	bool m_lobby_active;
 	sf::Time m_lobby_countdown;
 };

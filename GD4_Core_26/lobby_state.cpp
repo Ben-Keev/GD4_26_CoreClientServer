@@ -46,6 +46,8 @@ LobbyState::LobbyState(StateStack& stack, Context context)
 	, m_connected(false)
 	, m_connected_players(0)                          // Number of connections as last reported by the server...
 	, m_heartbeat_timer(sf::Time::Zero)
+	, m_client_timeout(sf::seconds(1.f))        // Disconnect after 1s with no packet
+	, m_time_since_last_packet(sf::seconds(0.f))// Accumulator for the above timeout
 {
 	// Broadcast messages appear centred near the top of the screen
 	m_broadcast_text.setPosition(sf::Vector2f(1024.f / 2, 100.f));
@@ -119,13 +121,24 @@ bool LobbyState::Update(sf::Time delta_time)
 			std::cout << "Packet received!" << std::endl;
 
 			// Reset the timeout accumulator — server is still alive
-			//m_time_since_last_packet = sf::seconds(0.f);
+			m_time_since_last_packet = sf::seconds(0.f);
 			uint8_t packet_type;
 			packet >> packet_type;
 
 			std::cout << "Packet type: " << (int)packet_type << std::endl;
 
 			HandlePacket(packet_type, packet);
+		}
+		else
+		{
+			// No packet arrived this frame; check for timeout
+			if (m_time_since_last_packet > m_client_timeout)
+			{
+				m_connected = false;
+				m_failed_connection_text.setString("Lost connection to the server");
+				Utility::CentreOrigin(m_failed_connection_text);
+				m_failed_connection_clock.restart();  // Begin the 5-second return-to-menu countdown
+			}
 		}
 
 		// Heartbeat — send every 500ms to prevent server timeout (Claude)
@@ -138,6 +151,17 @@ bool LobbyState::Update(sf::Time delta_time)
 			m_heartbeat_timer = sf::Time::Zero;
 		}
 
+		// Show the current broadcast message if the queue is non-empty
+		if (!m_broadcasts.empty())
+		{
+			m_window.draw(m_broadcast_text);
+		}
+
+		// Accumulate time since the last received packet to detect server timeout
+		m_time_since_last_packet += delta_time;
+
+		// Advance the broadcast message display timer
+		UpdateBroadcastMessage(delta_time);
 	}
 	else if (m_failed_connection_clock.getElapsedTime() >= sf::seconds(5.f))
 	{
@@ -154,6 +178,17 @@ void LobbyState::Draw()
 	if (m_connected) 
 	{
 		m_window.draw(m_players_connected_text);
+
+		// Show the current broadcast message if the queue is non-empty
+		if (!m_broadcasts.empty())
+		{
+			m_window.draw(m_broadcast_text);
+		}
+	}
+	else
+	{
+		// Not connected — show error or "attempting to connect" text
+		m_window.draw(m_failed_connection_text);
 	}
 }
 
@@ -179,6 +214,21 @@ void LobbyState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 		Utility::CentreOrigin(m_players_connected_text);
 	}
 	break;
+	case Server::PacketType::kBroadcastMessage:
+	{
+		std::string message;
+		packet >> message;
+		m_broadcasts.push_back(message);
+
+		// If this is the first message in the queue, display it immediately
+		if (m_broadcasts.size() == 1)
+		{
+			m_broadcast_text.setString(m_broadcasts.front());
+			Utility::CentreOrigin(m_broadcast_text);
+			m_broadcast_elapsed_time = sf::Time::Zero;
+		}
+	}
+	break;
 	case Server::PacketType::kGameStart:
 	{
 		std::cout << "Game start packet was sent" << std::endl;
@@ -188,5 +238,33 @@ void LobbyState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 		RequestStackPush(StateID::kJoinGame);
 	}
 	break;
+	}
+
+}
+
+// ---------------------------------------------------------------------------
+// UpdateBroadcastMessage
+// Ticks the display timer for the current broadcast message.
+// Each message is shown for 2 seconds; when it expires it is dequeued and
+// the next message in the queue (if any) begins displaying immediately.
+// ---------------------------------------------------------------------------
+void LobbyState::UpdateBroadcastMessage(sf::Time elapsed_time)
+{
+	if (m_broadcasts.empty())
+		return;
+
+	m_broadcast_elapsed_time += elapsed_time;
+	if (m_broadcast_elapsed_time > sf::seconds(2.f))
+	{
+		// Current message has expired — remove it from the front of the queue
+		m_broadcasts.erase(m_broadcasts.begin());
+
+		// If more messages are waiting, display the next one immediately
+		if (!m_broadcasts.empty())
+		{
+			m_broadcast_text.setString(m_broadcasts.front());
+			Utility::CentreOrigin(m_broadcast_text);
+			m_broadcast_elapsed_time = sf::Time::Zero;
+		}
 	}
 }

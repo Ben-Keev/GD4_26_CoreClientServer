@@ -210,6 +210,15 @@ void GameServer::Tick()
     // Broadcast the latest aircraft positions/HP to every connected client
     UpdateClientState();
 
+    // Heartbeat — send every 500ms to prevent server timeout (Claude)
+    m_heartbeat_timer += sf::seconds(1.f / 20.f);
+    if (m_heartbeat_timer >= sf::seconds(0.5f))
+    {
+        sf::Packet heartbeat;
+        heartbeat << static_cast<uint8_t>(Server::PacketType::kHeartbeat);
+        SendToAll(heartbeat);
+        m_heartbeat_timer = sf::Time::Zero;
+    }
 
     if (m_lobby_active && m_connected_players > 2)
     {
@@ -464,8 +473,6 @@ void GameServer::HandleIncomingConnections()
 {
     if (!m_listening_state)
         return;  // Not accepting connections right now
-
-
 
     // accept() is non-blocking — returns immediately if no client is waiting
     if (m_listener_socket.accept(m_peers[m_connected_players]->m_socket) == sf::TcpListener::Status::Done)
