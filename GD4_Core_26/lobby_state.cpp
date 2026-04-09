@@ -6,6 +6,7 @@
 #include <SFML/Network/Packet.hpp>
 #include <SFML/Network/IpAddress.hpp>
 #include <fstream>
+#include <numeric>
 
 // ---------------------------------------------------------------------------
 // GetAddressFromFile
@@ -42,6 +43,7 @@ LobbyState::LobbyState(StateStack& stack, Context context)
 	, m_lobby_countdown_text(context.fonts->Get(FontID::kMain))
 	, m_failed_connection_text(context.fonts->Get(FontID::kMain))
 	, m_players_connected_text(context.fonts->Get(FontID::kMain))
+	, m_players_list_text(context.fonts->Get(FontID::kMain))
 	, m_window(*context.window)
 	, m_failed_connection_clock()
 	, m_connected(false)
@@ -75,6 +77,15 @@ LobbyState::LobbyState(StateStack& stack, Context context)
 	Utility::CentreOrigin(m_failed_connection_text);
 	m_failed_connection_text.setPosition(
 		sf::Vector2f(m_window.getSize().x / 2.f, m_window.getSize().y / 2.f));
+
+	// We'll need the server to tell us who's connected for those that just joined...
+	m_players_list_text.setCharacterSize(25);
+	m_players_list_text.setFillColor(sf::Color::White);
+	m_players_list_text.setString("Players:\n- Alice\n- Bob\n- Charlie");
+	Utility::CentreOrigin(m_players_list_text);
+	m_players_list_text.setPosition(
+		sf::Vector2f(100, m_window.getSize().y / 2.f));
+
 
 	// Render one frame immediately so the user sees "Attempting to connect..."
 	// rather than a black screen during the potentially blocking connect() call
@@ -185,6 +196,7 @@ void LobbyState::Draw()
 	{
 		m_window.draw(m_players_connected_text);
 		m_window.draw(m_lobby_countdown_text);
+		m_window.draw(m_players_list_text);
 
 		// Show the current broadcast message if the queue is non-empty
 		if (!m_broadcasts.empty())
@@ -220,15 +232,18 @@ void LobbyState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 {
 	switch (static_cast<Server::PacketType>(packet_type))
 	{
+		// This is sent whenever someone connects or disconnects
 	case Server::PacketType::kLobbyCountdownReset:
 	{
-
 		std::cout << "Lobby countdown was reset" << std::endl;
 		float countdown;
 		uint8_t connected_players;
+		string player_name;
+		bool connect;
 
 		// Server has reset the lobby countdown (e.g. a new player joined)
-		packet >> countdown >> connected_players;
+		packet >> countdown >> connected_players >> player_name >> connect;
+
 		m_players_connected_text.setString(std::to_string(connected_players) + " players are connected");
 		Utility::CentreOrigin(m_players_connected_text);
 
@@ -269,6 +284,26 @@ void LobbyState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 		RequestStackPop();
 		// Server has started the game — transition to the multiplayer game state
 		RequestStackPush(StateID::kJoinGame);
+	}
+	break;
+	case Server::PacketType::kPlayerList:
+	{
+		// Copilot generated
+		m_ids_players.clear();
+		uint8_t num_players;
+		packet >> num_players;
+
+		for (uint8_t i = 0; i < num_players; ++i)
+		{
+			uint8_t id;
+			std::string name;
+			packet >> id >> name;
+			m_ids_players.push_back({ id, name });
+		}
+
+		m_players_list_text.setString("Players:\n" + std::accumulate(m_ids_players.begin(), m_ids_players.end(), std::string(),
+			[](const std::string& acc, const std::pair<uint8_t, std::string>& p) { return acc + "- " + p.second + "\n"; }));
+		Utility::CentreOrigin(m_players_list_text);
 	}
 	break;
 	}

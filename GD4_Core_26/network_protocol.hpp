@@ -18,7 +18,8 @@ namespace Server
 		kMissionSuccess, // This has no arguments. It just informs the client that the game is over and the client can show the appropriate state
 		kGameStart, // This has no arguments. It informs the client that the game is starting
 		kLobbyCountdownReset,
-		kLobbyPing // This is a keep-alive packet that also carries info on the lobby countdown. It is sent by the server every 500ms to prevent timeout in the lobby, and contains a float with the current countdown time and a sf::Int32 with the number of connected players.
+		kLobbyPing, // This is a keep-alive packet that also carries info on the lobby countdown. It is sent by the server every 500ms to prevent timeout in the lobby, and contains a float with the current countdown time and a sf::Int32 with the number of connected players.
+		kPlayerList // This is sent by the server to update the client on the current list of players in the lobby. It contains a sf::Int32 with the number of players, and for each player a sf::Int32 with their identifier and a std::string with their name.
 	};
 }
 
@@ -32,7 +33,7 @@ namespace Client
 		kStateUpdate, //sf::Int32 with number of local aircraft, for each aircraft send sf::Int32 identifier, two floats for position, health and ammo 
 		kGameEvent, //This is for explosions
 		kQuit,
-		kHeartbeat // This is a keep-alive packet sent periodically by the client to prevent server timeout in the lobby. No parameters.
+		kHeartbeat, // This is a keep-alive packet sent periodically by the client to prevent server timeout in the lobby. No parameters
 	};
 }
 

@@ -26,6 +26,7 @@ private:
 	sf::Text m_lobby_countdown_text;
 	sf::Text m_failed_connection_text;
 	sf::Text m_players_connected_text;
+	sf::Text m_players_list_text;
 
 	sf::Clock m_failed_connection_clock;
 
@@ -37,4 +38,6 @@ private:
 
 	sf::Time m_client_timeout;
 	sf::Time m_time_since_last_packet;
+
+	std::vector<std::pair<uint8_t, std::string>> m_ids_players;
 };

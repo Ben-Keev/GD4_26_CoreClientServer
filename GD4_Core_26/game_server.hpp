@@ -51,7 +51,8 @@ private:
 	void HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving_peer, bool& detected_timeout);
 
 	void HandleIncomingConnections();
-	void SendLobbyPacket();
+	void SendPlayerList();
+	void SendLobbyPacket(bool connected);
 	void HandleDisconnections();
 
 	void InformWorldState(sf::TcpSocket& socket);

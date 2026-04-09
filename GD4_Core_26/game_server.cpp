@@ -474,7 +474,7 @@ void GameServer::HandleIncomingConnections()
     if (m_listener_socket.accept(m_peers[m_connected_players]->m_socket) == sf::TcpListener::Status::Done)
     {
         m_aircraft_info[m_aircraft_identifier_counter].m_position = SpawnPositions[m_connected_players];
-        m_aircraft_info[m_aircraft_identifier_counter].m_hitpoints = 100;
+        m_aircraft_info[m_aircraft_identifier_counter].m_hitpoints = 10;
         m_aircraft_info[m_aircraft_identifier_counter].m_missile_ammo = 2;
 
         m_peers[m_connected_players]->m_aircraft_identifiers.emplace_back(m_aircraft_identifier_counter);
@@ -485,7 +485,7 @@ void GameServer::HandleIncomingConnections()
         m_connected_players++;
 
         // Don't send kSpawnSelf here — deferred until lobby ends
-        SendLobbyPacket();
+        SendLobbyPacket(true);
         BroadcastMessage("New player");
 
         if (m_connected_players >= m_max_connected_players)
@@ -494,6 +494,8 @@ void GameServer::HandleIncomingConnections()
             m_peers.emplace_back(PeerPtr(new RemotePeer()));
 
         m_aircraft_identifier_counter++;
+
+		SendPlayerList(); // Update the player list for all clients in the lobby
     }
     else 
     {
@@ -501,7 +503,27 @@ void GameServer::HandleIncomingConnections()
     }
 }
 
-void GameServer::SendLobbyPacket() 
+/// <summary>
+/// Send a player list to the lobby for everyone. Copilot generated.
+/// </summary>
+void GameServer::SendPlayerList()
+{
+    sf::Packet packet;
+    packet << static_cast<uint8_t>(Server::PacketType::kPlayerList);
+    packet << static_cast<uint8_t>(m_connected_players);
+    for (std::size_t i = 0; i < m_connected_players; ++i)
+    {
+        if (m_peers[i]->m_ready)
+        {
+            // For demonstration, we're sending a placeholder name. In a real implementation,
+            // you would want to store and send actual player names.
+            packet << static_cast<uint8_t>(i + 1) << "Player " + std::to_string(i + 1);
+        }
+    }
+    SendToAll(packet);
+}
+
+void GameServer::SendLobbyPacket(bool connected) 
 {
     m_lobby_countdown = sf::seconds(10.f); // Reset lobby countdown if a new player joins
     // Build kSpawnSelf — tells each client the new countdown and how many players are connected.
@@ -509,7 +531,9 @@ void GameServer::SendLobbyPacket()
     packet << static_cast<uint8_t>(Server::PacketType::kLobbyCountdownReset);
 
     packet << 10.f
-        << static_cast<uint8_t>(m_connected_players);
+        << static_cast<uint8_t>(m_connected_players)
+        << "Placeholder name"
+        << connected;
 
     std::cout << "A player has joined or left and the lobby packet was sent." << std::endl;
 
@@ -559,7 +583,8 @@ void GameServer::HandleDisconnections()
 
             if(m_lobby_active)
             {
-                SendLobbyPacket(); // Update lobby countdown and player count for remaining clients
+                SendLobbyPacket(false); // Update lobby countdown and player count for remaining clients
+                SendPlayerList(); // Update the player list for all clients in the lobby
 			}
         }
         else
