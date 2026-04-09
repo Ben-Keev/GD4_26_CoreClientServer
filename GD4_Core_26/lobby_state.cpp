@@ -201,7 +201,19 @@ void LobbyState::Draw()
 
 bool LobbyState::HandleEvent(const sf::Event& event)
 {
-	return false;
+
+	const auto* key_pressed = event.getIf<sf::Event::KeyPressed>();
+	if (key_pressed)
+	{
+		// Backspace exits the lobby and returns to the main menu.
+		if (key_pressed->scancode == sf::Keyboard::Scancode::Backspace)
+		{
+			RequestStackClear();
+			RequestStackPush(StateID::kMenu);
+		}
+	}
+
+	return true;
 }
 
 void LobbyState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
