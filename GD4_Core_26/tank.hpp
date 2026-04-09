@@ -25,6 +25,8 @@ public:
 	void IncreaseFireSpread();
 	//void CollectMissile(unsigned int count);
 
+	void AddPoints(int points);
+
 	void UpdateTexts();
 	void UpdateMovementPattern(sf::Time dt);
 
@@ -74,7 +76,6 @@ private:
 	bool m_is_firing;
 	bool m_is_launching_missile;
 	bool m_spawned_pickup;
-
 
 	sf::Time m_fire_countdown;
 

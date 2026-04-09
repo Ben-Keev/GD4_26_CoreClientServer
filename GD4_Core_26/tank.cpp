@@ -122,6 +122,13 @@ void Tank::IncreaseFireSpread()
 	}
 }
 
+void Tank::AddPoints(int points)
+{
+	m_player->SetScore(m_player->GetDetails().m_score + points);
+
+	std::cout << m_player->GetDetails().m_score;
+}
+
 void Tank::UpdateTexts()
 {
 	if (IsDestroyed())

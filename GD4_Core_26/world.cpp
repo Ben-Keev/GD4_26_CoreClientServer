@@ -548,6 +548,9 @@ void World::HandleCollisions()
 			auto& one = static_cast<Tank&>(*pair.first);
 			auto& two = static_cast<Tank&>(*pair.second);
 
+			one.AddPoints(1);
+			two.AddPoints(1);
+
 			one.Destroy();
 			two.Destroy();
 		}
@@ -557,9 +560,15 @@ void World::HandleCollisions()
 		{
 			auto& tank = static_cast<Tank&>(*pair.first);
 			auto& projectile = static_cast<Projectile&>(*pair.second);
-			if (&tank != &projectile.GetOwner() || projectile.GetBounces() != 0)
+			if (&tank == &projectile.GetOwner() && projectile.GetBounces() >= 1)
 			{
-				// Collision response
+				projectile.GetOwner().AddPoints(-1);
+				tank.Damage(projectile.GetDamage());
+				projectile.Destroy();
+			}
+			else if (&tank != &projectile.GetOwner())
+			{
+				projectile.GetOwner().AddPoints(1);
 				tank.Damage(projectile.GetDamage());
 				projectile.Destroy();
 			}
