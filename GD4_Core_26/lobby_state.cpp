@@ -93,7 +93,7 @@ LobbyState::LobbyState(StateStack& stack, Context context)
 	if (ip)
 	{
 		// Try to establish a TCP connection — 5 second timeout for the handshake
-		auto status = m_socket.connect(*ip, SERVER_PORT, sf::seconds(5.f));
+		auto status = context.socket->connect(*ip, SERVER_PORT, sf::seconds(5.f));
 
 		if (status == sf::Socket::Status::Done)
 		{
@@ -113,10 +113,7 @@ LobbyState::LobbyState(StateStack& stack, Context context)
 
 	// Switch to non-blocking mode now that the (blocking) connect() is done.
 	// All subsequent receive() calls must return immediately so Update() doesn't stall.
-	m_socket.setBlocking(false);
-
-	// Make the socket available to other states via the shared Context
-	context.socket = &m_socket;
+	context.socket->setBlocking(false);
 }
 
 bool LobbyState::Update(sf::Time delta_time)
@@ -124,7 +121,7 @@ bool LobbyState::Update(sf::Time delta_time)
 	if (m_connected) {
 		// --- Receive server packets ---
 		sf::Packet packet;
-		if (m_socket.receive(packet) == sf::Socket::Status::Done)
+		if (GetContext().socket->receive(packet) == sf::Socket::Status::Done)
 		{
 
 			//std::cout << "Packet received!" << std::endl;
@@ -156,7 +153,7 @@ bool LobbyState::Update(sf::Time delta_time)
 		{
 			sf::Packet heartbeat;
 			heartbeat << static_cast<uint8_t>(Client::PacketType::kHeartbeat);
-			m_socket.send(heartbeat);
+			GetContext().socket->send(heartbeat);
 			m_heartbeat_timer = sf::Time::Zero;
 		}
 

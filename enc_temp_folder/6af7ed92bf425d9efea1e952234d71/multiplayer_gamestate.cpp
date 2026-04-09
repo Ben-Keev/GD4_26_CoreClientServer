@@ -105,9 +105,11 @@ MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context)
         Utility::CentreOrigin(m_failed_connection_text);
         m_failed_connection_clock.restart();
 
+        std::cout << "Failed to connect Buddy" << std::endl;
     }
     else 
     {
+        std::cout << "Succeeded haheaehaehe" << std::endl;
 		m_connected = true;  // Assume the socket is already connected (handshake done in LobbyState)
     }
 

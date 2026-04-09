@@ -227,10 +227,28 @@ void GameServer::Tick()
 
         if (m_lobby_countdown <= sf::Time::Zero)
         {
-            m_lobby_active = false; // End the lobby phase
+            m_lobby_active = false;
+
+            // Send each peer their own spawn packet now that the lobby is over
+            for (std::size_t i = 0; i < m_connected_players; ++i)
+            {
+                if (m_peers[i]->m_ready)
+                {
+                    for (uint8_t identifier : m_peers[i]->m_aircraft_identifiers)
+                    {
+                        sf::Packet spawn_packet;
+                        spawn_packet << static_cast<uint8_t>(Server::PacketType::kSpawnSelf);
+                        spawn_packet << identifier;
+                        spawn_packet << m_aircraft_info[identifier].m_position.x;
+                        spawn_packet << m_aircraft_info[identifier].m_position.y;
+                        m_peers[i]->m_socket.send(spawn_packet);
+                    }
+                }
+            }
+
             sf::Packet game_start_packet;
             game_start_packet << static_cast<uint8_t>(Server::PacketType::kGameStart);
-			SendToAll(game_start_packet);
+            SendToAll(game_start_packet);
         }
     }
 
@@ -446,55 +464,29 @@ void GameServer::HandleIncomingConnections()
     if (!m_listening_state)
         return;  // Not accepting connections right now
 
-    // accept() is non-blocking — returns immediately if no client is waiting
-    if (m_listener_socket.accept(m_peers[m_connected_players]->m_socket) == sf::TcpListener::Status::Done && m_lobby_active)
+    if (m_listener_socket.accept(m_peers[m_connected_players]->m_socket) == sf::TcpListener::Status::Done)
     {
-        // Initialise the new aircraft's authoritative server state
         m_aircraft_info[m_aircraft_identifier_counter].m_position = SpawnPositions[m_connected_players];
         m_aircraft_info[m_aircraft_identifier_counter].m_hitpoints = 100;
         m_aircraft_info[m_aircraft_identifier_counter].m_missile_ammo = 2;
 
-        std::cout << "The counter for spawn position is here: " << m_aircraft_identifier_counter << std::endl;
-
-        // Build kSpawnSelf — tells the new client which ID it owns and where to place itself
-        sf::Packet packet;
-        packet << static_cast<uint8_t>(Server::PacketType::kSpawnSelf);
-        packet << m_aircraft_identifier_counter;
-        packet << m_aircraft_info[m_aircraft_identifier_counter].m_position.x;
-        packet << m_aircraft_info[m_aircraft_identifier_counter].m_position.y;
-
-        // Record the new aircraft under this peer so we can clean it up on disconnect
         m_peers[m_connected_players]->m_aircraft_identifiers.emplace_back(m_aircraft_identifier_counter);
-
-        // Announce the new player to everyone, send the world snapshot to the new client,
-        // and then send the kSpawnSelf packet (order matters — world state first so the
-        // client can populate the scene before handling its own spawn).
-        BroadcastMessage("New player");
-        InformWorldState(m_peers[m_connected_players]->m_socket);  // Send existing-world snapshot
-        NotifyPlayerSpawn(m_aircraft_identifier_counter++);        // Broadcast new player; advance ID
-
-        // Finally send the personalised kSpawnSelf packet to the new client THIS SHOULD WAIT UNTIL THE LOBBY IS FINISHED
-        m_peers[m_connected_players]->m_socket.send(packet);
-
-        // Mark the peer as ready so HandleIncomingPackets will process its messages
         m_peers[m_connected_players]->m_ready = true;
         m_peers[m_connected_players]->m_last_packet_time = Now();
 
         m_aircraft_count++;
         m_connected_players++;
 
-        if (m_connected_players >= m_max_connected_players)
-        {
-            // Server is full — stop accepting new connections
-            SetListening(false);
-        }
-        else
-        {
-            // Prepare an empty slot for the next potential connection
-            m_peers.emplace_back(PeerPtr(new RemotePeer()));
-        }
+        // Don't send kSpawnSelf here — deferred until lobby ends
+        SendLobbyPacket();
+        BroadcastMessage("New player");
 
-        SendLobbyPacket(); // Send lobby countdown update to all clients when a new player joins
+        if (m_connected_players >= m_max_connected_players)
+            SetListening(false);
+        else
+            m_peers.emplace_back(PeerPtr(new RemotePeer()));
+
+        m_aircraft_identifier_counter++;
     }
     else 
     {

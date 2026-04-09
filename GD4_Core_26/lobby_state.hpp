@@ -37,6 +37,4 @@ private:
 
 	sf::Time m_client_timeout;
 	sf::Time m_time_since_last_packet;
-
-	sf::TcpSocket m_socket;
 };
