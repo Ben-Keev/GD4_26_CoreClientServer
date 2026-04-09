@@ -371,9 +371,6 @@
     <ClInclude Include="world.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="xbox_layout.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="key_binding.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

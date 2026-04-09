@@ -8,7 +8,7 @@
 class MultiplayerGameState : public State
 {
 public:
-	MultiplayerGameState(StateStack& stack, Context context, bool is_host);
+	MultiplayerGameState(StateStack& stack, Context context);
 	virtual void Draw();
 	virtual bool Update(sf::Time dt);
 	virtual bool HandleEvent(const sf::Event& event);

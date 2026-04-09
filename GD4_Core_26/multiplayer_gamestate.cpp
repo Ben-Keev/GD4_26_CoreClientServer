@@ -33,8 +33,8 @@ sf::IpAddress GetAddressFromFile()
 	return local_address;
 }
 
-MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context, bool is_host)
-	:State(stack, context)
+MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context)
+	: State(stack, context)
 	, m_world(*context.window, *context.fonts, *context.sound, true)
 	, m_window(*context.window)
 	, m_texture_holder(*context.textures)
@@ -42,7 +42,6 @@ MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context, b
 	, m_game_server(nullptr)
 	, m_active_state(true)
 	, m_has_focus(true)
-	, m_host(is_host)
 	, m_game_started(false)
 	, m_client_timeout(sf::seconds(1.f))
 	, m_time_since_last_packet(sf::seconds(0.f))
@@ -51,11 +50,6 @@ MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context, b
 	, m_failed_connection_text(context.fonts->Get(FontID::kMain))
 {
 	m_broadcast_text.setPosition(sf::Vector2f(1024.f / 2, 100.f));
-
-	//m_player_invitation_text.setCharacterSize(20);
-	//m_player_invitation_text.setFillColor(sf::Color::White);
-	//m_player_invitation_text.setString("Press Enter to spawn player 2");
-	//m_player_invitation_text.setPosition(sf::Vector2f(1000 - m_player_invitation_text.getLocalBounds().size.x, 760 - m_player_invitation_text.getLocalBounds().size.y));
 
 	//Use this for "Attempt to connect" and "Failed to connect" messages
 	m_failed_connection_text.setCharacterSize(35);
@@ -71,18 +65,10 @@ MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context, b
 	m_failed_connection_text.setString("Failed to connect to server");
 	Utility::CentreOrigin(m_failed_connection_text);
 
-	//If this is the host, create a server
+	// Depends on presence of IP once read
 	std::optional<sf::IpAddress> ip;
 
-	if (m_host)
-	{
-		m_game_server.reset(new GameServer(sf::Vector2f(m_window.getSize())));
-		ip = sf::IpAddress::LocalHost;
-	}
-	else
-	{
-		ip = GetAddressFromFile();
-	}
+	ip = GetAddressFromFile();
 
 	if (ip)
 	{

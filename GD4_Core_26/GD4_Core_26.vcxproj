@@ -272,7 +272,6 @@
     <ClInclude Include="wall.hpp" />
     <ClInclude Include="wall_type.hpp" />
     <ClInclude Include="world.hpp" />
-    <ClInclude Include="xbox_layout.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resource_holder.inl" />

@@ -10,6 +10,5 @@ enum class StateID
 	kSettings,
 	kGameOver,
 	kMissionSuccess,
-	kHostGame,
 	kJoinGame
 };
