@@ -10,7 +10,7 @@ State::~State()
 {
 }
 
-State::Context::Context(sf::RenderWindow& window, TextureHolder& textures, FontHolder& fonts, MusicPlayer& music, SoundPlayer& sound, KeyBinding& keys1, KeyBinding& keys2) : window(&window), textures(&textures), fonts(&fonts), music(&music), sound(&sound), keys1(&keys1), keys2(&keys2)
+State::Context::Context(sf::RenderWindow& window, TextureHolder& textures, FontHolder& fonts, MusicPlayer& music, SoundPlayer& sound, KeyBinding& keys1, KeyBinding& keys2, sf::TcpSocket& socket) : window(&window), textures(&textures), fonts(&fonts), music(&music), sound(&sound), keys1(&keys1), keys2(&keys2), socket(&socket)
 {
 }
 

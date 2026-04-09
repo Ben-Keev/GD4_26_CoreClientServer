@@ -47,6 +47,7 @@ MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context)
     , m_broadcast_text(context.fonts->Get(FontID::kMain))
     , m_player_invitation_text(context.fonts->Get(FontID::kMain))
     , m_failed_connection_text(context.fonts->Get(FontID::kMain))
+	, m_socket(*context.socket)  // Socket is shared via the Context; see LobbyState
 {
     // Broadcast messages appear centred near the top of the screen
     m_broadcast_text.setPosition(sf::Vector2f(1024.f / 2, 100.f));
@@ -97,6 +98,18 @@ MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context)
     //// Switch to non-blocking mode now that the (blocking) connect() is done.
     //// All subsequent receive() calls must return immediately so Update() doesn't stall.
     //m_socket.setBlocking(false);
+
+    if(&m_socket == nullptr)
+    {
+        m_connected = false;
+        m_failed_connection_text.setString("No valid socket found in Context");
+        Utility::CentreOrigin(m_failed_connection_text);
+        m_failed_connection_clock.restart();
+    }
+    else 
+    {
+		m_connected = true;  // Assume the socket is already connected (handshake done in LobbyState)
+    }
 
     // Start the in-game music
     context.music->Play(MusicThemes::kMissionTheme);
@@ -348,7 +361,7 @@ void MultiplayerGameState::OnActivate()
 // ---------------------------------------------------------------------------
 void MultiplayerGameState::OnDestroy()
 {
-    if (!m_host && m_connected)
+    if (m_connected)
     {
         sf::Packet packet;
         packet << static_cast<uint8_t>(Client::PacketType::kQuit);

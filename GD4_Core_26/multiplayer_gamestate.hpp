@@ -46,11 +46,11 @@ private:
 	sf::Text m_failed_connection_text;
 	sf::Clock m_failed_connection_clock;
 
-	sf::TcpSocket m_socket;
+	// Use a reference to the shared socket from Context to avoid attempting to copy sf::TcpSocket
+	sf::TcpSocket& m_socket;
 
 	bool m_active_state;
 	bool m_has_focus;
-	bool m_host;
 	bool m_game_started;
 	sf::Time m_client_timeout;
 	sf::Time m_time_since_last_packet;

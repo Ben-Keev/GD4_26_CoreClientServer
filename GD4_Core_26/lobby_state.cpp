@@ -114,6 +114,9 @@ LobbyState::LobbyState(StateStack& stack, Context context)
 	// Switch to non-blocking mode now that the (blocking) connect() is done.
 	// All subsequent receive() calls must return immediately so Update() doesn't stall.
 	m_socket.setBlocking(false);
+
+	// Make the socket available to other states via the shared Context
+	context.socket = &m_socket;
 }
 
 bool LobbyState::Update(sf::Time delta_time)

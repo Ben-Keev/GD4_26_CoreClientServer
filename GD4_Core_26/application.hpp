@@ -34,5 +34,8 @@ private:
 
 	KeyBinding m_key_binding_1;
 	KeyBinding m_key_binding_2;
+
+	sf::TcpSocket m_socket;
+
 };
 
