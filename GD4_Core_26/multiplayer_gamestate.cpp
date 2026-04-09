@@ -459,9 +459,11 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 
         // Spawn the aircraft in the world scene graph and position it
         Tank* aircraft = m_world.AddAircraft(
-            aircraft_identifier,
-            m_players[aircraft_identifier]->GetDetails().m_colour,
-            { 512, 288 });  // Default spawn size / spawn context
+            aircraft_identifier, 
+            m_players[aircraft_identifier]->GetDetails(), 
+            { 512, 288 }
+        );
+
         aircraft->setPosition(aircraft_position);
 
         // Record this ID as a locally-controlled player for input and update packets
@@ -483,10 +485,14 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
         // nullptr key bindings = remote player; input handled via network packets only
         m_players[aircraft_identifier].reset(
             new Player(&m_socket, aircraft_identifier, nullptr, GetContext().window));
+
+        // Spawn the aircraft in the world scene graph and position it
         Tank* aircraft = m_world.AddAircraft(
-            aircraft_identifier,
-            m_players[aircraft_identifier]->GetDetails().m_colour,
-            { 512, 288 });
+            aircraft_identifier, 
+            m_players[aircraft_identifier]->GetDetails(), 
+            { 512, 288 }
+        );
+
         aircraft->setPosition(aircraft_position);
     }
     break;
@@ -541,8 +547,9 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 
             Tank* aircraft = m_world.AddAircraft(
                 aircraft_identifier,
-                m_players[aircraft_identifier]->GetDetails().m_colour,
+                m_players[aircraft_identifier]->GetDetails(),
                 { 512, 288 });
+            
             aircraft->setPosition(aircraft_position);
             aircraft->setRotation(sf::degrees(aircraft_rotation));
             aircraft->GetTurret()->setRotation(sf::degrees(turret_rotation));

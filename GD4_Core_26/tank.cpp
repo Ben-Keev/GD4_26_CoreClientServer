@@ -23,13 +23,12 @@ TextureID ToTextureID(TankType type)
 	return TextureID::kEntities;
 }
 
-Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts, sf::Color colour)
+Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts, PlayerDetails details)
 	: Entity(Table[static_cast<int>(type)].m_hitpoints)
 	, m_type(type)
 	, m_sprite(textures.Get(Table[static_cast<int>(type)].m_texture), Table[static_cast<int>(type)].m_texture_rect)
-	, m_colour(colour)
-	, m_health_display(nullptr)
-	, m_missile_display(nullptr)
+	, m_colour(details.m_colour)
+	, m_name_display(nullptr)
 	, m_distance_travelled(0.f)
 	, m_directions_index(0)
 	, m_fire_rate(1)
@@ -46,29 +45,22 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 	, m_pickups_enabled(true)
 	, m_identifier(0)
 {
-	m_sprite.setColor(colour);
-	m_explosion.SetFrameSize(sf::Vector2i(256, 256));
-	m_explosion.SetNumFrames(16);
-	m_explosion.SetDuration(sf::seconds(1));
+	m_sprite.setColor(details.m_colour);
+	m_explosion.SetFrameSize(sf::Vector2i(200, 200));
+	m_explosion.SetNumFrames(9);
+	m_explosion.SetDuration(sf::seconds(0.5));
+	// Center sprite origins for correct rotation/positioning (GPT)
 	Utility::CentreOrigin(m_sprite);
-	Utility::CentreOrigin(m_explosion);
+	Utility::CentreOrigin(m_explosion);;
 
 	m_fire_command.category = static_cast<int>(ReceiverCategories::kScene);
 	m_fire_command.action = [this, &textures](SceneNode& node, sf::Time dt)
-		{
-			m_explosion.SetFrameSize(sf::Vector2i(200, 200));
-			m_explosion.SetNumFrames(9);
-			m_explosion.SetDuration(sf::seconds(0.5));
-
-			// Center sprite origins for correct rotation/positioning (GPT)
-			Utility::CentreOrigin(m_sprite);
-			Utility::CentreOrigin(m_explosion);
-
-			CreateBullet(node, textures);
-		};
+	{
+		CreateBullet(node, textures);
+	};
 
 	std::unique_ptr<Turret> turret;
-	turret = std::unique_ptr<Turret>(new Turret(TurretType::kTurret, textures, colour));
+	turret = std::unique_ptr<Turret>(new Turret(TurretType::kTurret, textures, details.m_colour));
 	m_turret = turret.get();
 	AttachChild(std::move(turret));
 
@@ -83,19 +75,10 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 	//		CreatePickup(node, textures);
 	//	};
 
-	std::string* health = new std::string("");
-	std::unique_ptr<TextNode> health_display(new TextNode(fonts, *health));
-	m_health_display = health_display.get();
-	AttachChild(std::move(health_display));
-
-	if (Tank::GetCategory() == static_cast<int>(ReceiverCategories::kTank))
-	{
-		std::string* missile_ammo = new std::string("");
-		std::unique_ptr<TextNode> missile_display(new TextNode(fonts, *missile_ammo));
-		missile_display->setPosition(sf::Vector2f(0.f, 70.f));
-		m_missile_display = missile_display.get();
-		AttachChild(std::move(missile_display));
-	}
+	std::unique_ptr<TextNode> name_display(new TextNode(fonts, details.m_name));
+	m_name_display = name_display.get();
+	m_name_display->SetString(details.m_name);
+	AttachChild(std::move(name_display));
 	UpdateTexts();
 }
 
@@ -142,25 +125,14 @@ void Tank::UpdateTexts()
 {
 	if (IsDestroyed())
 	{
-		m_health_display->SetString("");
+		m_name_display->SetString("");
 	}
 	else
 	{
-		m_health_display->SetString(std::to_string(GetHitPoints()) + "HP");
-	}
-	m_health_display->setPosition(sf::Vector2f(0.f, 50.f));
-	m_health_display->setRotation(-getRotation());
-
-	if (m_missile_display)
-	{
-		if (m_missile_ammo == 0)
-		{
-			m_missile_display->SetString("");
-		}
-		else
-		{
-			m_missile_display->SetString("M: " + std::to_string(m_missile_ammo));
-		}
+		// Set the texts position relative to the world position to stay below the tank
+		float worldAngle = GetWorldRotation().asRadians();
+		m_name_display->setPosition(sf::Vector2f(50.f * std::sin(worldAngle), 50.f * std::cos(worldAngle)));
+		m_name_display->setRotation(-getRotation());
 	}
 }
 
@@ -292,8 +264,10 @@ void Tank::DrawCurrent(sf::RenderTarget & target, sf::RenderStates states) const
 
 void Tank::UpdateCurrent(sf::Time dt, CommandQueue & commands)
 {
+	UpdateTexts();
 	if (IsDestroyed())
 	{
+		m_turret->Hide();
 		m_explosion.Update(dt);
 		//Play explosion sound only once
 		if (!m_explosion_began)
@@ -320,11 +294,7 @@ void Tank::UpdateCurrent(sf::Time dt, CommandQueue & commands)
 		return;
 	}
 	Entity::UpdateCurrent(dt, commands);
-	UpdateTexts();
 	UpdateMovementPattern(dt);
-
-	//UpdateRollAnimation();
-
 	//Check if bullets or missiles were fired
 	CheckProjectileLaunch(dt, commands);
 }

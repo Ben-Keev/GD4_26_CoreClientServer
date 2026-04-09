@@ -7,11 +7,12 @@
 #include "command_queue.hpp"
 #include "animation.hpp"
 #include "turret.hpp"
+#include "player.hpp"
 
 class Tank : public Entity
 {
 public:
-	Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts, sf::Color colour);
+	Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts, PlayerDetails details);
 	unsigned int GetCategory() const override;
 
 	void DisablePickups();
@@ -55,8 +56,7 @@ private:
 	sf::Color m_colour;
 	Animation m_explosion;
 
-	TextNode* m_health_display;
-	TextNode* m_missile_display;
+	TextNode* m_name_display;
 
 	float m_distance_travelled;
 	int m_directions_index;

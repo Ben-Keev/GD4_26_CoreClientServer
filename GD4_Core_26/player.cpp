@@ -94,7 +94,7 @@ Player::Player(sf::TcpSocket* socket, uint8_t identifier, const KeyBinding* bind
     , m_identifier(identifier)               // Player ID
     , m_socket(socket)                       // Network socket (nullptr if local game)
     , m_window(window)
-    , m_details{ "", sf::Color::Cyan, 0}
+    , m_details{ "Ben Benim", sf::Color::Cyan, 0}
 
     // red
     // sf::Color(240, 70, 90)

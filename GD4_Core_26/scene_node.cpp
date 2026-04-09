@@ -159,7 +159,14 @@ unsigned int SceneNode::GetCategory() const
 
 void SceneNode::CheckNodeCollision(SceneNode& node, std::set<Pair>& collision_pairs)
 {
-	if (this != &node && Collision(*this, node) && !IsDestroyed() && !node.IsDestroyed())
+	unsigned int category1 = GetCategory();
+	unsigned int category2 = node.GetCategory();
+
+	if ((static_cast<int>(ReceiverCategories::kWall) & category1) && (static_cast<int>(ReceiverCategories::kWall) & category2))
+	{
+		return;
+	}
+	else if (this != &node && Collision(*this, node) && !IsDestroyed() && !node.IsDestroyed())
 	{
 		collision_pairs.insert(std::minmax(this, &node));
 	}
