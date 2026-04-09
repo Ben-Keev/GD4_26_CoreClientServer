@@ -79,7 +79,7 @@ private:
 	SceneNode m_scene_graph;
 	std::array<SceneNode*, static_cast<int>(SceneLayers::kLayerCount)> m_scene_layers;
 	sf::FloatRect m_world_bounds;
-	sf::Vector2f m_spawn_position;
+	sf::Vector2f m_center;
 	float m_scroll_speed;
 	float m_scrollspeed_compensation;
 

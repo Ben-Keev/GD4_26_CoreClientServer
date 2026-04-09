@@ -18,7 +18,7 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	, m_scene_graph(ReceiverCategories::kNone)
 	, m_scene_layers()
 	, m_world_bounds(sf::Vector2f(0.f, 0.f), sf::Vector2f(m_camera.getSize().x, m_camera.getSize().y))
-	, m_spawn_position(m_camera.getSize().x / 2.f, m_world_bounds.size.y - m_camera.getSize().y / 2.f)
+	, m_center(m_camera.getSize().x / 2.f, m_world_bounds.size.y - m_camera.getSize().y / 2.f)
 	, m_scroll_speed(0)
 	, m_scrollspeed_compensation(1.f)
 	, m_player_tank()
@@ -31,7 +31,7 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	m_scene_texture.resize({ m_target.getSize().x, m_target.getSize().y });
 	LoadTextures();
 	BuildScene();
-	m_camera.setCenter(m_spawn_position);
+	m_camera.setCenter(m_center);
 }
 
 void World::Update(sf::Time dt)
@@ -122,7 +122,7 @@ bool World::PollGameAction(GameActions::Action& out)
 void World::SetCurrentBattleFieldPosition(float lineY)
 {
 	m_camera.setCenter(sf::Vector2f(m_camera.getCenter().x, lineY - m_camera.getSize().y / 2));
-	m_spawn_position.y = m_world_bounds.size.y;
+	m_center.y = m_world_bounds.size.y;
 }
 
 void World::SetWorldHeight(float height)
@@ -248,57 +248,227 @@ void World::SpawnEnemies()
 /// </summary>
 void World::AddWalls()
 {
+	//Top Left Quadrant
+	SpawnWall(WallType::kWoodWall, m_center.x - 14, m_center.y - 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 42, m_center.y - 154, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x - 70, m_center.y - 196, 90);
+	SpawnWall(WallType::kMetalWall, m_center.x - 70, m_center.y - 280, 90);
+	SpawnWall(WallType::kWoodWall, m_center.x - 70, m_center.y - 350, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 70, m_center.y - 378, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 70, m_center.y - 406, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 70, m_center.y - 434, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 98, m_center.y - 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 126, m_center.y - 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 154, m_center.y - 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 182, m_center.y - 154, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x - 210, m_center.y - 112, 90);
+	SpawnWall(WallType::kWoodWall, m_center.x - 210, m_center.y - 14, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 210, m_center.y - 42, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 238, m_center.y - 70, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x - 308, m_center.y - 70, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 378, m_center.y - 70, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x - 448, m_center.y - 70, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 518, m_center.y - 70, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x - 588, m_center.y - 70, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 658, m_center.y - 70, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 686, m_center.y - 70, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 714, m_center.y - 70, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 742, m_center.y - 70, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x - 770, m_center.y - 112, 90);
+	SpawnWall(WallType::kWoodWall, m_center.x - 770, m_center.y - 42, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 770, m_center.y - 14, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 798, m_center.y - 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 826, m_center.y - 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 854, m_center.y - 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 882, m_center.y - 154, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x - 770, m_center.y - 196, 90);
+	SpawnWall(WallType::kWoodWall, m_center.x - 658, m_center.y - 238, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 686, m_center.y - 238, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 714, m_center.y - 238, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 742, m_center.y - 238, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x - 630, m_center.y - 280, 90);
+	SpawnWall(WallType::kWoodWall, m_center.x - 630, m_center.y - 350, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 630, m_center.y - 378, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 630, m_center.y - 406, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 630, m_center.y - 434, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 602, m_center.y - 322, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x - 532, m_center.y - 322, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 462, m_center.y - 322, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x - 392, m_center.y - 322, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 322, m_center.y - 322, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x - 252, m_center.y - 322, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 98, m_center.y - 322, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 126, m_center.y - 322, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 154, m_center.y - 322, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 182, m_center.y - 322, 0);
 
-    // Left side wall
-    SpawnWall(WallType::kMetalWall, m_spawn_position.x - 340, m_spawn_position.y - 140, 90);
-    SpawnWall(WallType::kWoodWall, m_spawn_position.x - 284, m_spawn_position.y + 42, 0);
-    /*
-    SpawnWall(WallType::kMetalWall, m_center.x - 340, m_center.y - 140, 90);
-    SpawnWall(WallType::kMetalWall, m_center.x - 340, m_center.y - 84, 90);
-    SpawnWall(WallType::kMetalWall, m_center.x - 340, m_center.y - 28, 90);
-    SpawnWall(WallType::kMetalWall, m_center.x - 340, m_center.y + 28, 90);
-    SpawnWall(WallType::kMetalWall, m_center.x - 326, m_center.y + 42, 0);
-    SpawnWall(WallType::kWoodWall, m_center.x - 284, m_center.y + 42, 0);
-    SpawnWall(WallType::kWoodWall, m_center.x - 256, m_center.y + 42, 0);
-    SpawnWall(WallType::kWoodWall, m_center.x - 228, m_center.y + 42, 0);
-    SpawnWall(WallType::kMetalWall, m_center.x - 186, m_center.y + 42, 0);
-    SpawnWall(WallType::kMetalWall, m_center.x - 172, m_center.y + 84, 90);
-    SpawnWall(WallType::kMetalWall, m_center.x - 172, m_center.y + 140, 90);
-    SpawnWall(WallType::kMetalWall, m_center.x - 130, m_center.y + 154, 0);
-    SpawnWall(WallType::kWoodWall, m_center.x - 88, m_center.y + 154, 0);
-    SpawnWall(WallType::kMetalWall, m_center.x - 46, m_center.y + 154, 0);
-    SpawnWall(WallType::kWoodWall, m_center.x - 4, m_center.y + 154, 0);
-    SpawnWall(WallType::kMetalWall, m_center.x + 38, m_center.y + 154, 0);
-    SpawnWall(WallType::kWoodWall, m_center.x + 80, m_center.y + 154, 0);
-    SpawnWall(WallType::kMetalWall, m_center.x + 122, m_center.y + 154, 0);
+	//Top Right Quadrant
+	SpawnWall(WallType::kWoodWall, m_center.x + 14, m_center.y - 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 42, m_center.y - 154, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x + 70, m_center.y - 196, 90);
+	SpawnWall(WallType::kMetalWall, m_center.x + 70, m_center.y - 280, 90);
+	SpawnWall(WallType::kWoodWall, m_center.x + 70, m_center.y - 350, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 70, m_center.y - 378, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 70, m_center.y - 406, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 70, m_center.y - 434, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 98, m_center.y - 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 126, m_center.y - 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 154, m_center.y - 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 182, m_center.y - 154, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x + 210, m_center.y - 112, 90);
+	SpawnWall(WallType::kWoodWall, m_center.x + 210, m_center.y - 14, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 210, m_center.y - 42, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 238, m_center.y - 70, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x + 308, m_center.y - 70, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 378, m_center.y - 70, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x + 448, m_center.y - 70, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 518, m_center.y - 70, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x + 588, m_center.y - 70, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 658, m_center.y - 70, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 686, m_center.y - 70, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 714, m_center.y - 70, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 742, m_center.y - 70, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x + 770, m_center.y - 112, 90);
+	SpawnWall(WallType::kWoodWall, m_center.x + 770, m_center.y - 42, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 770, m_center.y - 14, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 798, m_center.y - 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 826, m_center.y - 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 854, m_center.y - 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 882, m_center.y - 154, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x + 770, m_center.y - 196, 90);
+	SpawnWall(WallType::kWoodWall, m_center.x + 658, m_center.y - 238, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 686, m_center.y - 238, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 714, m_center.y - 238, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 742, m_center.y - 238, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x + 630, m_center.y - 280, 90);
+	SpawnWall(WallType::kWoodWall, m_center.x + 630, m_center.y - 350, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 630, m_center.y - 378, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 630, m_center.y - 406, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 630, m_center.y - 434, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 602, m_center.y - 322, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x + 532, m_center.y - 322, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 462, m_center.y - 322, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x + 392, m_center.y - 322, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 322, m_center.y - 322, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x + 252, m_center.y - 322, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 98, m_center.y - 322, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 126, m_center.y - 322, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 154, m_center.y - 322, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 182, m_center.y - 322, 0);
 
-    //// Right side wall
-    SpawnWall(WallType::kMetalWall, m_center.x + 340, m_center.y + 140, 90);
-    SpawnWall(WallType::kMetalWall, m_center.x + 340, m_center.y + 84, 90);
-    SpawnWall(WallType::kMetalWall, m_center.x + 340, m_center.y + 28, 90);
-    SpawnWall(WallType::kMetalWall, m_center.x + 340, m_center.y - 28, 90);
-    SpawnWall(WallType::kMetalWall, m_center.x + 326, m_center.y - 42, 0);
-    SpawnWall(WallType::kWoodWall, m_center.x + 284, m_center.y - 42, 0);
-    SpawnWall(WallType::kWoodWall, m_center.x + 256, m_center.y - 42, 0);
-    SpawnWall(WallType::kWoodWall, m_center.x + 228, m_center.y - 42, 0);
-    SpawnWall(WallType::kMetalWall, m_center.x + 186, m_center.y - 42, 0);
-    SpawnWall(WallType::kMetalWall, m_center.x + 172, m_center.y - 84, 90);
-    SpawnWall(WallType::kMetalWall, m_center.x + 172, m_center.y - 140, 90);
-    SpawnWall(WallType::kMetalWall, m_center.x + 130, m_center.y - 154, 0);
-    SpawnWall(WallType::kWoodWall, m_center.x + 88, m_center.y - 154, 0);
-    SpawnWall(WallType::kMetalWall, m_center.x + 46, m_center.y - 154, 0);
-    SpawnWall(WallType::kWoodWall, m_center.x + 4, m_center.y - 154, 0);
-    SpawnWall(WallType::kMetalWall, m_center.x - 38, m_center.y - 154, 0);
-    SpawnWall(WallType::kWoodWall, m_center.x - 80, m_center.y - 154, 0);
-    SpawnWall(WallType::kMetalWall, m_center.x - 122, m_center.y - 154, 0);
+	//Bottom Left Quadrant
+	SpawnWall(WallType::kWoodWall, m_center.x - 14, m_center.y + 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 42, m_center.y + 154, 0);
+    SpawnWall(WallType::kMetalWall, m_center.x - 70, m_center.y + 196, 90);
+	SpawnWall(WallType::kMetalWall, m_center.x - 70, m_center.y + 280, 90);
+	SpawnWall(WallType::kWoodWall, m_center.x - 70, m_center.y + 350, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 70, m_center.y + 378, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 70, m_center.y + 406, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 70, m_center.y + 434, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 98, m_center.y + 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 126, m_center.y + 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 154, m_center.y + 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 182, m_center.y + 154, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x - 210, m_center.y + 112, 90);
+	SpawnWall(WallType::kWoodWall, m_center.x - 210, m_center.y + 14, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 210, m_center.y + 42, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 238, m_center.y + 70, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x - 308, m_center.y + 70, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 378, m_center.y + 70, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x - 448, m_center.y + 70, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 518, m_center.y + 70, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x - 588, m_center.y + 70, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 658, m_center.y + 70, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 686, m_center.y + 70, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 714, m_center.y + 70, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 742, m_center.y + 70, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x - 770, m_center.y + 112, 90);
+	SpawnWall(WallType::kWoodWall, m_center.x - 770, m_center.y + 42, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 770, m_center.y + 14, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 798, m_center.y + 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 826, m_center.y + 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 854, m_center.y + 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 882, m_center.y + 154, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x - 770, m_center.y + 196, 90);
+	SpawnWall(WallType::kWoodWall, m_center.x - 658, m_center.y + 238, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 686, m_center.y + 238, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 714, m_center.y + 238, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 742, m_center.y + 238, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x - 630, m_center.y + 280, 90);
+	SpawnWall(WallType::kWoodWall, m_center.x - 630, m_center.y + 350, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 630, m_center.y + 378, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 630, m_center.y + 406, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 630, m_center.y + 434, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 602, m_center.y + 322, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x - 532, m_center.y + 322, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 462, m_center.y + 322, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x - 392, m_center.y + 322, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 322, m_center.y + 322, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x - 252, m_center.y + 322, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 98, m_center.y + 322, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 126, m_center.y + 322, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 154, m_center.y + 322, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x - 182, m_center.y + 322, 0);
+
+	//Bottom Right Quadrant
+	SpawnWall(WallType::kWoodWall, m_center.x + 14, m_center.y + 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 42, m_center.y + 154, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x + 70, m_center.y + 196, 90);
+	SpawnWall(WallType::kMetalWall, m_center.x + 70, m_center.y + 280, 90);
+	SpawnWall(WallType::kWoodWall, m_center.x + 70, m_center.y + 350, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 70, m_center.y + 378, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 70, m_center.y + 406, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 70, m_center.y + 434, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 98, m_center.y + 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 126, m_center.y + 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 154, m_center.y + 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 182, m_center.y + 154, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x + 210, m_center.y + 112, 90);
+	SpawnWall(WallType::kWoodWall, m_center.x + 210, m_center.y + 14, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 210, m_center.y + 42, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 238, m_center.y + 70, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x + 308, m_center.y + 70, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 378, m_center.y + 70, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x + 448, m_center.y + 70, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 518, m_center.y + 70, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x + 588, m_center.y + 70, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 658, m_center.y + 70, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 686, m_center.y + 70, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 714, m_center.y + 70, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 742, m_center.y + 70, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x + 770, m_center.y + 112, 90);
+	SpawnWall(WallType::kWoodWall, m_center.x + 770, m_center.y + 42, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 770, m_center.y + 14, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 798, m_center.y + 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 826, m_center.y + 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 854, m_center.y + 154, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 882, m_center.y + 154, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x + 770, m_center.y + 196, 90);
+	SpawnWall(WallType::kWoodWall, m_center.x + 658, m_center.y + 238, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 686, m_center.y + 238, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 714, m_center.y + 238, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 742, m_center.y + 238, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x + 630, m_center.y + 280, 90);
+	SpawnWall(WallType::kWoodWall, m_center.x + 630, m_center.y + 350, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 630, m_center.y + 378, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 630, m_center.y + 406, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 630, m_center.y + 434, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 602, m_center.y + 322, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x + 532, m_center.y + 322, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 462, m_center.y + 322, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x + 392, m_center.y + 322, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 322, m_center.y + 322, 0);
+	SpawnWall(WallType::kMetalWall, m_center.x + 252, m_center.y + 322, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 98, m_center.y + 322, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 126, m_center.y + 322, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 154, m_center.y + 322, 0);
+	SpawnWall(WallType::kWoodWall, m_center.x + 182, m_center.y + 322, 0);
 
     // Add Exterior Walls
-    SpawnWall(WallType::kExterior, m_center.x + 526, m_center.y, 90);
-    SpawnWall(WallType::kExterior, m_center.x - 526, m_center.y, 90);
-    SpawnWall(WallType::kExterior, m_center.x, m_center.y + 302, 0);
-    SpawnWall(WallType::kExterior, m_center.x, m_center.y - 302, 0);
-    */
-
+    SpawnWall(WallType::kExterior, m_center.x + 910, m_center.y, 90);
+    SpawnWall(WallType::kExterior, m_center.x - 910, m_center.y, 90);
+    SpawnWall(WallType::kExterior, m_center.x, m_center.y + 462, 0);
+    SpawnWall(WallType::kExterior, m_center.x, m_center.y - 462, 0);
 }
 
 /// <summary>
