@@ -135,13 +135,6 @@ void MultiplayerGameState::Draw()
         {
             m_window.draw(m_broadcast_text);
         }
-
-        // Show an invitation to a second local player if only one player is
-        // active and the invitation is within the first 0.5 s of its display cycle
-        if (m_local_player_identifiers.size() < 2 && m_player_invitation_time < sf::seconds(0.5f))
-        {
-            m_window.draw(m_player_invitation_text);
-        }
     }
     else
     {
@@ -162,10 +155,10 @@ bool MultiplayerGameState::Update(sf::Time dt)
 {
     if (m_connected)
     {
-        // If the game is paused (active_state == false), disable real-time input
-        // for all local players so they cannot move while the pause menu is open
-        if (!m_active_state)
-            DisableAllRealtimeActions(true);
+        //// If the game is paused (active_state == false), disable real-time input
+        //// for all local players so they cannot move while the pause menu is open
+        //if (m_active_state)
+        //    DisableAllRealtimeActions(true);
 
         m_world.Update(dt);
 
@@ -173,10 +166,8 @@ bool MultiplayerGameState::Update(sf::Time dt)
         bool found_local_plane = false;
         for (auto itr = m_players.begin(); itr != m_players.end();)
         {
-            // Track whether at least one local player's aircraft still exists
-            if (std::find(m_local_player_identifiers.begin(),
-                m_local_player_identifiers.end(),
-                itr->first) != m_local_player_identifiers.end())
+            // Track whether the local player's aircraft exists
+            if (itr->first == m_local_player_identifier)
             {
                 found_local_plane = true;
             }
@@ -270,22 +261,19 @@ bool MultiplayerGameState::Update(sf::Time dt)
         {
             sf::Packet position_update_packet;
             position_update_packet << static_cast<uint8_t>(Client::PacketType::kStateUpdate);
-            position_update_packet << static_cast<uint8_t>(m_local_player_identifiers.size());
+            position_update_packet << static_cast<uint8_t>(1);
 
-            for (uint8_t identifier : m_local_player_identifiers)
+            if (Tank* aircraft = m_world.GetAircraft(m_local_player_identifier))
             {
-                if (Tank* aircraft = m_world.GetAircraft(identifier))
-                {
-                    // Compress turret rotation from [0, 360] degrees into a uint8_t [0, 255]
-                    // to save bandwidth. The server decompresses back to degrees when relaying.
-                    position_update_packet << identifier
-                        << aircraft->getPosition().x
-                        << aircraft->getPosition().y
-                        << static_cast<uint8_t>(aircraft->GetHitPoints())
-                        << static_cast<uint8_t>(0)  // Missile count placeholder (not yet implemented)
-                        << static_cast<uint8_t>(aircraft->GetTurret()->getRotation().asDegrees() / 360.f * 255.f)
-                        << aircraft->getRotation().asDegrees();  // Hull rotation — full float precision
-                }
+                // Compress turret rotation from [0, 360] degrees into a uint8_t [0, 255]
+                // to save bandwidth. The server decompresses back to degrees when relaying.
+                position_update_packet << m_local_player_identifier
+                    << aircraft->getPosition().x
+                    << aircraft->getPosition().y
+                    << static_cast<uint8_t>(aircraft->GetHitPoints())
+                    << static_cast<uint8_t>(0)  // Missile count placeholder (not yet implemented)
+                    << static_cast<uint8_t>(aircraft->GetTurret()->getRotation().asDegrees() / 360.f * 255.f)
+                    << aircraft->getRotation().asDegrees();  // Hull rotation — full float precision
             }
             GetContext().socket->send(position_update_packet);
             m_tick_clock.restart();
@@ -350,6 +338,9 @@ bool MultiplayerGameState::HandleEvent(const sf::Event& event)
 void MultiplayerGameState::OnActivate()
 {
     m_active_state = true;
+
+    if (m_players.count(m_local_player_identifier))
+        m_players[m_local_player_identifier]->DisableAllRealtimeActions(true);
 }
 
 // ---------------------------------------------------------------------------
@@ -379,10 +370,7 @@ void MultiplayerGameState::OnDestroy()
 void MultiplayerGameState::DisableAllRealtimeActions(bool enable)
 {
     m_active_state = enable;
-    for (uint8_t identifier : m_local_player_identifiers)
-    {
-        m_players[identifier]->DisableAllRealtimeActions(enable);
-    }
+    m_players[m_local_player_identifier]->DisableAllRealtimeActions(enable);
 }
 
 // ---------------------------------------------------------------------------
@@ -466,8 +454,8 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 
         aircraft->setPosition(aircraft_position);
 
-        // Record this ID as a locally-controlled player for input and update packets
-        m_local_player_identifiers.push_back(aircraft_identifier);
+		m_local_player_identifier = aircraft_identifier;
+
         m_game_started = true;  // Allow game-over checks to run
     }
     break;
@@ -542,10 +530,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
                 >> aircraft_rotation;
 
             // Skip if this is our own aircraft — already spawned via kSpawnSelf (Claude)
-            if (m_local_player_identifiers.end() != std::find(
-                m_local_player_identifiers.begin(),
-                m_local_player_identifiers.end(),
-                aircraft_identifier))
+			if (aircraft_identifier == m_local_player_identifier)
             {
                 continue;
             }
@@ -677,11 +662,8 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 
             Tank* aircraft = m_world.GetAircraft(aircraft_identifier);
 
-            // Check if this is one of the aircraft we control locally
-            bool is_local_plane = std::find(
-                m_local_player_identifiers.begin(),
-                m_local_player_identifiers.end(),
-                aircraft_identifier) != m_local_player_identifiers.end();
+            // Check if this is the aircraft we control locally
+			bool is_local_plane = aircraft_identifier == m_local_player_identifier;
 
             if (aircraft && !is_local_plane)
             {

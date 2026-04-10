@@ -30,7 +30,7 @@ private:
 	TextureHolder& m_texture_holder;
 
 	std::map<uint8_t, PlayerPtr> m_players;
-	std::vector<uint8_t> m_local_player_identifiers;
+	uint8_t m_local_player_identifier;
 
 	bool m_connected;
 	std::unique_ptr<GameServer> m_game_server;

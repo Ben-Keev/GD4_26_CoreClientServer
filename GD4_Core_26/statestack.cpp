@@ -68,6 +68,8 @@ void StateStack::ApplyPendingChanges()
 			break;
 		case StackActions::kPop:
 			m_stack.pop_back();
+			if (!m_stack.empty())
+				m_stack.back()->OnActivate();  // notify the newly exposed state (Claude)
 			break;
 			//TODO should we clear the pending list when queueing up clear
 		case StackActions::kClear:
