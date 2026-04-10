@@ -37,6 +37,7 @@ public:
 	bool IsLocal() const;
 
 	PlayerDetails GetDetails();
+	void SetScore(int score);
 
 	void PushCombinedMoveCommand(CommandQueue& commands, sf::Vector2f velocity);
 	sf::Vector2f GetCombinedNetworkVelocity() const;

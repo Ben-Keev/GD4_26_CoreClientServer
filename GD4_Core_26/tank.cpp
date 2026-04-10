@@ -23,11 +23,12 @@ TextureID ToTextureID(TankType type)
 	return TextureID::kEntities;
 }
 
-Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts, PlayerDetails details)
+Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts, Player* player)
 	: Entity(Table[static_cast<int>(type)].m_hitpoints)
 	, m_type(type)
 	, m_sprite(textures.Get(Table[static_cast<int>(type)].m_texture), Table[static_cast<int>(type)].m_texture_rect)
-	, m_colour(details.m_colour)
+	, m_name(player->GetDetails().m_name)
+	, m_colour(player->GetDetails().m_colour)
 	, m_name_display(nullptr)
 	, m_distance_travelled(0.f)
 	, m_directions_index(0)
@@ -45,7 +46,7 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 	, m_pickups_enabled(true)
 	, m_identifier(0)
 {
-	m_sprite.setColor(details.m_colour);
+	m_sprite.setColor(m_colour);
 	m_explosion.SetFrameSize(sf::Vector2i(200, 200));
 	m_explosion.SetNumFrames(9);
 	m_explosion.SetDuration(sf::seconds(0.5));
@@ -60,7 +61,7 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 	};
 
 	std::unique_ptr<Turret> turret;
-	turret = std::unique_ptr<Turret>(new Turret(TurretType::kTurret, textures, details.m_colour));
+	turret = std::unique_ptr<Turret>(new Turret(TurretType::kTurret, textures, m_colour));
 	m_turret = turret.get();
 	AttachChild(std::move(turret));
 
@@ -75,9 +76,9 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 	//		CreatePickup(node, textures);
 	//	};
 
-	std::unique_ptr<TextNode> name_display(new TextNode(fonts, details.m_name));
+	std::unique_ptr<TextNode> name_display(new TextNode(fonts, m_name));
 	m_name_display = name_display.get();
-	m_name_display->SetString(details.m_name);
+	m_name_display->SetString(m_name);
 	AttachChild(std::move(name_display));
 	UpdateTexts();
 }
@@ -119,6 +120,13 @@ void Tank::IncreaseFireSpread()
 	{
 		++m_spread_level;
 	}
+}
+
+void Tank::AddPoints(int points)
+{
+	m_player->SetScore(m_player->GetDetails().m_score + points);
+
+	std::cout << m_player->GetDetails().m_score;
 }
 
 void Tank::UpdateTexts()

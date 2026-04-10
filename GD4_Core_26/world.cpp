@@ -108,19 +108,19 @@ void World::RemoveAircraft(uint8_t identifier)
 	}
 }
 
-Tank* World::AddAircraft(uint8_t identifier, PlayerDetails details, sf::Vector2f position)
+Tank* World::AddAircraft(uint8_t identifier, Player* player, sf::Vector2f position)
 {
-	std::unique_ptr<Tank> player(new Tank(TankType::kTank, m_textures, m_fonts, details));
+	std::unique_ptr<Tank> tank(new Tank(TankType::kTank, m_textures, m_fonts, player));
 
-	player->setPosition(position);
+	tank->setPosition(position);
 
 	// std::cout << "Spawning player at position " << player->getPosition().x << ", " << player->getPosition().y << std::endl;
 	std::cout << "World::AddTank " << +identifier << std::endl;
 	
-    player->SetIdentifier(identifier);
+    tank->SetIdentifier(identifier);
 
-	m_player_tank.emplace_back(player.get());
-	m_scene_layers[static_cast<int>(SceneLayers::kTanks)]->AttachChild(std::move(player));
+	m_player_tank.emplace_back(tank.get());
+	m_scene_layers[static_cast<int>(SceneLayers::kTanks)]->AttachChild(std::move(tank));
 	return m_player_tank.back();
 }
 
@@ -548,6 +548,9 @@ void World::HandleCollisions()
 			auto& one = static_cast<Tank&>(*pair.first);
 			auto& two = static_cast<Tank&>(*pair.second);
 
+			one.AddPoints(1);
+			two.AddPoints(1);
+
 			one.Destroy();
 			two.Destroy();
 		}
@@ -557,9 +560,15 @@ void World::HandleCollisions()
 		{
 			auto& tank = static_cast<Tank&>(*pair.first);
 			auto& projectile = static_cast<Projectile&>(*pair.second);
-			if (&tank != &projectile.GetOwner() || projectile.GetBounces() != 0)
+			if (&tank == &projectile.GetOwner() && projectile.GetBounces() >= 1)
 			{
-				// Collision response
+				projectile.GetOwner().AddPoints(-1);
+				tank.Damage(projectile.GetDamage());
+				projectile.Destroy();
+			}
+			else if (&tank != &projectile.GetOwner())
+			{
+				projectile.GetOwner().AddPoints(1);
 				tank.Damage(projectile.GetDamage());
 				projectile.Destroy();
 			}

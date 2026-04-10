@@ -12,7 +12,7 @@
 class Tank : public Entity
 {
 public:
-	Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts, PlayerDetails details);
+	Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts, Player* player);
 	unsigned int GetCategory() const override;
 
 	void DisablePickups();
@@ -24,6 +24,8 @@ public:
 	void IncreaseFireRate();
 	void IncreaseFireSpread();
 	//void CollectMissile(unsigned int count);
+
+	void AddPoints(int points);
 
 	void UpdateTexts();
 	void UpdateMovementPattern(sf::Time dt);
@@ -53,6 +55,8 @@ private:
 private:
 	TankType m_type;
 	sf::Sprite m_sprite;
+	Player* m_player;
+	string m_name;
 	sf::Color m_colour;
 	Animation m_explosion;
 
@@ -72,7 +76,6 @@ private:
 	bool m_is_firing;
 	bool m_is_launching_missile;
 	bool m_spawned_pickup;
-
 
 	sf::Time m_fire_countdown;
 
