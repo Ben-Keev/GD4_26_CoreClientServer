@@ -37,7 +37,7 @@ sf::IpAddress GetAddressFromFile()
 	return local_address;
 }
 
-LobbyState::LobbyState(StateStack& stack, Context context)
+LobbyState::LobbyState(StateStack& stack, Context context, bool firstTime)
 	: State(stack, context)
 	, m_broadcast_text(context.fonts->Get(FontID::kMain))
 	, m_lobby_countdown_text(context.fonts->Get(FontID::kMain))
@@ -97,34 +97,41 @@ LobbyState::LobbyState(StateStack& stack, Context context)
 	m_failed_connection_text.setString("Failed to connect");
 	Utility::CentreOrigin(m_failed_connection_text);
 
-	// Read the server address from disk
-	std::optional<sf::IpAddress> ip;
-	ip = GetAddressFromFile();
-
-	if (ip)
+	// If started from the menu it's first time and the socket needs to be set up. otherwise it's set up.
+	if (firstTime) 
 	{
-		// Try to establish a TCP connection — 5 second timeout for the handshake
-		auto status = context.socket->connect(*ip, SERVER_PORT, sf::seconds(5.f));
+		context.socket->disconnect();  // Reset socket to clean state before connecting (Claude)
+		context.socket->setBlocking(true);  // Must be blocking for the connect() handshake (Claude)
 
-		if (status == sf::Socket::Status::Done)
+		// Read the server address from disk
+		std::optional<sf::IpAddress> ip;
+		ip = GetAddressFromFile();
+
+		if (ip)
 		{
-			m_connected = true;  // Handshake succeeded
+			// Try to establish a TCP connection — 5 second timeout for the handshake
+			auto status = context.socket->connect(*ip, SERVER_PORT, sf::seconds(5.f));
+
+			if (status == sf::Socket::Status::Done)
+			{
+				m_connected = true;  // Handshake succeeded
+			}
+			else
+			{
+				// Connection failed; start the 5-second "return to menu" countdown
+				m_failed_connection_clock.restart();
+			}
 		}
 		else
 		{
-			// Connection failed; start the 5-second "return to menu" countdown
+			// IP resolution failed; start the countdown to return to the menu
 			m_failed_connection_clock.restart();
 		}
-	}
-	else
-	{
-		// IP resolution failed; start the countdown to return to the menu
-		m_failed_connection_clock.restart();
-	}
 
-	// Switch to non-blocking mode now that the (blocking) connect() is done.
-	// All subsequent receive() calls must return immediately so Update() doesn't stall.
-	context.socket->setBlocking(false);
+		// Switch to non-blocking mode now that the (blocking) connect() is done.
+		// All subsequent receive() calls must return immediately so Update() doesn't stall.
+		context.socket->setBlocking(false);
+	}
 }
 
 bool LobbyState::Update(sf::Time delta_time)

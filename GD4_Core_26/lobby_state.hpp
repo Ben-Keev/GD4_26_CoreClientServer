@@ -5,7 +5,7 @@
 class LobbyState : public State
 {
 public:
-	LobbyState(StateStack& stack, Context context);
+	LobbyState(StateStack& stack, Context context, bool firstTime);
 	virtual bool Update(sf::Time delta_time) override;
 	virtual void Draw() override;
 	void ToggleVoteSkipCountdown();

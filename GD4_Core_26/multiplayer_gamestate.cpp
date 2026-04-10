@@ -687,5 +687,11 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
         }
     }
     break;
+    case Server::PacketType::kReturnToLobby :
+    {
+        RequestStackClear();
+		RequestStackPush(StateID::kJoinLobby);
+    }
+    break;
     } // end switch
 }

@@ -284,11 +284,24 @@ void GameServer::Tick()
             if (itr->second.m_hitpoints <= 0)
             {
                 m_aircraft_info.erase(itr++);  // Erase and advance iterator safely
+				--m_aircraft_count;  // Decrement the total aircraft count
             }
             else
             {
                 ++itr;
             }
+        }
+
+        if (m_aircraft_count == 1) 
+        {
+			std::cout << "the game is won!" << std::endl;
+
+            m_lobby_active = true;
+
+            // Tell every client to return to the lobby
+            sf::Packet mission_success_packet;
+            mission_success_packet << static_cast<uint8_t>(Server::PacketType::kReturnToLobby);
+            SendToAll(mission_success_packet);
         }
     }
 }

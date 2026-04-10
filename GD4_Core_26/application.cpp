@@ -79,7 +79,8 @@ void Application::RegisterStates()
 	m_stack.RegisterState<TitleState>(StateID::kTitle);
 	m_stack.RegisterState<MenuState>(StateID::kMenu);
 	m_stack.RegisterState<GameState>(StateID::kGame);
-	m_stack.RegisterState<LobbyState>(StateID::kJoinLobby);
+	m_stack.RegisterState<LobbyState>(StateID::kJoinLobby, true);
+	m_stack.RegisterState<LobbyState>(StateID::kRejoinLobby, true);
 	m_stack.RegisterState<MultiplayerGameState>(StateID::kJoinGame);
 	m_stack.RegisterState<PauseState>(StateID::kPause);
 	m_stack.RegisterState<PauseState>(StateID::kNetworkPause, true);
