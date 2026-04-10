@@ -735,8 +735,8 @@ void GameServer::UpdateClientState()
     // determine the view position relative to the world)
     update_client_state_packet << static_cast<float>(m_battlefield_rect.position.y + m_battlefield_rect.size.y);
 
-    // Total number of aircraft entries that follow in the packet
-    update_client_state_packet << static_cast<uint8_t>(m_aircraft_count);
+    // Total number of aircraft entries that follow in the packet (Replace to use more accurate m_aircraft_infor_size.
+    update_client_state_packet << static_cast<uint8_t>(m_aircraft_info.size());
 
     for (const auto& aircraft : m_aircraft_info)
     {
