@@ -316,6 +316,8 @@ bool MultiplayerGameState::HandleEvent(const sf::Event& event)
         // Escape opens the network pause screen and disables real-time input
         if (key_pressed->scancode == sf::Keyboard::Scancode::Escape)
         {
+
+            if (!m_player_dead)
             DisableAllRealtimeActions(false);  // false = disable (stop) real-time actions
             RequestStackPush(StateID::kNetworkPause);
         }
