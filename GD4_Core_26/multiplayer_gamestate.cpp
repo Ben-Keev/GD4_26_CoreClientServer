@@ -454,7 +454,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
         // Spawn the aircraft in the world scene graph and position it
         Tank* aircraft = m_world.AddAircraft(
             aircraft_identifier, 
-            m_players[aircraft_identifier].get(),
+            GetContext().player_details,
             { 512, 288 }
         );
 
@@ -483,7 +483,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
         // Spawn the aircraft in the world scene graph and position it
         Tank* aircraft = m_world.AddAircraft(
             aircraft_identifier, 
-            m_players[aircraft_identifier].get(),
+            GetContext().player_details,
             { 512, 288 }
         );
 
@@ -547,7 +547,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
 
             Tank* aircraft = m_world.AddAircraft(
                 aircraft_identifier,
-                m_players[aircraft_identifier].get(),
+                GetContext().player_details,
                 { 512, 288 });
             
             aircraft->setPosition(aircraft_position);

@@ -23,12 +23,13 @@ TextureID ToTextureID(TankType type)
 	return TextureID::kEntities;
 }
 
-Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts, Player* player)
+Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts, PlayerDetails* details)
 	: Entity(Table[static_cast<int>(type)].m_hitpoints)
 	, m_type(type)
 	, m_sprite(textures.Get(Table[static_cast<int>(type)].m_texture), Table[static_cast<int>(type)].m_texture_rect)
-	, m_name(player->GetDetails().m_name)
-	, m_colour(player->GetDetails().m_colour)
+	, m_details(details)
+	, m_name(details->m_name)
+	, m_colour(details->m_colour)
 	, m_name_display(nullptr)
 	, m_distance_travelled(0.f)
 	, m_directions_index(0)
@@ -124,9 +125,9 @@ void Tank::IncreaseFireSpread()
 
 void Tank::AddPoints(int points)
 {
-	m_player->SetScore(m_player->GetDetails().m_score + points);
+	m_details->m_score = m_details->m_score + points;
 
-	std::cout << m_player->GetDetails().m_score;
+	std::cout << m_details->m_score;
 }
 
 void Tank::UpdateTexts()
