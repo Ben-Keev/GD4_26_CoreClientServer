@@ -156,7 +156,7 @@ void GameServer::ExecutionThread()
     // Target update intervals
     sf::Time frame_rate = sf::seconds(1.f / 60.f);  // Physics step: 60 fps
     sf::Time frame_time = sf::Time::Zero;             // Accumulated physics debt
-    sf::Time tick_rate = sf::seconds(1.f / 20.f);  // Network tick: 20 Hz
+    sf::Time tick_rate = sf::seconds(1.f / 30.f);  // Network tick: 30 Hz
     sf::Time tick_time = sf::Time::Zero;             // Accumulated tick debt
 
     sf::Clock frame_clock, tick_clock;  // Independent clocks for each accumulator
@@ -193,7 +193,7 @@ void GameServer::ExecutionThread()
 
         // Sleep to yield CPU — allows the client to run on the same machine.
         // Consider removing or reducing if performance becomes an issue.
-        sf::sleep(sf::milliseconds(50));
+        sf::sleep(sf::milliseconds(10));
     }
 }
 
@@ -211,7 +211,7 @@ void GameServer::Tick()
     UpdateClientState();
 
     // Heartbeat — send every 500ms to prevent server timeout (Claude)
-    m_heartbeat_timer += sf::seconds(1.f / 20.f);
+    m_heartbeat_timer += sf::seconds(1.f / 30.f);
     if (m_heartbeat_timer >= sf::seconds(0.5f))
     {
         sf::Packet heartbeat;
@@ -223,7 +223,7 @@ void GameServer::Tick()
 
     if (m_lobby_active && m_connected_players >= 2)
     {
-        m_lobby_countdown -= sf::seconds(1.f / 20.f); // Decrease countdown by tick duration
+        m_lobby_countdown -= sf::seconds(1.f / 30.f); // Decrease countdown by tick duration
 
         if (m_lobby_countdown <= sf::Time::Zero)
         {

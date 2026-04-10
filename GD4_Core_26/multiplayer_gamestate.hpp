@@ -19,7 +19,7 @@ public:
 
 private:
 	void UpdateBroadcastMessage(sf::Time elpased_time);
-	void HandlePacket(uint8_t packet_type, sf::Packet& packet);
+	void HandlePacket(uint8_t packet_type, sf::Packet& packet, sf::Time dt);
 
 private:
 	typedef std::unique_ptr<Player> PlayerPtr;

@@ -233,7 +233,7 @@ bool MultiplayerGameState::Update(sf::Time dt)
             m_time_since_last_packet = sf::seconds(0.f);
             uint8_t packet_type;
             packet >> packet_type;
-            HandlePacket(packet_type, packet);
+            HandlePacket(packet_type, packet, dt);
         }
         else
         {
@@ -266,7 +266,7 @@ bool MultiplayerGameState::Update(sf::Time dt)
 
         // --- Send position update at 20 Hz ---
         // Matches the server's tick rate so updates are not sent unnecessarily often.
-        if (m_tick_clock.getElapsedTime() > sf::seconds(1.f / 20.f))
+        if (m_tick_clock.getElapsedTime() > sf::seconds(1.f / 30.f))
         {
             sf::Packet position_update_packet;
             position_update_packet << static_cast<uint8_t>(Client::PacketType::kStateUpdate);
@@ -418,7 +418,7 @@ void MultiplayerGameState::UpdateBroadcastMessage(sf::Time elapsed_time)
 // Reads the packet type (already extracted by the caller) and routes the
 // remaining payload to the appropriate handler block.
 // ---------------------------------------------------------------------------
-void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
+void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet, sf::Time dt)
 {
     switch (static_cast<Server::PacketType>(packet_type))
     {
@@ -685,12 +685,13 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 
             if (aircraft && !is_local_plane)
             {
-                // Linear interpolation: move 10% of the way toward the server position
-                // each update.  Avoids the visual snap of a direct position assignment
-                // while still converging on the authoritative server state.
+                // (Claude AI)
+                // Framerate-independent exponential interpolation towards server position.
+                // 0.1f controls smoothing (lower = snappier), 30.f should match server tick rate.
+                float blend = 1.f - std::pow(0.5f, dt.asSeconds() * 30.f);
                 sf::Vector2f interpolated_position =
                     aircraft->getPosition()
-                    + (aircraft_position - aircraft->getPosition()) * 0.1f;
+                    + (aircraft_position - aircraft->getPosition()) * blend;
                 aircraft->setPosition(interpolated_position);
 
                 // Turret angle is snapped directly — the rotation is small and
