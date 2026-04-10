@@ -515,7 +515,7 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
 // ---------------------------------------------------------------------------
 void GameServer::HandleIncomingConnections()
 {
-    if (!m_listening_state)
+    if (!m_listening_state || !m_lobby_active)
         return;  // Not accepting connections right now
 
     if (m_listener_socket.accept(m_peers[m_connected_players]->m_socket) == sf::TcpListener::Status::Done)

@@ -692,7 +692,9 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
     {
         m_returning_to_lobby = true;
 
-		RequestStackPop(); // Pop the multiplayer game state
+		RequestStackClear(); // Pop the multiplayer game state
+
+
 		RequestStackPush(StateID::kRejoinLobby);
     }
     break;
