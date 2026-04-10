@@ -47,6 +47,7 @@ MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context)
     , m_broadcast_text(context.fonts->Get(FontID::kMain))
     , m_player_invitation_text(context.fonts->Get(FontID::kMain))
     , m_failed_connection_text(context.fonts->Get(FontID::kMain))
+    , m_player_dead(false)
 {
     // Broadcast messages appear centred near the top of the screen
     m_broadcast_text.setPosition(sf::Vector2f(1024.f / 2, 100.f));
@@ -180,7 +181,7 @@ bool MultiplayerGameState::Update(sf::Time dt)
                 // If ALL players are gone, trigger the game-over state
                 if (m_players.empty())
                 {
-                    RequestStackPush(StateID::kGameOver);
+                    //RequestStackPush(StateID::kGameOver);
                 }
             }
             else
@@ -192,9 +193,10 @@ bool MultiplayerGameState::Update(sf::Time dt)
         // If none of our own aircraft are alive (and the game was already running),
         // push the game-over state (handles the case where local planes despawn
         // without the players map becoming empty)
-        if (!found_local_plane && m_game_started)
+        if (!found_local_plane && m_game_started && !m_player_dead)
         {
-            RequestStackPush(StateID::kGameOver);
+            m_player_dead = true;
+            RequestStackPush(StateID::kNetworkPause);
         }
 
         // --- Local real-time input ---
@@ -213,6 +215,7 @@ bool MultiplayerGameState::Update(sf::Time dt)
         CommandQueue& commands = m_world.GetCommandQueue();
         for (auto& pair : m_players)
         {
+            
             pair.second->HandleRealtimeNetworkInput(commands);
         }
 
