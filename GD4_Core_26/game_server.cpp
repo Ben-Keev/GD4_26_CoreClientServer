@@ -435,15 +435,15 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
             uint8_t missile_ammo;
             sf::Vector2f aircraft_position;
             uint8_t turret_byte;      // Compressed turret rotation: 0-255 maps to 0-360 degrees
-            float aircraft_rotation;  // Hull rotation in degrees (uncompressed)
+            //float aircraft_rotation;  // Hull rotation in degrees (uncompressed)
 
             packet >> aircraft_identifier
                 >> aircraft_position.x
                 >> aircraft_position.y
                 >> aircraft_hitpoints
                 >> missile_ammo
-                >> turret_byte
-                >> aircraft_rotation;
+                >> turret_byte;
+                //>> aircraft_rotation;
 
             // Update the server's authoritative record for this aircraft
             m_aircraft_info[aircraft_identifier].m_position = aircraft_position;
@@ -451,7 +451,7 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
             m_aircraft_info[aircraft_identifier].m_missile_ammo = missile_ammo;
             // Convert compressed byte back to degrees for storage
             m_aircraft_info[aircraft_identifier].m_turret_byte = (static_cast<float>(turret_byte) / 255.f) * 360.f;
-            m_aircraft_info[aircraft_identifier].m_aircraft_rotation = aircraft_rotation;
+            //m_aircraft_info[aircraft_identifier].m_aircraft_rotation = aircraft_rotation;
         }
     }
     break;
@@ -648,8 +648,8 @@ void GameServer::InformWorldState(sf::TcpSocket& socket)
                     << m_aircraft_info[identifier].m_position.y
                     << m_aircraft_info[identifier].m_hitpoints
                     << m_aircraft_info[identifier].m_missile_ammo
-                    << m_aircraft_info[identifier].m_turret_byte      // Already in degrees (server-side)
-                    << m_aircraft_info[identifier].m_aircraft_rotation;
+                    << m_aircraft_info[identifier].m_turret_byte;      // Already in degrees (server-side)
+                    //<< m_aircraft_info[identifier].m_aircraft_rotation;
             }
         }
     }

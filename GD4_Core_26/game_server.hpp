@@ -35,7 +35,7 @@ private:
 		uint8_t m_missile_ammo;
 		// Turret rotation stored in degrees
 		float m_turret_byte;
-		float m_aircraft_rotation;
+		//float m_aircraft_rotation;
 		std::map<uint8_t, bool> m_real_time_actions;
 	};
 

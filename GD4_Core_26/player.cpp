@@ -204,6 +204,8 @@ void Player::DisableAllRealtimeActions(bool enable)
     }
 }
 
+
+// Claude - added diagonal movement
 void Player::HandleRealtimeNetworkInput(CommandQueue& commands)
 {
     if (m_socket && !IsLocal())
@@ -228,6 +230,7 @@ void Player::HandleRealtimeNetworkInput(CommandQueue& commands)
     }
 }
 
+// Claude - added diagonal movement
 void Player::HandleRealTimeInput(CommandQueue& command_queue, const sf::View& world_view)
 {
     if ((m_socket && IsLocal()) || !m_socket)
@@ -272,7 +275,7 @@ void Player::HandleRealTimeInput(CommandQueue& command_queue, const sf::View& wo
     }
 }
 
-
+// Claude - added diagonal movement
 void Player::PushCombinedMoveCommand(CommandQueue& commands, sf::Vector2f velocity)
 {
     if (velocity.x != 0.f || velocity.y != 0.f)

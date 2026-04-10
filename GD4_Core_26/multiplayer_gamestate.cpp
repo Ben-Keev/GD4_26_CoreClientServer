@@ -157,8 +157,8 @@ bool MultiplayerGameState::Update(sf::Time dt)
     {
         //// If the game is paused (active_state == false), disable real-time input
         //// for all local players so they cannot move while the pause menu is open
-        if (!m_active_state)
-            DisableAllRealtimeActions(true);
+        //if (!m_active_state)
+        //    DisableAllRealtimeActions(true);
 
         m_world.Update(dt);
 
@@ -272,8 +272,8 @@ bool MultiplayerGameState::Update(sf::Time dt)
                     << aircraft->getPosition().y
                     << static_cast<uint8_t>(aircraft->GetHitPoints())
                     << static_cast<uint8_t>(0)  // Missile count placeholder (not yet implemented)
-                    << static_cast<uint8_t>(aircraft->GetTurret()->getRotation().asDegrees() / 360.f * 255.f)
-                    << aircraft->getRotation().asDegrees();  // Hull rotation — full float precision
+                    << static_cast<uint8_t>(aircraft->GetTurret()->getRotation().asDegrees() / 360.f * 255.f);
+                    //<< aircraft->getRotation().asDegrees();  // Hull rotation — full float precision
             }
             GetContext().socket->send(position_update_packet);
             m_tick_clock.restart();
@@ -340,7 +340,7 @@ void MultiplayerGameState::OnActivate()
     m_active_state = true;
 
     if (m_players.count(m_local_player_identifier))
-        m_players[m_local_player_identifier]->DisableAllRealtimeActions(true);
+        m_players[m_local_player_identifier]->DisableAllRealtimeActions(false);
 }
 
 // ---------------------------------------------------------------------------
@@ -519,15 +519,15 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
             uint8_t missile_ammo;
             sf::Vector2f aircraft_position;
             float turret_rotation;
-            float aircraft_rotation;  // Hull rotation — only needed for initial state sync
+            //float aircraft_rotation;  // Hull rotation — only needed for initial state sync
 
             packet >> aircraft_identifier
                 >> aircraft_position.x
                 >> aircraft_position.y
                 >> hitpoints
                 >> missile_ammo
-                >> turret_rotation
-                >> aircraft_rotation;
+                >> turret_rotation;
+                //>> aircraft_rotation;
 
             // Skip if this is our own aircraft — already spawned via kSpawnSelf (Claude)
 			if (aircraft_identifier == m_local_player_identifier)
@@ -545,7 +545,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
                 { 512, 288 });
             
             aircraft->setPosition(aircraft_position);
-            aircraft->setRotation(sf::degrees(aircraft_rotation));
+            //aircraft->setRotation(sf::degrees(aircraft_rotation));
             aircraft->GetTurret()->setRotation(sf::degrees(turret_rotation));
         }
     }
