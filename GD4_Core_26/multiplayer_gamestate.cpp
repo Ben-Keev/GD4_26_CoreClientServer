@@ -48,6 +48,7 @@ MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context)
     , m_player_invitation_text(context.fonts->Get(FontID::kMain))
     , m_failed_connection_text(context.fonts->Get(FontID::kMain))
     , m_player_dead(false)
+    , m_returning_to_lobby(false)
 {
     // Broadcast messages appear centred near the top of the screen
     m_broadcast_text.setPosition(sf::Vector2f(1024.f / 2, 100.f));
@@ -357,7 +358,7 @@ void MultiplayerGameState::OnActivate()
 // ---------------------------------------------------------------------------
 void MultiplayerGameState::OnDestroy()
 {
-    if (m_connected)
+    if (m_connected && !m_returning_to_lobby)
     {
         sf::Packet packet;
         packet << static_cast<uint8_t>(Client::PacketType::kQuit);
@@ -689,8 +690,10 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
     break;
     case Server::PacketType::kReturnToLobby :
     {
-        RequestStackClear();
-		RequestStackPush(StateID::kJoinLobby);
+        m_returning_to_lobby = true;
+
+		RequestStackPop(); // Pop the multiplayer game state
+		RequestStackPush(StateID::kRejoinLobby);
     }
     break;
     } // end switch

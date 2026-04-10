@@ -229,6 +229,7 @@ void GameServer::Tick()
         if (m_lobby_countdown <= sf::Time::Zero)
         {
             m_lobby_active = false;
+            m_game_started = true;
 
             sf::Packet game_start_packet;
             game_start_packet << static_cast<uint8_t>(Server::PacketType::kGameStart);
@@ -260,7 +261,7 @@ void GameServer::Tick()
         }
     }
 
-    if (!m_lobby_active) 
+    if (!m_lobby_active && m_game_started) 
     {
         // --- Win condition check ---
         bool all_aircraft_done = false;
@@ -292,16 +293,22 @@ void GameServer::Tick()
             }
         }
 
-        if (m_aircraft_count == 1) 
+        std::cout << "[Server] Tick - aircraft_count: " << m_aircraft_count
+            << " game_started: " << m_game_started
+            << " lobby_active: " << m_lobby_active << std::endl;
+
+        if (m_aircraft_count <= 1 && m_game_started && !m_lobby_active)
         {
-			std::cout << "the game is won!" << std::endl;
+            ResetGameState();  // replaces m_lobby_active = true
 
-            m_lobby_active = true;
+            std::cout << "the game is won!" << std::endl;
+            
+            sf::Packet return_packet;
+            return_packet << static_cast<uint8_t>(Server::PacketType::kReturnToLobby);
+            SendToAll(return_packet);
 
-            // Tell every client to return to the lobby
-            sf::Packet mission_success_packet;
-            mission_success_packet << static_cast<uint8_t>(Server::PacketType::kReturnToLobby);
-            SendToAll(mission_success_packet);
+            SendLobbyPacket(true);
+            SendPlayerList();
         }
     }
 }
@@ -509,6 +516,8 @@ void GameServer::HandleIncomingConnections()
 
     if (m_listener_socket.accept(m_peers[m_connected_players]->m_socket) == sf::TcpListener::Status::Done)
     {
+        std::cout << "[Server] New connection accepted. Connected players before: " << std::to_string(m_connected_players) << std::endl;
+
         m_aircraft_info[m_aircraft_identifier_counter].m_position = SpawnPositions[m_connected_players];
         m_aircraft_info[m_aircraft_identifier_counter].m_hitpoints = 10;
         m_aircraft_info[m_aircraft_identifier_counter].m_missile_ammo = 2;
@@ -752,4 +761,32 @@ GameServer::RemotePeer::RemotePeer()
     // Non-blocking is essential — a blocking receive would freeze the entire
     // server thread waiting for data from a single slow or idle client.
     m_socket.setBlocking(false);
+}
+
+void GameServer::ResetGameState()
+{
+    m_lobby_active = true;
+    m_game_started = false;
+    m_aircraft_info.clear();
+    m_aircraft_count = 0;
+    m_aircraft_identifier_counter = 1;
+    m_lobby_countdown = sf::seconds(kLobbyCountdown);
+    m_total_skip_countdown = 0;
+
+    // Reassign identifiers to existing connected peers — don't touch the sockets
+    for (std::size_t i = 0; i < m_connected_players; ++i)
+    {
+        if (m_peers[i]->m_ready)
+        {
+            m_peers[i]->m_aircraft_identifiers.clear();
+            m_peers[i]->m_aircraft_identifiers.emplace_back(m_aircraft_identifier_counter);
+
+            m_aircraft_info[m_aircraft_identifier_counter].m_position = SpawnPositions[i];
+            m_aircraft_info[m_aircraft_identifier_counter].m_hitpoints = 10;
+            m_aircraft_info[m_aircraft_identifier_counter].m_missile_ammo = 2;
+
+            m_aircraft_count++;
+            m_aircraft_identifier_counter++;
+        }
+    }
 }

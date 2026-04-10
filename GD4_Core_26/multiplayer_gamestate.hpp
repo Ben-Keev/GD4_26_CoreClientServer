@@ -51,6 +51,7 @@ private:
 	bool m_game_started;
 
 	bool m_player_dead;
+	bool m_returning_to_lobby;
 
 	sf::Time m_client_timeout;
 	sf::Time m_time_since_last_packet;

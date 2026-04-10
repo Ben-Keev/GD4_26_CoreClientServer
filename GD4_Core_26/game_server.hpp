@@ -60,6 +60,8 @@ private:
 	void SendToAll(sf::Packet& packet);
 	void UpdateClientState();
 
+	void ResetGameState();
+
 private:
 	std::thread m_thread;
 	sf::Clock m_clock;
@@ -86,5 +88,6 @@ private:
 
 	bool m_lobby_active;
 	sf::Time m_lobby_countdown;
+	bool m_game_started;
 };
 

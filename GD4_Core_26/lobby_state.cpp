@@ -100,6 +100,8 @@ LobbyState::LobbyState(StateStack& stack, Context context, bool firstTime)
 	// If started from the menu it's first time and the socket needs to be set up. otherwise it's set up.
 	if (firstTime) 
 	{
+		std::cout << "*blushes* it's my first time" << std::endl;
+
 		context.socket->disconnect();  // Reset socket to clean state before connecting (Claude)
 		context.socket->setBlocking(true);  // Must be blocking for the connect() handshake (Claude)
 
@@ -131,6 +133,12 @@ LobbyState::LobbyState(StateStack& stack, Context context, bool firstTime)
 		// Switch to non-blocking mode now that the (blocking) connect() is done.
 		// All subsequent receive() calls must return immediately so Update() doesn't stall.
 		context.socket->setBlocking(false);
+	}
+
+	if (!firstTime) 
+	{
+		m_connected = true;
+		m_time_since_last_packet = sf::Time::Zero;
 	}
 }
 
@@ -276,6 +284,8 @@ void LobbyState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 	case Server::PacketType::kLobbyPing:
 	{
 		float countdown;
+
+		std::cout << "[Client] kLobbyPing received" << std::endl;
 
 		// Server has reset the lobby countdown (e.g. a new player joined)
 		packet >> countdown;
