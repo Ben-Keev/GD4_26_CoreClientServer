@@ -228,9 +228,6 @@ void GameServer::Tick()
 
         if (m_lobby_countdown <= sf::Time::Zero)
         {
-            m_lobby_active = false;
-            m_game_started = true;
-
             sf::Packet game_start_packet;
             game_start_packet << static_cast<uint8_t>(Server::PacketType::kGameStart);
             SendToAll(game_start_packet);
@@ -258,6 +255,8 @@ void GameServer::Tick()
 				InformWorldState(m_peers[i]->m_socket);
             }
 
+            m_lobby_active = false;
+            m_game_started = true;
         }
     }
 
@@ -284,8 +283,8 @@ void GameServer::Tick()
         {
             if (itr->second.m_hitpoints <= 0)
             {
+                //std::cout << "Aircraft " << std::to_string(itr->first) << " destroyed" << std::endl;
                 m_aircraft_info.erase(itr++);  // Erase and advance iterator safely
-				--m_aircraft_count;  // Decrement the total aircraft count
             }
             else
             {
@@ -293,16 +292,17 @@ void GameServer::Tick()
             }
         }
 
-        std::cout << "[Server] Tick - aircraft_count: " << m_aircraft_count
-            << " game_started: " << m_game_started
-            << " lobby_active: " << m_lobby_active << std::endl;
+        // Count alive aircraft (optional explicit version)
+        std::size_t alive = m_aircraft_info.size();
 
-        if (m_aircraft_count <= 1 && m_game_started && !m_lobby_active)
+		//std::cout << "The amount alive: " << std::to_string(alive) << std::endl;
+
+        if (alive <= 1)
         {
-            ResetGameState();  // replaces m_lobby_active = true
+            std::cout << "Game over!!" << std::endl;
 
-            std::cout << "the game is won!" << std::endl;
-            
+            ResetGameState();
+
             sf::Packet return_packet;
             return_packet << static_cast<uint8_t>(Server::PacketType::kReturnToLobby);
             SendToAll(return_packet);
@@ -465,13 +465,17 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
                 >> turret_byte;
                 //>> aircraft_rotation;
 
-            // Update the server's authoritative record for this aircraft
-            m_aircraft_info[aircraft_identifier].m_position = aircraft_position;
-            m_aircraft_info[aircraft_identifier].m_hitpoints = aircraft_hitpoints;
-            m_aircraft_info[aircraft_identifier].m_missile_ammo = missile_ammo;
-            // Convert compressed byte back to degrees for storage
-            m_aircraft_info[aircraft_identifier].m_turret_byte = (static_cast<float>(turret_byte) / 255.f) * 360.f;
-            //m_aircraft_info[aircraft_identifier].m_aircraft_rotation = aircraft_rotation;
+            // Only update if the server still recognises this aircraft, prevent generation of duplicate aircraft (Claude)
+            auto itr = m_aircraft_info.find(aircraft_identifier);
+            if (itr != m_aircraft_info.end())
+            {
+                itr->second.m_position = aircraft_position;
+                itr->second.m_hitpoints = aircraft_hitpoints;
+                itr->second.m_missile_ammo = missile_ammo;
+                itr->second.m_turret_byte = (static_cast<float>(turret_byte) / 255.f) * 360.f;
+                //itr->second.m_aircraft_rotation = aircraft_rotation;
+            }
+            // If not found, silently discard — the aircraft has already been removed
         }
     }
     break;
