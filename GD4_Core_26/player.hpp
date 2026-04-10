@@ -38,6 +38,9 @@ public:
 
 	PlayerDetails GetDetails();
 
+	void PushCombinedMoveCommand(CommandQueue& commands, sf::Vector2f velocity);
+	sf::Vector2f GetCombinedNetworkVelocity() const;
+
 private:
 	void InitialiseActions();
 

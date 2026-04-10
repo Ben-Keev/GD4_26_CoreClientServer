@@ -157,8 +157,8 @@ bool MultiplayerGameState::Update(sf::Time dt)
     {
         //// If the game is paused (active_state == false), disable real-time input
         //// for all local players so they cannot move while the pause menu is open
-        //if (m_active_state)
-        //    DisableAllRealtimeActions(true);
+        if (!m_active_state)
+            DisableAllRealtimeActions(true);
 
         m_world.Update(dt);
 
