@@ -14,17 +14,6 @@ int main()
 {
 	std::cout << "YOU IN THE CLIENT BOAH" << std::endl;
 
-	//Player* new_player = new Player();
-
-	//std::cout << "Size of a player is: " << sizeof(new_player) << std::endl;
-
-	//SocketUtil::StaticInit();
-
-	//UDPSocketPtr client_socket = SocketUtil::CreateUDPSocket(INET);
-
-	//client_socket->SetNonBlockingMode(false);
-	//Client client = Client(client_socket, "127.0.0.1");
-
 	// RUN THE CA1 GAME ====================================================================
 
 	sf::Joystick::update();
@@ -40,10 +29,6 @@ int main()
 	}
 
 	// RUN THE CA1 GAME ====================================================================
-
-	//client.DoServiceLoop();
-	//client.SendPlayerOutputBitStream(client_socket, new_player);
-	//SocketUtil::CleanUp();
 }
 
 Client::Client(UDPSocketPtr client_socket, string server_address)

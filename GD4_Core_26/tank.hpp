@@ -8,6 +8,9 @@
 #include "animation.hpp"
 #include "turret.hpp"
 #include "player.hpp"
+#include "state.hpp"
+
+struct PlayerDetails;
 
 class Tank : public Entity
 {

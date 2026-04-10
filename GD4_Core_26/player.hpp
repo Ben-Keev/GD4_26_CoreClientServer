@@ -9,18 +9,12 @@
 #include "key_binding.hpp"
 #include <SFML/Network/TcpSocket.hpp>
 
-
-struct PlayerDetails
-{
-	std::string m_name;
-	sf::Color m_colour;
-	int m_score;
-};
+struct PlayerDetails;
 
 class Player
 {
 public:
-	Player(sf::TcpSocket* socket, uint8_t identifier, const KeyBinding* binding, sf::RenderWindow* window);
+	Player(sf::TcpSocket* socket, uint8_t identifier, const KeyBinding* binding, sf::RenderWindow* window, PlayerDetails* details);
 	Command AnalogueAiming(const sf::Vector2f& mousePos);
 	void HandleEvent(const sf::Event& event, CommandQueue& command_queue);
 	void HandleRealTimeInput(CommandQueue& command_queue, const sf::View& world_view);
@@ -46,7 +40,7 @@ private:
 	void InitialiseActions();
 
 private:
-	PlayerDetails m_details;
+	PlayerDetails* m_details;
 	const KeyBinding* m_key_binding;
 	std::map<Action, Command> m_action_binding;
 	std::map<Action, bool> m_action_proxies;

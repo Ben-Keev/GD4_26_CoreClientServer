@@ -9,6 +9,8 @@
 #include "sound_player.hpp"
 #include "key_binding.hpp"
 
+struct PlayerDetails;
+
 class Application
 {
 public:
@@ -36,6 +38,6 @@ private:
 	KeyBinding m_key_binding_2;
 
 	sf::TcpSocket m_socket;
-
+	PlayerDetails m_player_details;
 };
 

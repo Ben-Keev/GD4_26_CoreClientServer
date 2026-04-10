@@ -449,7 +449,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
 
         // Create a Player with actual key bindings (keys1) — this is a local player
         m_players[aircraft_identifier].reset(
-            new Player(GetContext().socket, aircraft_identifier, GetContext().keys1, GetContext().window));
+            new Player(GetContext().socket, aircraft_identifier, GetContext().keys1, GetContext().window, GetContext().player_details));
 
         // Spawn the aircraft in the world scene graph and position it
         Tank* aircraft = m_world.AddAircraft(
@@ -478,7 +478,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
 
         // nullptr key bindings = remote player; input handled via network packets only
         m_players[aircraft_identifier].reset(
-            new Player(GetContext().socket, aircraft_identifier, nullptr, GetContext().window));
+            new Player(GetContext().socket, aircraft_identifier, nullptr, GetContext().window, GetContext().player_details));
 
         // Spawn the aircraft in the world scene graph and position it
         Tank* aircraft = m_world.AddAircraft(
@@ -543,7 +543,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
 
             // All existing players are remote from this client's perspective (nullptr keys)
             m_players[aircraft_identifier].reset(
-                new Player(GetContext().socket, aircraft_identifier, nullptr, GetContext().window));
+                new Player(GetContext().socket, aircraft_identifier, nullptr, GetContext().window, GetContext().player_details));
 
             Tank* aircraft = m_world.AddAircraft(
                 aircraft_identifier,
