@@ -28,6 +28,7 @@ private:
 		bool m_timed_out;
 		std::string m_name;
 		int m_score = 0;
+		int m_high_score = 0;
 	};
 
 	struct AircraftInfo

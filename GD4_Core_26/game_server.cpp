@@ -495,14 +495,14 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
     {
         std::string name;
         int score;
-        packet >> name >> score;
-
+        int high_score;
+        packet >> name >> score >> high_score;
         receiving_peer.m_name = name;
         receiving_peer.m_score = score;
-        std::cout << "Player details received: " << name << " score: " << score << "\n";
-
+        receiving_peer.m_high_score = high_score;
         SendPlayerList();
     }
+    break;
     break;
 
     // Client notifies the server of a world event (e.g. an enemy exploded).
@@ -592,8 +592,9 @@ void GameServer::SendPlayerList()
             for (uint8_t id : m_peers[i]->m_aircraft_identifiers)
             {
                 packet << id
-                    << m_peers[i]->m_name   // from peer
-                    << m_peers[i]->m_score; // from peer
+                    << m_peers[i]->m_name    // from peer
+                    << m_peers[i]->m_score   // from peer
+                    << m_peers[i]->m_high_score;
             }
         }
     }

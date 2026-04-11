@@ -732,7 +732,6 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
 
     case Server::PacketType::kPlayerList:
     {
-        std::cout << "kPlayerList received in game state - ignoring\n";
         uint8_t count;
         packet >> count;
         for (uint8_t i = 0; i < count; ++i)
@@ -740,7 +739,8 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
             uint8_t id;
             std::string name;
             int score;
-            packet >> id >> name >> score;
+            int high_score;
+            packet >> id >> name >> score >> high_score;
         }
     }
     break;

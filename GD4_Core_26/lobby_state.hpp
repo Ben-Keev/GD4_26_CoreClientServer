@@ -18,6 +18,7 @@ private:
 		uint8_t id;
 		std::string name;
 		int score;
+		int high_score;
 	};
 
 	std::vector<PlayerEntry> m_ids_players;

@@ -8,6 +8,10 @@
 #include <fstream>
 #include <numeric>
 
+std::string LoadPlayerName();
+int LoadHighScore();
+void SaveDetails(const std::string& name, int high_score);
+
 // ---------------------------------------------------------------------------
 // GetAddressFromFile
 // Reads the target server IP from "ip.txt" in the working directory.
@@ -84,7 +88,7 @@ LobbyState::LobbyState(StateStack& stack, Context context, bool firstTime)
 	m_players_list_text.setString("Players:\n");
 	Utility::CentreOrigin(m_players_list_text);
 	m_players_list_text.setPosition(
-		sf::Vector2f(200, m_window.getSize().y / 2.f));
+		sf::Vector2f(300, m_window.getSize().y / 2.f));
 
 
 	// Render one frame immediately so the user sees "Attempting to connect..."
@@ -149,6 +153,7 @@ LobbyState::LobbyState(StateStack& stack, Context context, bool firstTime)
 		details_packet << static_cast<uint8_t>(Client::PacketType::kPlayerDetails);
 		details_packet << context.player_details->m_name;
 		details_packet << context.player_details->m_score;
+		details_packet << LoadHighScore();
 		context.socket->send(details_packet);
 	}
 }
@@ -341,14 +346,16 @@ void LobbyState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 			uint8_t id;
 			std::string name;
 			int score;
-			packet >> id >> name >> score;
-			m_ids_players.push_back({ id, name, score }); // update struct to include score
+			int high_score;
+			packet >> id >> name >> score >> high_score;
+			m_ids_players.push_back({ id, name, score, high_score }); // update struct to include score
 		}
 
 		std::string list = "Players:\n";
 		for (auto& p : m_ids_players)
 		{
-			list += "- " + p.name + " (Score: " + std::to_string(p.score) + ")\n";
+			list += "- " + p.name + " (MatchScore: " + std::to_string(p.score)
+				+ ", HighScore: " + std::to_string(p.high_score) + ")\n";
 		}
 		m_players_list_text.setString(list);
 		Utility::CentreOrigin(m_players_list_text);
