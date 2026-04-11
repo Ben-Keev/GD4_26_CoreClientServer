@@ -70,20 +70,30 @@ GameServer::~GameServer()
 }
 
 // ---------------------------------------------------------------------------
-// NotifyPlayerSpawn
+// (Claude AI) NotifyPlayerSpawn
 // Broadcasts a kPlayerConnect packet to ALL peers so every client knows a
 // new aircraft has entered the game and where it spawned.
 // ---------------------------------------------------------------------------
 void GameServer::NotifyPlayerSpawn(uint8_t aircraft_identifier)
 {
-    sf::Packet packet;
-    // Every packet begins with its type identifier (cast to uint8_t for compactness)
-    packet << static_cast<uint8_t>(Server::PacketType::kPlayerConnect);
-    // Append the new aircraft's unique ID and its initial world position
-    packet << aircraft_identifier
-        << m_aircraft_info[aircraft_identifier].m_position.x
-        << m_aircraft_info[aircraft_identifier].m_position.y;
-    SendToAll(packet);
+    // Find the peer that owns this identifier
+    for (std::size_t i = 0; i < m_connected_players; ++i)
+    {
+        for (uint8_t id : m_peers[i]->m_aircraft_identifiers)
+        {
+            if (id == aircraft_identifier)
+            {
+                sf::Packet packet;
+                packet << static_cast<uint8_t>(Server::PacketType::kPlayerConnect);
+                packet << aircraft_identifier
+                    << m_aircraft_info[aircraft_identifier].m_position.x
+                    << m_aircraft_info[aircraft_identifier].m_position.y
+                    << m_peers[i]->m_name;
+                SendToAll(packet);
+                return;
+            }
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -692,8 +702,8 @@ void GameServer::InformWorldState(sf::TcpSocket& socket)
                     << m_aircraft_info[identifier].m_position.y
                     << m_aircraft_info[identifier].m_hitpoints
                     << m_aircraft_info[identifier].m_missile_ammo
-                    << m_aircraft_info[identifier].m_turret_byte;      // Already in degrees (server-side)
-                    //<< m_aircraft_info[identifier].m_aircraft_rotation;
+                    << m_aircraft_info[identifier].m_turret_byte      // Already in degrees (server-side)
+                    << m_peers[i]->m_name;
             }
         }
     }
