@@ -222,24 +222,23 @@ bool MultiplayerGameState::Update(sf::Time dt)
 
         // --- Receive server packets ---
         sf::Packet packet;
-        if (GetContext().socket->receive(packet) == sf::Socket::Status::Done)
+        while (GetContext().socket->receive(packet) == sf::Socket::Status::Done)
         {
-            // Reset the timeout accumulator — server is still alive
             m_time_since_last_packet = sf::seconds(0.f);
             uint8_t packet_type;
             packet >> packet_type;
             HandlePacket(packet_type, packet, dt);
+            packet.clear();
+            if (m_returning_to_lobby) break;
         }
-        else
+
+        // No packet arrived this frame; check for timeout
+        if (m_time_since_last_packet > m_client_timeout)
         {
-            // No packet arrived this frame; check for timeout
-            if (m_time_since_last_packet > m_client_timeout)
-            {
-                m_connected = false;
-                m_failed_connection_text.setString("Lost connection to the server");
-                Utility::CentreOrigin(m_failed_connection_text);
-                m_failed_connection_clock.restart();  // Begin the 5-second return-to-menu countdown
-            }
+            m_connected = false;
+            m_failed_connection_text.setString("Lost connection to the server");
+            Utility::CentreOrigin(m_failed_connection_text);
+            m_failed_connection_clock.restart(); // Begin the 5-second return-to-menu countdown
         }
 
         // Advance the broadcast message display timer
@@ -358,8 +357,10 @@ void MultiplayerGameState::OnActivate()
 // ---------------------------------------------------------------------------
 void MultiplayerGameState::OnDestroy()
 {
+    std::cout << "OnDestroy called, returning_to_lobby: " << m_returning_to_lobby << "\n";
     if (m_connected && !m_returning_to_lobby)
     {
+        std::cout << "Sending kQuit\n";
         sf::Packet packet;
         packet << static_cast<uint8_t>(Client::PacketType::kQuit);
         GetContext().socket->send(packet);
@@ -699,5 +700,42 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
 		RequestStackPush(StateID::kRejoinLobby);
     }
     break;
+
+    //(Claude AI)
+    case Server::PacketType::kLobbyCountdownReset:
+    {
+        std::cout << "kLobbyCountdownReset received in game state - ignoring\n";
+        float countdown;
+        uint8_t player_count;
+        std::string name;
+        bool connected;
+        packet >> countdown >> player_count >> name >> connected;
+    }
+    break;
+
+    case Server::PacketType::kPlayerList:
+    {
+        std::cout << "kPlayerList received in game state - ignoring\n";
+        uint8_t count;
+        packet >> count;
+        for (uint8_t i = 0; i < count; ++i)
+        {
+            uint8_t id;
+            std::string name;
+            packet >> id >> name;
+        }
+    }
+    break;
+
+    case Server::PacketType::kLobbyPing:
+    {
+        float countdown;
+        packet >> countdown;
+    }
+    break;
+
+    default:
+        std::cout << "Unknown packet type: " << +packet_type << "\n";
+        break;
     } // end switch
 }

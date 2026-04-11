@@ -127,7 +127,7 @@ void Tank::AddPoints(int points)
 {
 	m_details->m_score = m_details->m_score + points;
 
-	std::cout << m_details->m_score;
+	std::cout << "Score: " << m_details->m_score << "\n";
 }
 
 void Tank::UpdateTexts()
