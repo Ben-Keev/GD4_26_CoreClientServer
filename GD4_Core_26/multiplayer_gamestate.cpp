@@ -23,6 +23,9 @@
 #include <fstream>
 #include <iostream>
 
+std::string LoadPlayerName();
+int LoadHighScore();
+void SaveDetails(const std::string& name, int high_score);
 
 
 // ---------------------------------------------------------------------------
@@ -441,6 +444,8 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
     // object with the correct key bindings (keys1) and marks the game as started.
     case Server::PacketType::kSpawnSelf:
     {
+        GetContext().player_details->m_score = 0;
+
         uint8_t aircraft_identifier;
         sf::Vector2f aircraft_position;
 
@@ -694,14 +699,22 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
         }
     }
     break;
+    // (Claude AI)
     case Server::PacketType::kReturnToLobby :
     {
+        // Check and update high score
+        int current_score = GetContext().player_details->m_score;
+        int high_score = LoadHighScore();
+
+        if (current_score > high_score)
+        {
+            SaveDetails(GetContext().player_details->m_name, current_score);
+            std::cout << "New high score: " << current_score << "\n";
+        }
+
         m_returning_to_lobby = true;
-
-		RequestStackClear(); // Pop the multiplayer game state
-
-
-		RequestStackPush(StateID::kRejoinLobby);
+        RequestStackClear();
+        RequestStackPush(StateID::kRejoinLobby);
     }
     break;
 

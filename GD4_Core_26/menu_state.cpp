@@ -10,28 +10,36 @@
 // (Claude AI) Load name from details.txt
 std::string LoadPlayerName()
 {
+    std::ifstream input_file("details.txt");
+    std::string name;
+    if (input_file >> name)
     {
-        std::ifstream input_file("details.txt");
-        std::string name;
-        if (input_file >> name)
-        {
-            // Clamp to 5 characters regardless of what's in the file
-            if (name.size() > 5)
-                name = name.substr(0, 5);
-            return name;
-        }
+        if (name.size() > 5)
+            name = name.substr(0, 5);
+        return name;
     }
+    // File missing — create with defaults
     std::ofstream output_file("details.txt");
-    std::string default_name = "Guest";
-    output_file << default_name;
-    return default_name;
+    output_file << "Guest\n" << 0;
+    return "Guest";
 }
-
-// (Claude AI) Save name to details.txt
-void SavePlayerName(const std::string& name)
+// (Claude AI)
+int LoadHighScore()
+{
+    std::ifstream input_file("details.txt");
+    std::string name;
+    int high_score = 0;
+    if (input_file >> name >> high_score) // reads line 1 then line 2
+    {
+        return high_score;
+    }
+    return 0;
+}
+// (Claude AI)
+void SaveDetails(const std::string& name, int high_score)
 {
     std::ofstream output_file("details.txt");
-    output_file << name;
+    output_file << name << "\n" << high_score;
 }
 
 MenuState::MenuState(StateStack& stack, Context context) 
@@ -157,7 +165,7 @@ bool MenuState::HandleEvent(const sf::Event& event)
 
         m_name_input_text.setString("Name: " + m_name_input);
         GetContext().player_details->m_name = m_name_input;
-        SavePlayerName(m_name_input);
+        SaveDetails(m_name_input, LoadHighScore());
     }
 
     // Only forward events to GUI when name field is not active
