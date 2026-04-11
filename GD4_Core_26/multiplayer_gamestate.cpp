@@ -226,6 +226,7 @@ bool MultiplayerGameState::Update(sf::Time dt)
             packet << static_cast<uint8_t>(game_action.type);
             packet << game_action.position.x;
             packet << game_action.position.y;
+            packet << game_action.identifier;  // (Claude)
             GetContext().socket->send(packet);
         }
 
@@ -724,9 +725,12 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
     {
         // Claude - destroy a wall at the given position according to server
         float x, y;
-        packet >> x >> y;
+        uint16_t id;
+        packet >> x >> y >> id;
         m_world.DestroyWallAt(sf::Vector2f(x, y));
+		m_world.DestroyProjectile(id);  // Also destroy the projectile that hit the wall (if it still exists on the client
     }
+    break;
     default:
         std::cout << "Unknown packet type: " << +packet_type << "\n";
         break;

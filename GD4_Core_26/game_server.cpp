@@ -504,14 +504,15 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
         // Claude - notify of wall destruction
         uint8_t action;
         float x, y;
-        packet >> action >> x >> y;
+        uint16_t id;
+        packet >> action >> x >> y >> id;
 
         if (action == GameActions::kWallDestroyed)
         {
             // Relay to everyone including sender
             sf::Packet relay;
             relay << static_cast<uint8_t>(Server::PacketType::kWallDestroyed);
-            relay << x << y;
+            relay << x << y << id;
             SendToAll(relay);
         }
     }

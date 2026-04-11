@@ -45,6 +45,7 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 	, m_explosion(textures.Get(TextureID::kExplosion))
 	, m_explosion_began(false)
 	, m_pickups_enabled(true)
+	, m_shot_counter(0)
 {
 	const std::vector<sf::Color> colours = InitializeTankColours();
 	details->m_colour = colours[identifier - 1];
@@ -198,7 +199,13 @@ void Tank::CreateBullet(SceneNode& node, const TextureHolder& textures)
 /// </summary>
 void Tank::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset, float y_offset, const TextureHolder& textures)
 {
-	std::unique_ptr<Projectile> projectile(new Projectile(type, textures, m_colour, this));
+	// Claude - Create a projectile id
+	// The top byte is the owner's id and the bottom is the shot number e.g client 1's third shot is 0x0103
+	uint16_t projectile_id = (static_cast<uint16_t>(m_identifier) << 8) | (m_shot_counter & 0xFF);
+
+	++m_shot_counter;
+
+	std::unique_ptr<Projectile> projectile(new Projectile(type, textures, m_colour, this, projectile_id));
 
 	//sf::Vector2f offset(x_offset * m_sprite.getGlobalBounds().size.x, y_offset * m_sprite.getGlobalBounds().size.y);
 
@@ -214,6 +221,14 @@ void Tank::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset
 	projectile->setPosition(GetWorldPosition()  + (direction * 25.0f));
 	projectile->setRotation(m_turret->GetWorldRotation());
 	projectile->SetVelocity(direction * projectile->GetMaxSpeed());
+
+	// Claude - callback to inform the world of the projectile
+	if (m_on_projectile_fired)
+		m_on_projectile_fired(projectile.get());
+
+	std::cout << "Just created projectile, GetIdentifier()=" << std::to_string(projectile->GetIdentifier())
+		<< " projectile_id was=" << std::to_string(projectile_id) << std::endl;
+
 	node.AttachChild(std::move(projectile));
 }
 
@@ -309,14 +324,6 @@ void Tank::CheckProjectileLaunch(sf::Time dt, CommandQueue & commands)
 		m_fire_countdown -= dt;
 		m_is_firing = false;
 	}
-
-	////Missile launch
-	//if (m_is_launching_missile)
-	//{
-	//	PlayLocalSound(commands, SoundEffect::kLaunchMissile);
-	//	commands.Push(m_missile_command);
-	//	m_is_launching_missile = false;
-	//}
 }
 
 /// <summary>

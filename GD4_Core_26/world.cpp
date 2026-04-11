@@ -21,7 +21,6 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	, m_textures()
 	, m_fonts(font)
 	, m_sounds(sounds)
-	, m_local_player_identifier(identifier)
 	, m_scene_graph(ReceiverCategories::kNone)
 	, m_scene_layers()
 	, m_world_bounds(sf::Vector2f(0.f, 0.f), sf::Vector2f(m_camera.getSize().x, m_camera.getSize().y))
@@ -63,6 +62,8 @@ void World::Update(sf::Time dt)
 	auto first_to_remove = std::remove_if(m_player_tank.begin(), m_player_tank.end(), std::mem_fn(&Tank::IsMarkedForRemoval));
 	m_player_tank.erase(first_to_remove, m_player_tank.end());
 	m_scene_graph.RemoveWrecks();
+
+
 
 	SpawnEnemies();
 
@@ -114,6 +115,19 @@ Tank* World::AddAircraft(uint8_t identifier, PlayerDetails* details, sf::Vector2
 	std::unique_ptr<Tank> tank(new Tank(TankType::kTank, m_textures, m_fonts, identifier, details));
 
 	tank->setPosition(position);
+
+	// Claude - Plant a callback on tanks so that projectiles can be registered
+	// Remove projectiles that are marked for removal
+	tank->m_on_projectile_fired = [this](Projectile* p)
+	{
+		m_projectile_map[p->GetIdentifier()] = p;
+
+		// When this projectile is destroyed, remove it from the map
+		p->m_on_destroyed = [this](uint16_t id)
+			{
+				m_projectile_map.erase(id);
+			};
+	};
 
 	// std::cout << "Spawning player at position " << player->getPosition().x << ", " << player->getPosition().y << std::endl;
 	std::cout << "World::AddTank " << +identifier << std::endl;
@@ -541,11 +555,12 @@ bool MatchesCategories(SceneNode::Pair& colliders, ReceiverCategories type1, Rec
 
 }
 
+
+
 void World::HandleCollisions()
 {
 	std::set<SceneNode::Pair> collision_pairs;
 	m_scene_graph.CheckSceneCollision(m_scene_graph, collision_pairs);
-	
 
 	for (SceneNode::Pair pair : collision_pairs)
 	{
@@ -631,7 +646,7 @@ void World::HandleCollisions()
 				// Let the server decide wall destruction — only the projectile owner sends the event
 				if (m_network_node && projectile.GetOwner().GetIdentifier() == m_local_player_identifier)
 				{
-					m_network_node->NotifyGameAction(GameActions::kWallDestroyed, wall.getPosition());
+					m_network_node->NotifyGameAction(GameActions::kWallDestroyed, wall.getPosition(), projectile.GetIdentifier());
 				}
 				// Don't damage the wall here — wait for server kWallDestroyed packet
 			}
@@ -689,6 +704,20 @@ void World::HandleCollisions()
 	}
 }
 
+// Clausde - DestroyProjectile becomes a simple lookup
+void World::DestroyProjectile(uint16_t id)
+{
+	std::cout << "Destroying projectile with id: " << std::to_string(id) << std::endl;
+
+	auto itr = m_projectile_map.find(id);
+	if (itr != m_projectile_map.end())
+	{
+		itr->second->Destroy();
+		m_projectile_map.erase(itr);
+	}
+}
+
+// Claude - Drestroy a wall at a certain position
 void World::DestroyWallAt(sf::Vector2f position)
 {
 	for (auto& pair : m_wall_map)

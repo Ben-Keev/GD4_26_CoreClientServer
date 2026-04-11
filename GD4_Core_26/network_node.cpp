@@ -6,6 +6,11 @@ NetworkNode::NetworkNode()
 {
 }
 
+void NetworkNode::NotifyGameAction(GameActions::Type type, sf::Vector2f position, uint16_t identifier)
+{
+	m_pending_actions.push(GameActions::Action(type, position, identifier));
+}
+
 void NetworkNode::NotifyGameAction(GameActions::Type type, sf::Vector2f position)
 {
 	m_pending_actions.push(GameActions::Action(type, position));

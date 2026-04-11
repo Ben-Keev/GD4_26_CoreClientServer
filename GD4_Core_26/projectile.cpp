@@ -4,6 +4,7 @@
 #include "utility.hpp"
 #include "emitter_node.hpp"
 #include "particle_type.hpp"
+#include "tank.hpp"
 
 /// <summary>
 /// Modified: Kaylon Riordan D00255039
@@ -13,8 +14,13 @@ namespace
     const std::vector<ProjectileData> Table = InitializeProjectileData();
 }
 
-Projectile::Projectile(ProjectileType type, const TextureHolder& textures, sf::Color colour, Tank* owner) : Entity(1), m_type(type),
-    m_sprite(textures.Get(Table[static_cast<int>(type)].m_texture), Table[static_cast<int>(type)].m_texture_rect), m_owner(owner)
+Projectile::Projectile(ProjectileType type, const TextureHolder& textures, sf::Color colour, Tank* owner, uint16_t identifier) 
+    : Entity(1)
+    , m_type(type)
+    , m_sprite(textures.Get(Table[static_cast<int>(type)].m_texture)
+    , Table[static_cast<int>(type)].m_texture_rect)
+    , m_owner(owner)
+    , projectile_id(identifier)
 {
     m_sprite.setColor(colour);
     Utility::CentreOrigin(m_sprite);
@@ -27,6 +33,15 @@ Projectile::Projectile(ProjectileType type, const TextureHolder& textures, sf::C
     std::unique_ptr<EmitterNode> propellant(new EmitterNode(ParticleType::kPropellant));
     propellant->setPosition(sf::Vector2f(-GetBoundingRect().size.x / 2.f, 0.f));
     AttachChild(std::move(propellant));
+
+
+}
+
+// (Claude) projectile.cpp destructor
+Projectile::~Projectile()
+{
+    if (m_on_destroyed)
+        m_on_destroyed(projectile_id);
 }
 
 unsigned int Projectile::GetCategory() const
@@ -95,4 +110,8 @@ void Projectile::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 void Projectile::DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const
 {
     target.draw(m_sprite, states);
+}
+
+uint16_t Projectile::GetIdentifier() const {
+    return projectile_id;
 }

@@ -58,8 +58,13 @@ namespace GameActions
 
 		}
 
+		Action(Type type, sf::Vector2f position, uint16_t identifier) :type(type), position(position), identifier(identifier)
+		{
+		}
+
 		Type type;
 		sf::Vector2f position;
+		uint16_t identifier; // An identifier which can carry extra information if needed.
 	};
 }
 

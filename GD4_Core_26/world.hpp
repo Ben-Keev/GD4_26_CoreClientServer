@@ -42,6 +42,9 @@ public:
 	void DestroyWallAt(sf::Vector2f position);
 	void SetLocalPlayerIdentifier(uint8_t identifier);
 
+	void DestroyProjectile(uint16_t id);
+	void OnProjectileDestroyed(uint16_t id);
+
 private:
 	void LoadTextures();
 	void BuildScene();
@@ -101,4 +104,7 @@ private:
 
 	std::map<uint8_t, Wall*> m_wall_map;
 	uint8_t m_wall_id_counter = 0;
+
+	// In world.hpp
+	std::map<uint16_t, Projectile*> m_projectile_map;
 };

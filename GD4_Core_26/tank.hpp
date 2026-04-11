@@ -9,6 +9,7 @@
 #include "turret.hpp"
 #include "player.hpp"
 #include "state.hpp"
+#include "projectile.hpp"
 
 struct PlayerDetails;
 
@@ -18,7 +19,6 @@ public:
 	Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts, uint8_t identifier, PlayerDetails* details);
 	unsigned int GetCategory() const override;
 
-	void DisablePickups();
 	uint8_t GetIdentifier();
 	//int GetMissileAmmo() const;
 	//void SetMissileAmmo(int ammo);
@@ -43,6 +43,8 @@ public:
 	void Remove() override;
 	Turret* GetTurret() const { return m_turret; }
 	void PlayLocalSound(CommandQueue& commands, SoundEffect effect);
+
+	std::function<void(Projectile*)> m_on_projectile_fired;
 
 private:
 	virtual void DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const;
@@ -88,6 +90,7 @@ private:
 
 	bool m_pickups_enabled;
 
+	uint8_t m_shot_counter;
 	Turret* m_turret;
 };
 
