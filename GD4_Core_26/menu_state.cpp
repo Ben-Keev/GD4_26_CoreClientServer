@@ -14,10 +14,15 @@ std::string LoadPlayerName()
         std::ifstream input_file("details.txt");
         std::string name;
         if (input_file >> name)
+        {
+            // Clamp to 5 characters regardless of what's in the file
+            if (name.size() > 5)
+                name = name.substr(0, 5);
             return name;
+        }
     }
     std::ofstream output_file("details.txt");
-    std::string default_name = "Player";
+    std::string default_name = "Guest";
     output_file << default_name;
     return default_name;
 }
