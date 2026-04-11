@@ -25,6 +25,7 @@ public:
 	int GetBounces() const;
 	bool CanBounce() const;
 	void AddBounce();
+	bool IsLocallyOwned() const;
 
 private:
 	virtual void UpdateCurrent(sf::Time dt, CommandQueue& commands) override;

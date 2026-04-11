@@ -12,7 +12,6 @@
 #include "tank_type.hpp"
 #include "turret.hpp"
 
-
 namespace
 {
 	const std::vector<TankData> Table = InitializeTankData();
@@ -69,17 +68,6 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 	m_turret = turret.get();
 	AttachChild(std::move(turret));
 	m_turret->SetIdentifier(identifier);
-
-	//m_missile_command.category = static_cast<int>(ReceiverCategories::kScene);
-	//m_missile_command.action = [this, &textures](SceneNode& node, sf::Time dt)
-	//	{
-	//		CreateProjectile(node, ProjectileType::kMissile, 0.f, 0.5f, textures);
-	//	};
-	//m_drop_pickup_command.category = static_cast<int>(ReceiverCategories::kScene);
-	//m_drop_pickup_command.action = [this, &textures](SceneNode& node, sf::Time dt)
-	//	{
-	//		CreatePickup(node, textures);
-	//	};
 
 	std::unique_ptr<TextNode> name_display(new TextNode(fonts, m_name));
 	m_name_display = name_display.get();
@@ -344,41 +332,3 @@ void Tank::Remove()
 	Entity::Remove();
 	m_show_explosion = false;
 }
-
-//void Aircraft::CreatePickup(SceneNode& node, const TextureHolder& textures) const
-//{
-//	auto type = static_cast<PickupType>(Utility::RandomInt(static_cast<int>(PickupType::kPickupCount)));
-//	std::unique_ptr<Pickup> pickup(new Pickup(type, textures));
-//	pickup->setPosition(GetWorldPosition());
-//	pickup->SetVelocity(0.f, 0.f);
-//	node.AttachChild(std::move(pickup));
-//}
-
-//void Aircraft::CheckPickupDrop(CommandQueue& commands)
-//{
-//	if (!IsAllied() && Utility::RandomInt(kPickupDropChance) == 0 && !m_spawned_pickup)
-//	{
-//		commands.Push(m_drop_pickup_command);
-//	}
-//	m_spawned_pickup = true;
-//}
-
-//void Aircraft::UpdateRollAnimation()
-//{
-//	if (Table[static_cast<int>(m_type)].m_has_roll_animation)
-//	{
-//		sf::IntRect textureRect = Table[static_cast<int>(m_type)].m_texture_rect;
-//
-//		//Roll left: Texture rect is offset once
-//		if (GetVelocity().x < 0.f)
-//		{
-//			textureRect.position.x += textureRect.size.x;
-//		}
-//		else if (GetVelocity().x > 0.f)
-//		{
-//			textureRect.position.x += 2 * textureRect.size.x;
-//		}
-//		m_sprite.setTextureRect(textureRect);
-//
-//	}
-//}

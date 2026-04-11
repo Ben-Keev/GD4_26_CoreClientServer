@@ -501,19 +501,18 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
     // NOTE: Pickup spawning is currently commented out / disabled.
     case Client::PacketType::kGameEvent:
     {
+        // Claude - notify of wall destruction
         uint8_t action;
-        float x;
-        float y;
-
+        float x, y;
         packet >> action >> x >> y;
 
-        // Only process kEnemyExplode events, and only from the first/host peer,
-        // to avoid duplicate pickup spawns when multiple clients report the same explosion.
-        if (action == GameActions::kEnemyExplode
-            && Utility::RandomInt(3) == 0          // 33% chance of a pickup
-            && &receiving_peer == m_peers[0].get())
+        if (action == GameActions::kWallDestroyed)
         {
-            
+            // Relay to everyone including sender
+            sf::Packet relay;
+            relay << static_cast<uint8_t>(Server::PacketType::kWallDestroyed);
+            relay << x << y;
+            SendToAll(relay);
         }
     }
     } // end switch

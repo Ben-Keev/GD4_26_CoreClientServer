@@ -71,35 +71,6 @@ MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context)
     m_failed_connection_text.setString("Failed to connect to server");
     Utility::CentreOrigin(m_failed_connection_text);
 
-    //// Read the server address from disk
-    //std::optional<sf::IpAddress> ip;
-    //ip = GetAddressFromFile();
-
-    //if (ip)
-    //{
-    //    // Try to establish a TCP connection — 5 second timeout for the handshake
-    //    auto status = m_socket.connect(*ip, SERVER_PORT, sf::seconds(5.f));
-
-    //    if (status == sf::Socket::Status::Done)
-    //    {
-    //        m_connected = true;  // Handshake succeeded
-    //    }
-    //    else
-    //    {
-    //        // Connection failed; start the 5-second "return to menu" countdown
-    //        m_failed_connection_clock.restart();
-    //    }
-    //}
-    //else
-    //{
-    //    // IP resolution failed; start the countdown to return to the menu
-    //    m_failed_connection_clock.restart();
-    //}
-
-    //// Switch to non-blocking mode now that the (blocking) connect() is done.
-    //// All subsequent receive() calls must return immediately so Update() doesn't stall.
-    //m_socket.setBlocking(false);
-
     if(context.socket == nullptr)
     {
         m_connected = false;
@@ -257,6 +228,8 @@ bool MultiplayerGameState::Update(sf::Time dt)
             packet << game_action.position.y;
             GetContext().socket->send(packet);
         }
+
+
 
         // --- Send position update at 20 Hz ---
         // Matches the server's tick rate so updates are not sent unnecessarily often.
@@ -746,6 +719,13 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
         }
     }
     break;
+    case Server::PacketType::kWallDestroyed:
+    {
+        // Claude - destroy a wall at the given position according to server
+        float x, y;
+        packet >> x >> y;
+        m_world.DestroyWallAt(sf::Vector2f(x, y));
+    }
     default:
         std::cout << "Unknown packet type: " << +packet_type << "\n";
         break;

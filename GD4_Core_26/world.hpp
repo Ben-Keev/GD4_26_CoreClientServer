@@ -39,6 +39,8 @@ public:
 
 	const sf::View& GetCamera() const { return m_camera; };
 
+	void DestroyWallAt(sf::Vector2f position);
+
 private:
 	void LoadTextures();
 	void BuildScene();
@@ -84,6 +86,7 @@ private:
 	float m_scrollspeed_compensation;
 
 	std::vector<Tank*> m_player_tank;
+	uint8_t m_local_player_identifier;
 
 	CommandQueue m_command_queue;
 
@@ -94,4 +97,7 @@ private:
 	bool m_networked_world;
 	NetworkNode* m_network_node;
 	SpriteNode* m_finish_sprite;
+
+	std::map<uint8_t, Wall*> m_wall_map;
+	uint8_t m_wall_id_counter = 0;
 };

@@ -17,6 +17,9 @@ public:
 	sf::FloatRect GetBoundingRect() const override;
 	bool IsMarkedForRemoval() const override;
 
+	void SetIdentifier(uint8_t id);
+	uint8_t GetIdentifier() const;
+
 protected:
 	virtual void DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const;
 	virtual void UpdateCurrent(sf::Time dt, CommandQueue& commands) override;
@@ -26,4 +29,5 @@ private:
 	sf::Sprite m_sprite;
 	bool m_is_marked_for_removal;
 
+	uint8_t m_identifier;
 };

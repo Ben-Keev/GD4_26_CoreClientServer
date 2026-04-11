@@ -488,6 +488,16 @@ void World::SpawnWall(WallType type, float x, float y, float rotation)
     std::unique_ptr<Wall> wall(new Wall(type, m_textures));
     wall->setPosition(sf::Vector2f(x, y));
     wall->setRotation(sf::degrees(rotation));
+
+	// Claude - Store a pointer to the wooden walls.
+	if (type == WallType::kWoodWall)
+	{
+		Wall* wall_ptr = wall.get();
+		m_wall_map[m_wall_id_counter++] = wall_ptr;
+		wall_ptr->SetIdentifier(m_wall_id_counter - 1);
+	}
+
+
     m_scene_layers[static_cast<int>(SceneLayers::kWalls)]->AttachChild(std::move(wall));
 }
 
@@ -538,7 +548,6 @@ void World::HandleCollisions()
 
 	for (SceneNode::Pair pair : collision_pairs)
 	{
-
 		// Handle collision for 2 tanks
 		// destroy both tnaks on collision
 		if (MatchesCategories(pair, ReceiverCategories::kTank, ReceiverCategories::kTank))
@@ -607,10 +616,23 @@ void World::HandleCollisions()
 		// Handle projectile/breakable wall collisions
 		else if (MatchesCategories(pair, ReceiverCategories::kProjectile, ReceiverCategories::kWoodWall))
 		{
+			// Claude -> send a wall destruction as a game event
 			auto& projectile = static_cast<Projectile&>(*pair.first);
 			auto& wall = static_cast<Wall&>(*pair.second);
-			wall.Damage(projectile.GetDamage());
+
 			projectile.Destroy();
+
+			// Don't damage the wall locally — send to server instead
+			if (m_networked_world)
+			{
+				// Let the server decide wall destruction — only the projectile owner sends the event
+				if (m_network_node && projectile.IsLocallyOwned())
+				{
+					m_network_node->NotifyGameAction(GameActions::kWallDestroyed, wall.getPosition());
+				}
+				// Don't damage the wall here — wait for server kWallDestroyed packet
+			}
+
 		}
 		// Handle projectile/durable wall collisions
 		else if (MatchesCategories(pair, ReceiverCategories::kProjectile, ReceiverCategories::kWall))
@@ -664,6 +686,20 @@ void World::HandleCollisions()
 	}
 }
 
+void World::DestroyWallAt(sf::Vector2f position)
+{
+	for (auto& pair : m_wall_map)
+	{
+		if (pair.second &&
+			std::abs(pair.second->getPosition().x - position.x) < 1.f &&
+			std::abs(pair.second->getPosition().y - position.y) < 1.f)
+		{
+			pair.second->Destroy();
+			break;
+		}
+	}
+}
+
 void World::DestroyEntitiesOutsideView()
 {
 	return;
@@ -689,4 +725,3 @@ void World::UpdateSounds()
 	m_sounds.SetListenerPosition(listener_position);
 	m_sounds.RemoveStoppedSounds();
 }
-

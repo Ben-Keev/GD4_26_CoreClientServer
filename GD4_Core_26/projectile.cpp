@@ -86,6 +86,11 @@ void Projectile::AddBounce()
     }
 }
 
+bool Projectile::IsLocallyOwned() const
+{
+    return m_owner->IsLocallyOwned();
+}
+
 void Projectile::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 {
     m_has_bounced = false;

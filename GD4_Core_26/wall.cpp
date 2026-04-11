@@ -56,6 +56,16 @@ void Wall::DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const
 	}
 }
 
+void Wall::SetIdentifier(uint8_t id)
+{	
+	m_identifier = id;
+}
+
+uint8_t Wall::GetIdentifier() const
+{
+	return m_identifier;
+}
+
 void Wall::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 {
 	Entity::UpdateCurrent(dt, commands);

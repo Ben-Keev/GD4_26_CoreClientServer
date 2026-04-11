@@ -21,7 +21,8 @@ namespace Server
 		kLobbyPing, // This is a keep-alive packet that also carries info on the lobby countdown. It is sent by the server every 500ms to prevent timeout in the lobby, and contains a float with the current countdown time and a sf::Int32 with the number of connected players.
 		kPlayerList, // This is sent by the server to update the client on the current list of players in the lobby. It contains a sf::Int32 with the number of players, and for each player a sf::Int32 with their identifier and a std::string with their name.
 		kReturnToLobby, // Tell Clients connected ingame to return to lobby
-		kPlayerVelocityUpdate // Direct update on velocity to prevent desync.
+		kPlayerVelocityUpdate, // Direct update on velocity to prevent desync.
+		kWallDestroyed // Claude suggested - send wall destructions as an event to the clients to give authority.
 	};
 }
 
@@ -45,7 +46,8 @@ namespace GameActions
 {
 	enum Type
 	{
-		kEnemyExplode
+		kEnemyExplode,
+		kWallDestroyed // Claude suggested - send wall destructions as an event to the server to give authority.
 	};
 
 	struct Action
