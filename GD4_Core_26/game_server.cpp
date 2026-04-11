@@ -480,6 +480,22 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
     }
     break;
 
+    case Client::PacketType::kPlayerVelocityUpdate:
+    {
+        uint8_t aircraft_identifier;
+        float vx, vy;
+        packet >> aircraft_identifier >> vx >> vy;
+
+        // Relay to all other clients
+        sf::Packet relay;
+        relay << static_cast<uint8_t>(Server::PacketType::kPlayerVelocityUpdate);
+        relay << aircraft_identifier;
+        relay << vx;
+        relay << vy;
+        SendToAll(relay);
+    }
+    break;
+
     // Client notifies the server of a world event (e.g. an enemy exploded).
     // The server can optionally decide to spawn a pickup in response.
     // NOTE: Pickup spawning is currently commented out / disabled.

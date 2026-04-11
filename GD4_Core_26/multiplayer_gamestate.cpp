@@ -733,7 +733,19 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
         packet >> countdown;
     }
     break;
+    case Server::PacketType::kPlayerVelocityUpdate:
+    {
+        uint8_t aircraft_identifier;
+        float vx, vy;
+        packet >> aircraft_identifier >> vx >> vy;
 
+        auto itr = m_players.find(aircraft_identifier);
+        if (itr != m_players.end())
+        {
+            itr->second->SetNetworkVelocity(sf::Vector2f(vx, vy));
+        }
+    }
+    break;
     default:
         std::cout << "Unknown packet type: " << +packet_type << "\n";
         break;

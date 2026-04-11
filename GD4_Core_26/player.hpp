@@ -28,6 +28,7 @@ public:
 	MissionStatus GetMissionStatus() const;
 
 	void DisableAllRealtimeActions(bool enable);
+	void SetNetworkVelocity(sf::Vector2f velocity);
 	bool IsLocal() const;
 
 	void PushCombinedMoveCommand(CommandQueue& commands, sf::Vector2f velocity);
@@ -44,5 +45,6 @@ private:
 	uint8_t m_identifier;
 	sf::TcpSocket* m_socket;
 	sf::RenderWindow* m_window;
+	sf::Vector2f m_current_network_velocity;
 };
 

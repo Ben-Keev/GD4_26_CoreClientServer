@@ -195,74 +195,28 @@ void Player::DisableAllRealtimeActions(bool enable)
     }
 }
 
+// Claude - set current network velocity (called by GameState on receipt of kPlayerVelocityUpdate)
+void Player::SetNetworkVelocity(sf::Vector2f velocity)
+{
+    m_current_network_velocity = velocity;
+}
 
-// Claude - added diagonal movement
+// Claude - current network velocity
 void Player::HandleRealtimeNetworkInput(CommandQueue& commands)
 {
     if (m_socket && !IsLocal())
     {
-        sf::Vector2f combined_velocity(0.f, 0.f);
+        // Handle non-movement realtime actions (e.g. firing)
         for (auto& pair : m_action_proxies)
         {
             if (!pair.second || !IsRealtimeAction(pair.first)) continue;
-            switch (pair.first)
-            {
-            case Action::kMoveLeft:  combined_velocity.x -= 1.f; break;
-            case Action::kMoveRight: combined_velocity.x += 1.f; break;
-            case Action::kMoveUp:    combined_velocity.y -= 1.f; break;
-            case Action::kMoveDown:  combined_velocity.y += 1.f; break;
-            default:
+
+            if (pair.first == Action::kBulletFire)
                 commands.Push(m_action_binding[pair.first]);
-                break;
-            }
         }
 
-        PushCombinedMoveCommand(commands, combined_velocity);
-    }
-}
-
-// Claude - added diagonal movement
-void Player::HandleRealTimeInput(CommandQueue& command_queue, const sf::View& world_view)
-{
-    if ((m_socket && IsLocal()) || !m_socket)
-    {
-        std::vector<Action> activeActions = m_key_binding->GetRealtimeActions();
-
-        // Accumulate all active movement directions into one vector
-        sf::Vector2f combined_velocity(0.f, 0.f);
-        for (Action action : activeActions)
-        {
-            switch (action)
-            {
-            case Action::kMoveLeft:  combined_velocity.x -= 1.f; break;
-            case Action::kMoveRight: combined_velocity.x += 1.f; break;
-            case Action::kMoveUp:    combined_velocity.y -= 1.f; break;
-            case Action::kMoveDown:  combined_velocity.y += 1.f; break;
-            default:
-                // Non-movement realtime actions still push their own commands
-                command_queue.Push(m_action_binding[action]);
-                break;
-            }
-        }
-
-        // Only push a move command if there's actual input
-        if (combined_velocity.x != 0.f || combined_velocity.y != 0.f)
-        {
-            // Normalise so diagonal speed matches cardinal speed
-            float length = std::sqrt(combined_velocity.x * combined_velocity.x
-                + combined_velocity.y * combined_velocity.y);
-            combined_velocity /= length;
-
-            Command move;
-            move.category = static_cast<unsigned int>(ReceiverCategories::kTank);
-            move.action = DerivedAction<Tank>(AircraftMover(
-                combined_velocity.x, combined_velocity.y, m_identifier));
-            command_queue.Push(move);
-        }
-
-        sf::Vector2i mouseScreen = sf::Mouse::getPosition(*m_window);
-        sf::Vector2f mouseWorld = m_window->mapPixelToCoords(mouseScreen, world_view);
-        command_queue.Push(AnalogueAiming(mouseWorld));
+        // Push movement once using the received network velocity
+        PushCombinedMoveCommand(commands, m_current_network_velocity);
     }
 }
 
@@ -280,6 +234,73 @@ void Player::PushCombinedMoveCommand(CommandQueue& commands, sf::Vector2f veloci
         commands.Push(move);
     }
 }
+
+// Claude - added diagonal movement
+void Player::HandleRealTimeInput(CommandQueue& command_queue, const sf::View& world_view)
+{
+    if ((m_socket && IsLocal()) || !m_socket)
+    {
+        std::vector<Action> activeActions = m_key_binding->GetRealtimeActions();
+
+        sf::Vector2f combined_velocity(0.f, 0.f);
+        for (Action action : activeActions)
+        {
+            switch (action)
+            {
+            case Action::kMoveLeft:  combined_velocity.x -= 1.f; break;
+            case Action::kMoveRight: combined_velocity.x += 1.f; break;
+            case Action::kMoveUp:    combined_velocity.y -= 1.f; break;
+            case Action::kMoveDown:  combined_velocity.y += 1.f; break;
+            default:
+                command_queue.Push(m_action_binding[action]);
+                break;
+            }
+        }
+
+        if (combined_velocity.x != 0.f || combined_velocity.y != 0.f)
+        {
+            float length = std::sqrt(combined_velocity.x * combined_velocity.x
+                + combined_velocity.y * combined_velocity.y);
+            combined_velocity /= length;
+
+            Command move;
+            move.category = static_cast<unsigned int>(ReceiverCategories::kTank);
+            move.action = DerivedAction<Tank>(AircraftMover(
+                combined_velocity.x, combined_velocity.y, m_identifier));
+            command_queue.Push(move);
+
+			// Send the final normalised velocity as a single atomic packet (Claude)
+            if (m_socket)
+            {
+                sf::Packet packet;
+                packet << static_cast<uint8_t>(Client::PacketType::kPlayerVelocityUpdate);
+                packet << m_identifier;
+                packet << combined_velocity.x;
+                packet << combined_velocity.y;
+                m_socket->send(packet);
+            }
+        }
+        else
+        {
+            // Send zero velocity so remote tanks stop moving (Claude)
+            if (m_socket)
+            {
+                sf::Packet packet;
+                packet << static_cast<uint8_t>(Client::PacketType::kPlayerVelocityUpdate);
+                packet << m_identifier;
+                packet << 0.f;
+                packet << 0.f;
+                m_socket->send(packet);
+            }
+        }
+
+        sf::Vector2i mouseScreen = sf::Mouse::getPosition(*m_window);
+        sf::Vector2f mouseWorld = m_window->mapPixelToCoords(mouseScreen, world_view);
+        command_queue.Push(AnalogueAiming(mouseWorld));
+    }
+}
+
+
 
 sf::Vector2f Player::GetCombinedNetworkVelocity() const
 {
