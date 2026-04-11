@@ -232,7 +232,6 @@ bool MultiplayerGameState::Update(sf::Time dt)
                     << aircraft->getPosition().x
                     << aircraft->getPosition().y
                     << static_cast<uint8_t>(aircraft->GetHitPoints())
-                    << static_cast<uint8_t>(0)  // Missile count placeholder (not yet implemented)
                     << static_cast<uint8_t>(aircraft->GetTurret()->getRotation().asDegrees() / 360.f * 255.f)
                     << aircraft->getRotation().asDegrees();  // Hull rotation — full float precision
             }
@@ -482,7 +481,6 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
         {
             uint8_t aircraft_identifier;
             uint8_t hitpoints;
-            uint8_t missile_ammo;
             sf::Vector2f aircraft_position;
             float turret_rotation;
 
@@ -490,7 +488,6 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
                 >> aircraft_position.x
                 >> aircraft_position.y
                 >> hitpoints
-                >> missile_ammo
                 >> turret_rotation;
 
             // Skip if this is our own aircraft — already spawned via kSpawnSelf (Claude)
@@ -578,7 +575,6 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
             sf::Vector2f aircraft_position;
             uint8_t aircraft_identifier;
             uint8_t hitpoints;
-            uint8_t ammo;
             float turret_rotation;  // Server sends this in degrees (decompressed server-side)
             float aircraft_rotation;
 
@@ -586,7 +582,6 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
                 >> aircraft_position.x
                 >> aircraft_position.y
                 >> hitpoints
-                >> ammo
                 >> turret_rotation
                 >> aircraft_rotation;
 

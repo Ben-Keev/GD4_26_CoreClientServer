@@ -10,8 +10,6 @@
 
 #include "game_server.hpp"
 #include "network_protocol.hpp"   // Defines PacketType enums shared between client & server
-#include "tank_type.hpp"          // TankType enum used when spawning enemies
-#include "utility.hpp"            // RandomInt, CentreOrigin, etc.
 #include <SFML/Network/Packet.hpp>
 #include <SFML/System/Sleep.hpp>
 #include <iostream>
@@ -201,15 +199,18 @@ void GameServer::Tick()
     // Broadcast the latest aircraft positions/HP to every connected client
     UpdateClientState();
 
-    // Heartbeat — send every 500ms to prevent server timeout (Claude)
-    m_heartbeat_timer += sf::seconds(1.f / 30.f);
-    if (m_heartbeat_timer >= sf::seconds(0.5f))
+    if (m_lobby_active) 
     {
-        sf::Packet heartbeat;
-        heartbeat << static_cast<uint8_t>(Server::PacketType::kLobbyPing);
-		heartbeat << static_cast<float>(m_lobby_countdown.asSeconds());
-        SendToAll(heartbeat);
-        m_heartbeat_timer = sf::Time::Zero;
+        // Heartbeat — send every 500ms to prevent server timeout (Claude)
+        m_heartbeat_timer += sf::seconds(1.f / 30.f);
+        if (m_heartbeat_timer >= sf::seconds(0.5f))
+        {
+            sf::Packet heartbeat;
+            heartbeat << static_cast<uint8_t>(Server::PacketType::kLobbyPing);
+            heartbeat << static_cast<float>(m_lobby_countdown.asSeconds());
+            SendToAll(heartbeat);
+            m_heartbeat_timer = sf::Time::Zero;
+        }
     }
 
     if (m_lobby_active && m_connected_players >= 2)
@@ -420,7 +421,6 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
         {
             uint8_t aircraft_identifier;
             uint8_t aircraft_hitpoints;
-            uint8_t missile_ammo;
             sf::Vector2f aircraft_position;
             uint8_t turret_byte;      // Compressed turret rotation: 0-255 maps to 0-360 degrees
             float aircraft_rotation;  // Hull rotation in degrees (uncompressed)
@@ -429,7 +429,6 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
                 >> aircraft_position.x
                 >> aircraft_position.y
                 >> aircraft_hitpoints
-                >> missile_ammo
                 >> turret_byte
                 >> aircraft_rotation;
 
@@ -439,8 +438,7 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
             {
                 itr->second.m_position = aircraft_position;
                 itr->second.m_hitpoints = aircraft_hitpoints;
-                itr->second.m_missile_ammo = missile_ammo;
-                itr->second.m_turret_byte = (static_cast<float>(turret_byte) / 255.f) * 360.f;
+                itr->second.m_turret_rotation = (static_cast<float>(turret_byte) / 255.f) * 360.f;
                 itr->second.m_aircraft_rotation = aircraft_rotation;
             }
             // If not found, silently discard — the aircraft has already been removed
@@ -492,7 +490,6 @@ void GameServer::HandleIncomingConnections()
 
         m_aircraft_info[m_aircraft_identifier_counter].m_position = SpawnPositions[m_connected_players];
         m_aircraft_info[m_aircraft_identifier_counter].m_hitpoints = 10;
-        m_aircraft_info[m_aircraft_identifier_counter].m_missile_ammo = 2;
 
         m_peers[m_connected_players]->m_aircraft_identifiers.emplace_back(m_aircraft_identifier_counter);
         m_peers[m_connected_players]->m_ready = true;
@@ -641,9 +638,7 @@ void GameServer::InformWorldState(sf::TcpSocket& socket)
                     << m_aircraft_info[identifier].m_position.x
                     << m_aircraft_info[identifier].m_position.y
                     << m_aircraft_info[identifier].m_hitpoints
-                    << m_aircraft_info[identifier].m_missile_ammo
-                    << m_aircraft_info[identifier].m_turret_byte;      // Already in degrees (server-side)
-                    //<< m_aircraft_info[identifier].m_aircraft_rotation;
+                    << m_aircraft_info[identifier].m_turret_rotation;      // Already in degrees (server-side)
             }
         }
     }
@@ -713,8 +708,7 @@ void GameServer::UpdateClientState()
             << aircraft.second.m_position.x          // World X
             << aircraft.second.m_position.y          // World Y
             << aircraft.second.m_hitpoints           // Current HP (0-100)
-            << aircraft.second.m_missile_ammo        // Remaining missiles
-            << aircraft.second.m_turret_byte        // Turret angle (stored as degrees on server)
+            << aircraft.second.m_turret_rotation        // Turret angle (stored as degrees on server)
 		    << aircraft.second.m_aircraft_rotation; // Hull rotation (degrees)
     }
 
@@ -756,7 +750,6 @@ void GameServer::ResetGameState()
 
             m_aircraft_info[m_aircraft_identifier_counter].m_position = SpawnPositions[i];
             m_aircraft_info[m_aircraft_identifier_counter].m_hitpoints = 10;
-            m_aircraft_info[m_aircraft_identifier_counter].m_missile_ammo = 2;
 
             m_aircraft_count++;
             m_aircraft_identifier_counter++;

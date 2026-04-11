@@ -198,7 +198,6 @@
     <ClInclude Include="lobby_state.hpp" />
     <ClInclude Include="menu_options.hpp" />
     <ClInclude Include="menu_state.hpp" />
-    <ClInclude Include="mission_status.hpp" />
     <ClInclude Include="multiplayer_gamestate.hpp" />
     <ClInclude Include="music_player.hpp" />
     <ClInclude Include="music_themes.hpp" />
@@ -239,7 +238,6 @@
     <ClInclude Include="title_state.hpp" />
     <ClInclude Include="turret.hpp" />
     <ClInclude Include="turret_type.hpp" />
-    <ClInclude Include="UDPSocket.hpp" />
     <ClInclude Include="utility.hpp" />
     <ClInclude Include="wall.hpp" />
     <ClInclude Include="wall_type.hpp" />

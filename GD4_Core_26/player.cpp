@@ -89,7 +89,6 @@ struct AircraftFireTrigger
 // Player constructor
 Player::Player(sf::TcpSocket* socket, uint8_t identifier, const KeyBinding* binding, sf::RenderWindow* window)
     : m_key_binding(binding)                 // Key bindings for this player
-    , m_current_mission_status(MissionStatus::kMissionRunning)
     , m_identifier(identifier)               // Player ID
     , m_socket(socket)                       // Network socket (nullptr if local game)
     , m_window(window)
@@ -115,7 +114,6 @@ Command Player::AnalogueAiming(const sf::Vector2f& mousePos)
 void Player::HandleEvent(const sf::Event& event, CommandQueue& command_queue)
 {
     const auto* key_pressed = event.getIf<sf::Event::KeyPressed>();
-
 
     if (key_pressed)
     {
@@ -295,18 +293,6 @@ void Player::HandleNetworkEvent(Action action, CommandQueue& commands)
 void Player::HandleNetworkRealtimeChange(Action action, bool actionEnabled)
 {
     m_action_proxies[action] = actionEnabled;
-}
-
-// Set mission/game status
-void Player::SetMissionStatus(MissionStatus status)
-{
-    m_current_mission_status = status;
-}
-
-// Get mission/game status
-MissionStatus Player::GetMissionStatus() const
-{
-    return m_current_mission_status;
 }
 
 // Setup action -> command mappings

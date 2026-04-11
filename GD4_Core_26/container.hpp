@@ -11,9 +11,6 @@ namespace gui
 		Container();
 		void Pack(Component::Ptr component);
 		virtual bool IsSelectable() const override;
-		void HandleRealtimeInput();
-		void HandleJoystickInput(int joystick);
-		size_t GetContainerSize();
 		virtual void HandleEvent(const sf::Event& event) override;
 
 	private:
