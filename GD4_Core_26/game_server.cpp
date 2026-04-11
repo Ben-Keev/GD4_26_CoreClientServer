@@ -407,6 +407,7 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
             m_total_skip_countdown--; // Decrement the count of "skip countdown" votes
         }
 	}
+    break;
 
     // Client reports a one-shot input event (e.g. missile fired).
     // The server relays this to all other clients via NotifyPlayerEvent.
@@ -455,15 +456,15 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
             uint8_t missile_ammo;
             sf::Vector2f aircraft_position;
             uint8_t turret_byte;      // Compressed turret rotation: 0-255 maps to 0-360 degrees
-            //float aircraft_rotation;  // Hull rotation in degrees (uncompressed)
+            float aircraft_rotation;  // Hull rotation in degrees (uncompressed)
 
             packet >> aircraft_identifier
                 >> aircraft_position.x
                 >> aircraft_position.y
                 >> aircraft_hitpoints
                 >> missile_ammo
-                >> turret_byte;
-                //>> aircraft_rotation;
+                >> turret_byte
+                >> aircraft_rotation;
 
             // Only update if the server still recognises this aircraft, prevent generation of duplicate aircraft (Claude)
             auto itr = m_aircraft_info.find(aircraft_identifier);
@@ -473,26 +474,10 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
                 itr->second.m_hitpoints = aircraft_hitpoints;
                 itr->second.m_missile_ammo = missile_ammo;
                 itr->second.m_turret_byte = (static_cast<float>(turret_byte) / 255.f) * 360.f;
-                //itr->second.m_aircraft_rotation = aircraft_rotation;
+                itr->second.m_aircraft_rotation = aircraft_rotation;
             }
             // If not found, silently discard — the aircraft has already been removed
         }
-    }
-    break;
-
-    case Client::PacketType::kPlayerVelocityUpdate:
-    {
-        uint8_t aircraft_identifier;
-        float vx, vy;
-        packet >> aircraft_identifier >> vx >> vy;
-
-        // Relay to all other clients
-        sf::Packet relay;
-        relay << static_cast<uint8_t>(Server::PacketType::kPlayerVelocityUpdate);
-        relay << aircraft_identifier;
-        relay << vx;
-        relay << vy;
-        SendToAll(relay);
     }
     break;
 
@@ -762,7 +747,8 @@ void GameServer::UpdateClientState()
             << aircraft.second.m_position.y          // World Y
             << aircraft.second.m_hitpoints           // Current HP (0-100)
             << aircraft.second.m_missile_ammo        // Remaining missiles
-            << aircraft.second.m_turret_byte;        // Turret angle (stored as degrees on server)
+            << aircraft.second.m_turret_byte        // Turret angle (stored as degrees on server)
+		    << aircraft.second.m_aircraft_rotation; // Hull rotation (degrees)
     }
 
     SendToAll(update_client_state_packet);

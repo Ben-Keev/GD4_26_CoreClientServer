@@ -249,8 +249,8 @@ bool MultiplayerGameState::Update(sf::Time dt)
                     << aircraft->getPosition().y
                     << static_cast<uint8_t>(aircraft->GetHitPoints())
                     << static_cast<uint8_t>(0)  // Missile count placeholder (not yet implemented)
-                    << static_cast<uint8_t>(aircraft->GetTurret()->getRotation().asDegrees() / 360.f * 255.f);
-                    //<< aircraft->getRotation().asDegrees();  // Hull rotation — full float precision
+                    << static_cast<uint8_t>(aircraft->GetTurret()->getRotation().asDegrees() / 360.f * 255.f)
+                    << aircraft->getRotation().asDegrees();  // Hull rotation — full float precision
             }
             GetContext().socket->send(position_update_packet);
             m_tick_clock.restart();
@@ -634,13 +634,15 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
             uint8_t hitpoints;
             uint8_t ammo;
             float turret_rotation;  // Server sends this in degrees (decompressed server-side)
+            float aircraft_rotation;
 
             packet >> aircraft_identifier
                 >> aircraft_position.x
                 >> aircraft_position.y
                 >> hitpoints
                 >> ammo
-                >> turret_rotation;
+                >> turret_rotation
+                >> aircraft_rotation;
 
             Tank* aircraft = m_world.GetAircraft(aircraft_identifier);
 
@@ -657,6 +659,8 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
                     aircraft->getPosition()
                     + (aircraft_position - aircraft->getPosition()) * blend;
                 aircraft->setPosition(interpolated_position);
+
+                aircraft->setRotation(sf::degrees(aircraft_rotation));
 
                 // Turret angle is snapped directly — the rotation is small and
                 // frequent enough that interpolation is not necessary
@@ -708,19 +712,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
         packet >> countdown;
     }
     break;
-    case Server::PacketType::kPlayerVelocityUpdate:
-    {
-        uint8_t aircraft_identifier;
-        float vx, vy;
-        packet >> aircraft_identifier >> vx >> vy;
 
-        auto itr = m_players.find(aircraft_identifier);
-        if (itr != m_players.end())
-        {
-            itr->second->SetNetworkVelocity(sf::Vector2f(vx, vy));
-        }
-    }
-    break;
     case Server::PacketType::kWallDestroyed:
     {
         // Claude - destroy a wall at the given position according to server
