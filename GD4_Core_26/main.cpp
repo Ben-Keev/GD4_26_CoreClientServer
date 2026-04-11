@@ -1,4 +1,3 @@
-#include "SocketWrapperPCH.hpp"
 #include "application.hpp"
 #include <iostream>
 
@@ -8,8 +7,6 @@
 /// <returns></returns>
 int main()
 {
-	sf::Joystick::update();
-
 	try
 	{
 		Application app;

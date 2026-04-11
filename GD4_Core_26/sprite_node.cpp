@@ -1,4 +1,3 @@
-#include "SocketWrapperPCH.hpp"
 #include "sprite_node.hpp"
 
 SpriteNode::SpriteNode(const sf::Texture& texture):m_sprite(texture)

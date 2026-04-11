@@ -10,6 +10,8 @@
 #include "player.hpp"
 #include "state.hpp"
 #include "projectile.hpp"
+#include <string>
+#include <functional>
 
 struct PlayerDetails;
 
@@ -61,7 +63,7 @@ private:
 	sf::Sprite m_sprite;
 	uint8_t m_identifier;
 	PlayerDetails* m_details;
-	string m_name;
+	std::string m_name;
 	sf::Color m_colour;
 	Animation m_explosion;
 

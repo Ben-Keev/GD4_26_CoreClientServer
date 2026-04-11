@@ -1,5 +1,4 @@
 #pragma once
-#include "SocketWrapperPCH.hpp"       // Pre-compiled header wrapping SFML network types
 #include "state.hpp"
 #include "world.hpp"
 #include "player.hpp"

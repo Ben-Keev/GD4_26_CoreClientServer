@@ -2,6 +2,7 @@
 #include "entity.hpp"
 #include "resource_identifiers.hpp"
 #include "projectile_type.hpp"
+#include <functional>
 
 /// <summary>
 /// Modified: Kaylon Riordan D00255039
@@ -45,7 +46,6 @@ private:
 
 	// Claude
 	uint16_t projectile_id;
-
 
 	Tank* m_owner;
 	int m_bounces = 0;

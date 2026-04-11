@@ -1,4 +1,3 @@
-#include "SocketWrapperPCH.hpp"
 #include "application.hpp"
 #include "constants.hpp"
 #include "fontid.hpp"

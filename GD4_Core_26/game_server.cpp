@@ -8,7 +8,6 @@
 // at a fixed tick rate.
 // ============================================================
 
-#include "SocketWrapperPCH.hpp"   // Pre-compiled header; wraps SFML network includes
 #include "game_server.hpp"
 #include "network_protocol.hpp"   // Defines PacketType enums shared between client & server
 #include "tank_type.hpp"          // TankType enum used when spawning enemies
@@ -17,6 +16,7 @@
 #include <SFML/System/Sleep.hpp>
 #include <iostream>
 #include "data_tables.hpp"        // InitializeTankPositions and other data-driven tables
+#include "constants.hpp"
 
 // ---------------------------------------------------------------------------
 // Anonymous namespace — limits the visibility of SpawnPositions to this TU.

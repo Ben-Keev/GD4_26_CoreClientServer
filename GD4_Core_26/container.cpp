@@ -1,4 +1,3 @@
-#include "SocketWrapperPCH.hpp"
 #include "container.hpp"
 
 gui::Container::Container() : m_selected_child(-1)

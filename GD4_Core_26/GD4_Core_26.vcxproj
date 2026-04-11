@@ -105,8 +105,6 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <PrecompiledHeader>Create</PrecompiledHeader>
-      <PrecompiledHeaderFile>SocketWrapperPCH.hpp</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)/SFML-3.0.1/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -139,7 +137,6 @@
     <ClCompile Include="application.cpp" />
     <ClCompile Include="bloom_effect.cpp" />
     <ClCompile Include="button.cpp" />
-    <ClCompile Include="Client.cpp" />
     <ClCompile Include="command.cpp" />
     <ClCompile Include="command_queue.cpp" />
     <ClCompile Include="component.cpp" />
@@ -154,8 +151,6 @@
     <ClCompile Include="label.cpp" />
     <ClCompile Include="lobby_state.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="MemoryBitStream.cpp" />
-    <ClCompile Include="MemoryStream.cpp" />
     <ClCompile Include="menu_state.cpp" />
     <ClCompile Include="multiplayer_gamestate.cpp" />
     <ClCompile Include="music_player.cpp" />
@@ -167,25 +162,17 @@
     <ClCompile Include="post_effect.cpp" />
     <ClCompile Include="projectile.cpp" />
     <ClCompile Include="scene_node.cpp" />
-    <ClCompile Include="Server.cpp" />
     <ClCompile Include="settings_state.cpp" />
-    <ClCompile Include="SocketAddress.cpp" />
-    <ClCompile Include="SocketAddressFactory.cpp" />
-    <ClCompile Include="SocketUtil.cpp" />
-    <ClCompile Include="SocketWrapperPCH.cpp" />
     <ClCompile Include="sound_node.cpp" />
     <ClCompile Include="sound_player.cpp" />
     <ClCompile Include="sprite_node.cpp" />
     <ClCompile Include="state.cpp" />
     <ClCompile Include="statestack.cpp" />
-    <ClCompile Include="StringUtils.cpp" />
     <ClCompile Include="tank.cpp" />
-    <ClCompile Include="TCPSocket.cpp" />
     <ClCompile Include="texture_holder.cpp" />
     <ClCompile Include="text_node.cpp" />
     <ClCompile Include="title_state.cpp" />
     <ClCompile Include="turret.cpp" />
-    <ClCompile Include="UDPSocket.cpp" />
     <ClCompile Include="utility.cpp" />
     <ClCompile Include="wall.cpp" />
     <ClCompile Include="world.cpp" />
@@ -197,9 +184,7 @@
     <ClInclude Include="bloom_effect.hpp" />
     <ClInclude Include="button.hpp" />
     <ClInclude Include="button_type.hpp" />
-    <ClInclude Include="ByteSwap.hpp" />
     <ClInclude Include="choice.hpp" />
-    <ClInclude Include="Client.hpp" />
     <ClInclude Include="command.hpp" />
     <ClInclude Include="command_queue.hpp" />
     <ClInclude Include="component.hpp" />
@@ -215,9 +200,6 @@
     <ClInclude Include="key_binding.hpp" />
     <ClInclude Include="label.hpp" />
     <ClInclude Include="lobby_state.hpp" />
-    <ClInclude Include="Math.hpp" />
-    <ClInclude Include="MemoryBitStream.hpp" />
-    <ClInclude Include="MemoryStream.hpp" />
     <ClInclude Include="menu_options.hpp" />
     <ClInclude Include="menu_state.hpp" />
     <ClInclude Include="mission_status.hpp" />
@@ -246,11 +228,6 @@
     <ClInclude Include="Server.hpp" />
     <ClInclude Include="settings_state.hpp" />
     <ClInclude Include="shader_types.hpp" />
-    <ClInclude Include="SocketAddress.hpp" />
-    <ClInclude Include="SocketAddressFactory.hpp" />
-    <ClInclude Include="SocketUtil.hpp" />
-    <ClInclude Include="SocketWrapperPCH.hpp" />
-    <ClInclude Include="SocketWrapperShared.hpp" />
     <ClInclude Include="sound_effect.hpp" />
     <ClInclude Include="sound_node.hpp" />
     <ClInclude Include="sound_player.hpp" />
@@ -259,10 +236,8 @@
     <ClInclude Include="state.hpp" />
     <ClInclude Include="stateid.hpp" />
     <ClInclude Include="statestack.hpp" />
-    <ClInclude Include="StringUtils.hpp" />
     <ClInclude Include="tank.hpp" />
     <ClInclude Include="tank_type.hpp" />
-    <ClInclude Include="TCPSocket.hpp" />
     <ClInclude Include="texture_holder.hpp" />
     <ClInclude Include="texture_id.hpp" />
     <ClInclude Include="text_node.hpp" />

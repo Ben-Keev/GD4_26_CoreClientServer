@@ -1,4 +1,3 @@
-#include "SocketWrapperPCH.hpp"       // Pre-compiled header wrapping SFML network types
 #include "lobby_state.hpp"
 #include "utility.hpp"
 
@@ -7,6 +6,8 @@
 #include <SFML/Network/IpAddress.hpp>
 #include <fstream>
 #include <numeric>
+#include <iostream>
+using namespace std;
 
 // ---------------------------------------------------------------------------
 // GetAddressFromFile

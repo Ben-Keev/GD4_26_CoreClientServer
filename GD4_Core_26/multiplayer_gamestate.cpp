@@ -10,7 +10,6 @@
 // game-over states, and is pushed when a multiplayer session begins.
 // ============================================================
 
-#include "SocketWrapperPCH.hpp"       // Pre-compiled header wrapping SFML network types
 #include "multiplayer_gamestate.hpp"
 #include "music_player.hpp"
 #include "utility.hpp"                // CentreOrigin helper
