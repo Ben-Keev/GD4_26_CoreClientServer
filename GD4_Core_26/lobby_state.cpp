@@ -7,7 +7,6 @@
 #include <fstream>
 #include <numeric>
 #include <iostream>
-using namespace std;
 
 // ---------------------------------------------------------------------------
 // GetAddressFromFile
@@ -268,7 +267,7 @@ void LobbyState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 		std::cout << "Lobby countdown was reset" << std::endl;
 		float countdown;
 		uint8_t connected_players;
-		string player_name;
+		std::string player_name;
 		bool connect;
 
 		// Server has reset the lobby countdown (e.g. a new player joined)

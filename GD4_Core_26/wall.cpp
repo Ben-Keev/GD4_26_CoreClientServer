@@ -1,9 +1,6 @@
 #include "wall.hpp"
-#include "texture_id.hpp"
 #include "utility.hpp"
-#include "constants.hpp"
 #include "data_tables.hpp"
-#include <iostream>
 
 /// <summary>
 /// Authored: Kaylon Riodan

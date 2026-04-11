@@ -31,5 +31,4 @@ private:
 	bool m_is_marked_for_removal;
 
 	uint8_t m_identifier;
-	Projectile* destructor; // Projectile that destroyed the wall
 };

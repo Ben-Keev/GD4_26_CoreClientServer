@@ -2,7 +2,6 @@
 #include "texture_id.hpp"
 #include "data_tables.hpp"
 #include "utility.hpp"
-#include "constants.hpp"
 #include "projectile.hpp"
 #include "projectile_type.hpp"
 #include <iostream>

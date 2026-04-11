@@ -13,16 +13,11 @@
 #include "multiplayer_gamestate.hpp"
 #include "music_player.hpp"
 #include "utility.hpp"                // CentreOrigin helper
-#include "data_tables.hpp"
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Network/Packet.hpp>
-#include <SFML/Network/IpAddress.hpp>
 
-#include <fstream>
 #include <iostream>
-
-
 
 // ---------------------------------------------------------------------------
 // MultiplayerGameState constructor
@@ -127,11 +122,6 @@ bool MultiplayerGameState::Update(sf::Time dt)
 {
     if (m_connected)
     {
-        //// If the game is paused (active_state == false), disable real-time input
-        //// for all local players so they cannot move while the pause menu is open
-        //if (!m_active_state)
-        //    DisableAllRealtimeActions(true);
-
         m_world.Update(dt);
 
         // --- Check for destroyed / missing local aircraft ---
@@ -186,11 +176,10 @@ bool MultiplayerGameState::Update(sf::Time dt)
         CommandQueue& commands = m_world.GetCommandQueue();
         for (auto& pair : m_players)
         {
-            
             pair.second->HandleRealtimeNetworkInput(commands);
         }
 
-        // (Claude AI) --- Receive server packets ---
+        // Claude - Receive server packets
         sf::Packet packet;
         while (GetContext().socket->receive(packet) == sf::Socket::Status::Done)
         {
@@ -289,9 +278,9 @@ bool MultiplayerGameState::HandleEvent(const sf::Event& event)
         // Escape opens the network pause screen and disables real-time input
         if (key_pressed->scancode == sf::Keyboard::Scancode::Escape)
         {
-
             if (!m_player_dead)
-            DisableAllRealtimeActions(false);  // false = disable (stop) real-time actions
+                DisableAllRealtimeActions(false);
+
             RequestStackPush(StateID::kNetworkPause);
         }
     }
@@ -330,10 +319,10 @@ void MultiplayerGameState::OnActivate()
 // ---------------------------------------------------------------------------
 void MultiplayerGameState::OnDestroy()
 {
-    std::cout << "OnDestroy called, returning_to_lobby: " << m_returning_to_lobby << "\n";
+    //std::cout << "OnDestroy called, returning_to_lobby: " << m_returning_to_lobby << "\n";
     if (m_connected && !m_returning_to_lobby)
     {
-        std::cout << "Sending kQuit\n";
+        //std::cout << "Sending kQuit\n";
         sf::Packet packet;
         packet << static_cast<uint8_t>(Client::PacketType::kQuit);
         GetContext().socket->send(packet);
@@ -390,9 +379,9 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
 {
     switch (static_cast<Server::PacketType>(packet_type))
     {
-        // --- kBroadcastMessage ---
-        // Server is sending a text message to display on screen (e.g. "New player").
-        // Messages are queued; each is shown for 2 seconds before the next appears.
+    // --- kBroadcastMessage ---
+    // Server is sending a text message to display on screen (e.g. "New player").
+    // Messages are queued; each is shown for 2 seconds before the next appears.
     case Server::PacketType::kBroadcastMessage:
     {
         std::string message;
@@ -500,7 +489,6 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
             uint8_t missile_ammo;
             sf::Vector2f aircraft_position;
             float turret_rotation;
-            //float aircraft_rotation;  // Hull rotation — only needed for initial state sync
 
             packet >> aircraft_identifier
                 >> aircraft_position.x
@@ -508,7 +496,6 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
                 >> hitpoints
                 >> missile_ammo
                 >> turret_rotation;
-                //>> aircraft_rotation;
 
             // Skip if this is our own aircraft — already spawned via kSpawnSelf (Claude)
 			if (aircraft_identifier == m_local_player_identifier)
@@ -526,7 +513,6 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
                 { 512, 288 });
             
             aircraft->setPosition(aircraft_position);
-            //aircraft->setRotation(sf::degrees(aircraft_rotation));
             aircraft->GetTurret()->setRotation(sf::degrees(turret_rotation));
         }
     }
@@ -541,7 +527,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
         uint8_t aircraft_identifier;
         uint8_t action;
         packet >> aircraft_identifier >> action;
-        std::cout << "Player Event" << aircraft_identifier << std::endl;
+        //std::cout << "Player Event" << aircraft_identifier << std::endl;
 
         auto itr = m_players.find(aircraft_identifier);
         if (itr != m_players.end())
@@ -570,41 +556,6 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
             itr->second->HandleNetworkRealtimeChange(
                 static_cast<Action>(action), action_enabled);
         }
-    }
-    break;
-
-    // --- kSpawnEnemy ---
-    // The server has decided to spawn an enemy at a given location and type.
-    // Currently the packet is received but no action is taken (enemy spawning
-    // logic not yet implemented on the client side).
-    case Server::PacketType::kSpawnEnemy:
-    {
-        float height;
-        uint8_t type;
-        float relative_x;
-        packet >> type >> height >> relative_x;
-        // TODO: Spawn the enemy aircraft in the world at (relative_x, height)
-    }
-    break;
-
-    // --- kMissionSuccess ---
-    // All objectives have been met.  Push the mission-success state to display
-    // the victory screen to the player.
-    case Server::PacketType::kMissionSuccess:
-    {
-        RequestStackPush(StateID::kMissionSuccess);
-    }
-    break;
-
-    // --- kSpawnPickup ---
-    // Server is telling the client to place a pickup item in the world.
-    // Currently received but not acted upon (pickup logic not yet implemented).
-    case Server::PacketType::kSpawnPickup:
-    {
-        uint8_t type;
-        sf::Vector2f position;
-        packet >> type >> position.x >> position.y;
-        // TODO: Spawn the pickup entity in the world scene graph
     }
     break;
 
@@ -678,37 +629,22 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
 		RequestStackPush(StateID::kRejoinLobby);
     }
     break;
-
     //(Claude AI)
     case Server::PacketType::kLobbyCountdownReset:
     {
-        std::cout << "kLobbyCountdownReset received in game state - ignoring\n";
-        float countdown;
-        uint8_t player_count;
-        std::string name;
-        bool connected;
-        packet >> countdown >> player_count >> name >> connected;
+        std::cout << "kLobbyCountdownReset received in game state - ignoring" << std::endl;
     }
     break;
 
     case Server::PacketType::kPlayerList:
     {
-        std::cout << "kPlayerList received in game state - ignoring\n";
-        uint8_t count;
-        packet >> count;
-        for (uint8_t i = 0; i < count; ++i)
-        {
-            uint8_t id;
-            std::string name;
-            packet >> id >> name;
-        }
+        std::cout << "kPlayerList received in game state - ignoring" << std::endl;
     }
     break;
 
     case Server::PacketType::kLobbyPing:
     {
-        float countdown;
-        packet >> countdown;
+        std::cout << "kLobbyPing received in game state - ignoring" << std::endl;
     }
     break;
 

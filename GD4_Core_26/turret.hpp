@@ -12,18 +12,19 @@
 class Turret : public SceneNode
 {
 public:
-	Turret(TurretType type, const TextureHolder& textures, sf::Color colour);
-	unsigned int GetCategory() const override;
-	void Hide();
 
-	uint8_t GetIdentifier();
-	void SetIdentifier(uint8_t identifier);
+	Turret(TurretType type, const TextureHolder& textures, sf::Color colour);
 
 	static sf::Angle CalculateMouseRotation(const sf::Vector2f& turret_position, const sf::Vector2f& mouse_position);
 
+	void Hide();
+
+	unsigned int GetCategory() const override;
+	uint8_t GetIdentifier();
+	void SetIdentifier(uint8_t identifier);
+
 protected: 
 	virtual void DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const;
-
 
 private:
 	TurretType m_type;
