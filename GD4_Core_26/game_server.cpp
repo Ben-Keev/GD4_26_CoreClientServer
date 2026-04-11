@@ -38,12 +38,11 @@ namespace
 GameServer::GameServer(sf::Vector2f battlefield_size)
     : m_thread(&GameServer::ExecutionThread, this)  // Binds ExecutionThread as the thread entry point
     , m_listening_state(false)                        // Not yet accepting connections
-    , m_client_timeout(sf::seconds(1.f))              // Kick a peer after 1 second of silence
-    , m_max_connected_players(20)                     // Hard cap on simultaneous players
+    , m_client_timeout(kClientTimeout)              // Kick a peer after 1 second of silence
+    , m_max_connected_players(kMaxPlayers)                     // Hard cap on simultaneous players
     , m_connected_players(0)                          // Current number of live connections
     , m_world_height(battlefield_size.y)              // Scrolling world height in pixels
     , m_battlefield_rect(sf::Vector2f(0.f, 0.f), battlefield_size) // AABB of the entire level
-    , m_battlefield_scrollspeed(0.f)                  // Pixels/second scroll speed (currently 0)
     , m_aircraft_count(0)                             // Total spawned aircraft (players + enemies)
     , m_peers(1)                                      // Start with capacity for 1 peer
     , m_aircraft_identifier_counter(1)                // Unique IDs start at 1 (0 = invalid)
@@ -175,15 +174,6 @@ void GameServer::ExecutionThread()
         frame_clock.restart();
         tick_time += tick_clock.getElapsedTime();
         tick_clock.restart();
-
-        // Fixed-timestep physics: consume frame_rate-sized slices from the accumulator.
-        // This keeps the battlefield scroll deterministic regardless of actual loop speed.
-        while (frame_time >= frame_rate)
-        {
-            // Scroll the battlefield rectangle downward each physics step
-            m_battlefield_rect.position.y += m_battlefield_scrollspeed * frame_rate.asSeconds();
-            frame_time -= frame_rate;
-        }
 
         // Fixed-timestep network tick: send state updates to clients at 20 Hz
         while (tick_time >= tick_rate)

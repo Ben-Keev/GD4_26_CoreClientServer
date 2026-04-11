@@ -75,7 +75,6 @@ private:
 
 	float m_world_height;
 	sf::FloatRect m_battlefield_rect;
-	float m_battlefield_scrollspeed;
 
 	std::size_t m_aircraft_count;
 	std::map<uint8_t, AircraftInfo> m_aircraft_info;
