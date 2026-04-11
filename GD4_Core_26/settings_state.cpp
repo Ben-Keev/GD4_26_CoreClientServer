@@ -8,15 +8,11 @@ SettingsState::SettingsState(StateStack& stack, Context context)
     , m_gui_container()
     , m_background_sprite(context.textures->Get(TextureID::kTitleScreen))
 {
-    //Build key binding buttons and labels
-    for (std::size_t x = 0; x < 2; ++x)
-    {
-        AddButtonLabel(static_cast<int>(Action::kMoveLeft), x, 0, "Move Left", context);
-        AddButtonLabel(static_cast<int>(Action::kMoveRight), x, 1, "Move Right", context);
-        AddButtonLabel(static_cast<int>(Action::kMoveUp), x, 2, "Move Up", context);
-        AddButtonLabel(static_cast<int>(Action::kMoveDown), x, 3, "Move Down", context);
-        AddButtonLabel(static_cast<int>(Action::kBulletFire), x, 4, "Fire", context);
-    }
+    AddButtonLabel(static_cast<int>(Action::kMoveLeft), 0, 0, "Move Left", context);
+    AddButtonLabel(static_cast<int>(Action::kMoveRight), 0, 1, "Move Right", context);
+    AddButtonLabel(static_cast<int>(Action::kMoveUp), 0, 2, "Move Up", context);
+    AddButtonLabel(static_cast<int>(Action::kMoveDown), 0, 3, "Move Down", context);
+    AddButtonLabel(static_cast<int>(Action::kBulletFire), 0, 4, "Fire", context);
 
     UpdateLabels();
 
@@ -44,7 +40,7 @@ bool SettingsState::HandleEvent(const sf::Event& event)
     bool is_key_binding = false;
 
     //Iterate through all of the key binding buttons to see if they are being pressed, waiting for input from the user
-    for (std::size_t action = 0; action < 2 * (static_cast<int>(Action::kActionCount)); ++action)
+    for (std::size_t action = 0; action < static_cast<int>(Action::kActionCount); ++action)
     {
         if (m_binding_buttons[action]->IsActive())
         {
@@ -53,16 +49,8 @@ bool SettingsState::HandleEvent(const sf::Event& event)
             if (key_event)
             {
                 sf::Keyboard::Scancode pressed_key = key_event->scancode;
-                // Player 1
-                if (action < static_cast<int>(Action::kActionCount))
-                    GetContext().keys1->AssignKey(static_cast<Action>(action), pressed_key);
+                GetContext().keys->AssignKey(static_cast<Action>(action), pressed_key);
 
-                // Player 2
-                else
-                {
-                    auto action_index = action - static_cast<int>(Action::kActionCount);
-                    GetContext().keys2->AssignKey(static_cast<Action>(action_index), pressed_key);
-                }
                 m_binding_buttons[action]->Deactivate();
             }
             break;
@@ -86,13 +74,11 @@ void SettingsState::UpdateLabels()
     {
         auto action = static_cast<Action>(i);
 
-        // Get keys of both players
-        sf::Keyboard::Scancode key1 = GetContext().keys1->GetAssignedKey(action);
-        sf::Keyboard::Scancode key2 = GetContext().keys2->GetAssignedKey(action);
+        // Get keys
+        sf::Keyboard::Scancode key = GetContext().keys->GetAssignedKey(action);
 
-        // Assign both key strings to labels
-        m_binding_labels[i]->SetText(Utility::toString(key1));
-        m_binding_labels[i + static_cast<int>(Action::kActionCount)]->SetText(Utility::toString(key2));
+        // Assign key strings to labels
+        m_binding_labels[i]->SetText(Utility::toString(key));
     }
 }
 
@@ -108,7 +94,6 @@ void SettingsState::AddButtonLabel(std::size_t index, std::size_t x, std::size_t
 
     m_binding_labels[index] = std::make_shared<gui::Label>("", *context.fonts);
     m_binding_labels[index]->setPosition(sf::Vector2f(400.f * x + 300.f, 50.f * y + 315.f));
-
 
     m_gui_container.Pack(m_binding_buttons[index]);
     m_gui_container.Pack(m_binding_labels[index]);

@@ -26,15 +26,13 @@ public:
 
 	struct Context
 	{
-		Context(sf::RenderWindow& window, TextureHolder& textures, FontHolder& fonts, MusicPlayer& music, SoundPlayer& sound, KeyBinding& keys1, KeyBinding& keys2, sf::TcpSocket& socket, PlayerDetails& player_details);
-		//TODO unique_ptr rather than raw pointers here?
+		Context(sf::RenderWindow& window, TextureHolder& textures, FontHolder& fonts, MusicPlayer& music, SoundPlayer& sound, KeyBinding& keys, sf::TcpSocket& socket, PlayerDetails& player_details);
 		sf::RenderWindow* window;
 		TextureHolder* textures;
 		FontHolder* fonts;
 		MusicPlayer* music;
 		SoundPlayer* sound;
-		KeyBinding* keys1;
-		KeyBinding* keys2;
+		KeyBinding* keys;
 		sf::TcpSocket* socket;
 		PlayerDetails* player_details;
 	};
@@ -53,13 +51,8 @@ protected:
 	void RequestStackPop();
 	void RequestStackClear();
 
-	// Return non-const reference so callers can modify the shared Context. (Github Copilot)
-	// Also provide a const overload for const-qualified usage.
-	//Context& GetContext() { return m_context; }
-	//const Context& GetContext() const { return m_context; }
 	Context GetContext() const;
 private:
 	StateStack* m_stack;
 	Context m_context;
 };
-

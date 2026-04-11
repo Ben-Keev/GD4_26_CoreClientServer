@@ -410,9 +410,9 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
 
         std::cout << "Client kSpawnSelf " << +aircraft_identifier << std::endl;
 
-        // Create a Player with actual key bindings (keys1) — this is a local player
+        // Create a Player with actual key bindings (keys) — this is a local player
         m_players[aircraft_identifier].reset(
-            new Player(GetContext().socket, aircraft_identifier, GetContext().keys1, GetContext().window));
+            new Player(GetContext().socket, aircraft_identifier, GetContext().keys, GetContext().window));
 
         // Spawn the aircraft in the world scene graph and position it
         Tank* aircraft = m_world.AddAircraft(

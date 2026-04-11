@@ -32,7 +32,7 @@ private:
 	MusicPlayer m_music;
 	SoundPlayer m_sound;
 
-	KeyBinding m_key_binding_1;
+	KeyBinding m_key_binding;
 	KeyBinding m_key_binding_2;
 
 	sf::TcpSocket m_socket;
