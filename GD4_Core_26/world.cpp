@@ -5,14 +5,7 @@
 #include <SFML/System/Angle.hpp>
 #include "Projectile.hpp"
 #include "particle_node.hpp"
-#include "particletype.hpp"
 #include "sound_node.hpp"
-#include "data_tables.hpp"
-
-namespace
-{
-	const std::vector<sf::Color> TankColours = InitializeTankColours();
-}
 
 World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sounds, bool networked)
 	: m_target(output_target)
@@ -46,8 +39,6 @@ void World::Update(sf::Time dt)
 		t->SetVelocity(0.f, 0.f);
 	}
 
-	DestroyEntitiesOutsideView();
-
 	//Process commands from the scenegraph
 	while (!m_command_queue.IsEmpty())
 	{
@@ -61,10 +52,6 @@ void World::Update(sf::Time dt)
 	auto first_to_remove = std::remove_if(m_player_tank.begin(), m_player_tank.end(), std::mem_fn(&Tank::IsMarkedForRemoval));
 	m_player_tank.erase(first_to_remove, m_player_tank.end());
 	m_scene_graph.RemoveWrecks();
-
-
-
-	SpawnEnemies();
 
 	m_scene_graph.Update(dt, m_command_queue);
 	AdaptPlayerPosition();
@@ -105,7 +92,6 @@ void World::RemoveAircraft(uint8_t identifier)
 	if (tank)
 	{
 		tank->Destroy();
-		//m_player_tank.erase(std::find(m_player_tank.begin(), m_player_tank.end(), tank));
 	}
 }
 
@@ -162,15 +148,6 @@ bool World::HasAlivePlayer() const
 	return !m_player_tank.empty();
 }
 
-bool World::HasPlayerReachedEnd() const
-{
-	if (Tank* tank = GetAircraft(1))
-	{
-		return !m_world_bounds.contains(tank->getPosition());
-	}
-	return false;
-}
-
 void World::LoadTextures()
 {
 	m_textures.Load(TextureID::kEntities, "Media/Textures/SpriteSheet.png");
@@ -216,7 +193,6 @@ void World::BuildScene()
 		m_network_node = network_node.get();
 		m_scene_graph.AttachChild(std::move(network_node));
 	}
-	AddEnemies();
 
 	//Add the particle nodes to the scene
 	std::unique_ptr<ParticleNode> smokeNode(new ParticleNode(ParticleType::kSmoke, m_textures));
@@ -257,11 +233,6 @@ void World::AdaptPlayerPosition()
 		position.y = std::max(position.y, view_bounds.position.y + border_distance);
 		tank->setPosition(position);
 	}
-}
-
-void World::SpawnEnemies() 
-{
-    return;
 }
 	 
 /// <summary>
@@ -515,11 +486,6 @@ void World::SpawnWall(WallType type, float x, float y, float rotation)
     m_scene_layers[static_cast<int>(SceneLayers::kWalls)]->AttachChild(std::move(wall));
 }
 
-void World::AddEnemies()
-{
-	return;
-}
-
 sf::FloatRect World::GetViewBounds() const
 {
 	return sf::FloatRect(m_camera.getCenter() - m_camera.getSize() / 2.f, m_camera.getSize());
@@ -551,10 +517,7 @@ bool MatchesCategories(SceneNode::Pair& colliders, ReceiverCategories type1, Rec
 	{
 		return false;
 	}
-
 }
-
-
 
 void World::HandleCollisions()
 {
@@ -729,11 +692,6 @@ void World::DestroyWallAt(sf::Vector2f position)
 			break;
 		}
 	}
-}
-
-void World::DestroyEntitiesOutsideView()
-{
-	return;
 }
 
 void World::SetLocalPlayerIdentifier(uint8_t identifier) {

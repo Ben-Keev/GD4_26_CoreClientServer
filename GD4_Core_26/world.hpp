@@ -31,7 +31,6 @@ public:
 	void SetWorldHeight(float height);
 
 	bool HasAlivePlayer() const;
-	bool HasPlayerReachedEnd() const;
 
 	Tank* GetAircraft(int identifier) const;
 	sf::FloatRect GetBattleFieldBounds() const;
@@ -54,12 +53,7 @@ private:
 	void SpawnWall(WallType type, float x, float y, float rotation);
 	void AddWalls();
 
-	void SpawnEnemies();
-	void AddEnemies();
-
 	void HandleCollisions();
-
-	void DestroyEntitiesOutsideView();
 
 	void UpdateSounds();
 

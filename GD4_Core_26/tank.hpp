@@ -54,9 +54,6 @@ private:
 
 	void CheckProjectileLaunch(sf::Time dt, CommandQueue& commands);
 	bool IsAllied() const;
-	//void CreatePickup(SceneNode& node, const TextureHolder& textures) const;
-	//void CheckPickupDrop(CommandQueue& commands);
-	//void UpdateRollAnimation();
 
 private:
 	TankType m_type;
