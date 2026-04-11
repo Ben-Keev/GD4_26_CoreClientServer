@@ -6,10 +6,10 @@
 #include "projectile_type.hpp"
 #include <iostream>
 #include "sound_node.hpp"
-#include "network_node.hpp"
 #include "tank_type.hpp"
 #include "turret.hpp"
 #include "constants.hpp"
+#include "state.hpp"
 
 namespace
 {
@@ -33,17 +33,12 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 	, m_distance_travelled(0.f)
 	, m_directions_index(0)
 	, m_fire_rate(1)
-	, m_spread_level(1)
 	, m_is_firing(false)
-	, m_is_launching_missile(false)
 	, m_fire_countdown(sf::Time::Zero)
-	, m_missile_ammo(2)
 	, m_is_marked_for_removal(false)
-	, m_spawned_pickup(false)
 	, m_show_explosion(true)
 	, m_explosion(textures.Get(TextureID::kExplosion))
 	, m_explosion_began(false)
-	, m_pickups_enabled(true)
 	, m_shot_counter(0)
 {
 	const std::vector<sf::Color> colours = InitializeTankColours();
@@ -53,6 +48,7 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 	m_explosion.SetFrameSize(sf::Vector2i(200, 200));
 	m_explosion.SetNumFrames(9);
 	m_explosion.SetDuration(sf::seconds(0.5));
+
 	// Center sprite origins for correct rotation/positioning (GPT)
 	Utility::CentreOrigin(m_sprite);
 	Utility::CentreOrigin(m_explosion);;
@@ -76,7 +72,7 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 	UpdateTexts();
 }
 
-uint8_t	Tank::GetIdentifier()
+uint8_t	Tank::GetIdentifier() const
 {
 	return m_identifier;
 }
@@ -89,27 +85,10 @@ unsigned int Tank::GetCategory() const
 	return static_cast<unsigned int>(ReceiverCategories::kTank);
 }
 
-void Tank::IncreaseFireRate()
-{
-	if (m_fire_rate < 3)
-	{
-		++m_fire_rate;
-	}
-}
-
-void Tank::IncreaseFireSpread()
-{
-	if (m_spread_level < 3)
-	{
-		++m_spread_level;
-	}
-}
-
 void Tank::AddPoints(int points)
 {
 	m_details->m_score = m_details->m_score + points;
-
-	std::cout << "Score: " << m_details->m_score << "\n";
+	//std::cout << "Score: " << m_details->m_score << std::endl;
 }
 
 void Tank::UpdateTexts()
@@ -142,24 +121,7 @@ void Tank::Fire()
 
 void Tank::CreateBullet(SceneNode& node, const TextureHolder& textures)
 {
-	ProjectileType type = ProjectileType::kBullet;
-
-	// How many bullets are fired based on the level accquired
-	switch (m_spread_level)
-	{
-	case 1:
-		CreateProjectile(node, type, 0.0f, 0.5f, textures);
-		break;
-	case 2:
-		CreateProjectile(node, type, -0.5f, 0.5f, textures);
-		CreateProjectile(node, type, 0.5f, 0.5f, textures);
-		break;
-	case 3:
-		CreateProjectile(node, type, 0.0f, 0.5f, textures);
-		CreateProjectile(node, type, -0.5f, 0.5f, textures);
-		CreateProjectile(node, type, 0.5f, 0.5f, textures);
-		break;
-	}
+	CreateProjectile(node, ProjectileType::kBullet, 0.0f, 0.5f, textures);
 }
 
 /// <summary>
@@ -247,26 +209,13 @@ void Tank::UpdateCurrent(sf::Time dt, CommandQueue & commands)
 	{
 		m_turret->Hide();
 		m_explosion.Update(dt);
+
 		//Play explosion sound only once
 		if (!m_explosion_began)
 		{
 			SoundEffect soundEffect = (Utility::RandomInt(2) == 0) ? SoundEffect::kExplosion1 : SoundEffect::kExplosion2;
 			PlayLocalSound(commands, soundEffect);
 
-			//Emit network game action for enemy explodes
-			if (!IsAllied())
-			{
-				sf::Vector2f position = GetWorldPosition();
-
-				Command command;
-				command.category = static_cast<int>(ReceiverCategories::kNetwork);
-				command.action = DerivedAction<NetworkNode>([position](NetworkNode& node, sf::Time)
-					{
-						node.NotifyGameAction(GameActions::kEnemyExplode, position);
-					});
-
-				commands.Push(command);
-			}
 			m_explosion_began = true;
 		}
 		return;
@@ -279,14 +228,10 @@ void Tank::UpdateCurrent(sf::Time dt, CommandQueue & commands)
 
 void Tank::CheckProjectileLaunch(sf::Time dt, CommandQueue & commands)
 {
-	if (!IsAllied())
-	{
-		Fire();
-	}
-
 	if (m_is_firing && m_fire_countdown <= sf::Time::Zero)
 	{
-		PlayLocalSound(commands, IsAllied() ? SoundEffect::kRedGunfire : SoundEffect::kRedGunfire);
+		SoundEffect soundEffect = (Utility::RandomInt(2) == 0) ? SoundEffect::kGunfire1 : SoundEffect::kGunfire2;
+		PlayLocalSound(commands, soundEffect);
 		commands.Push(m_fire_command);
 		m_fire_countdown += Table[static_cast<int>(m_type)].m_fire_interval / (m_fire_rate + 1.f);
 		m_is_firing = false;
@@ -296,14 +241,6 @@ void Tank::CheckProjectileLaunch(sf::Time dt, CommandQueue & commands)
 		m_fire_countdown -= dt;
 		m_is_firing = false;
 	}
-}
-
-/// <summary>
-/// Returns true if tank is allied (red tank). (GPT)
-/// </summary>
-bool Tank::IsAllied() const
-{
-	return m_type == TankType::kTank;
 }
 
 void Tank::Remove()

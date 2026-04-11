@@ -5,8 +5,8 @@
 /// </summary>
 enum class SoundEffect
 {
-	kRedGunfire,
-	kBlueGunfire,
+	kGunfire1,
+	kGunfire2,
 	kExplosion1,
 	kExplosion2,
 	kButton,

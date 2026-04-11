@@ -8,7 +8,6 @@
 #include "animation.hpp"
 #include "turret.hpp"
 #include "player.hpp"
-#include "state.hpp"
 #include "projectile.hpp"
 #include <string>
 #include <functional>
@@ -21,16 +20,13 @@ public:
 	Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts, uint8_t identifier, PlayerDetails* details);
 	unsigned int GetCategory() const override;
 
-	uint8_t GetIdentifier();
-
-	void IncreaseFireRate();
-	void IncreaseFireSpread();
+	uint8_t GetIdentifier() const;
+	float GetMaxSpeed() const;
 
 	void AddPoints(int points);
 
 	void UpdateTexts();
 
-	float GetMaxSpeed() const;
 	void Fire();
 	void CreateBullet(SceneNode& node, const TextureHolder& textures);
 	void CreateProjectile(SceneNode& node, ProjectileType type, float x_offset, float y_offset, const TextureHolder& textures);
@@ -48,7 +44,6 @@ private:
 	virtual void UpdateCurrent(sf::Time dt, CommandQueue& commands) override;
 
 	void CheckProjectileLaunch(sf::Time dt, CommandQueue& commands);
-	bool IsAllied() const;
 
 private:
 	TankType m_type;
@@ -65,24 +60,13 @@ private:
 	int m_directions_index;
 
 	Command m_fire_command;
-	Command m_missile_command;
-	Command m_drop_pickup_command;
-
 	unsigned int m_fire_rate;
-	unsigned int m_spread_level;
-	unsigned int m_missile_ammo;
-
 	bool m_is_firing;
-	bool m_is_launching_missile;
-	bool m_spawned_pickup;
-
 	sf::Time m_fire_countdown;
 
 	bool m_is_marked_for_removal;
 	bool m_show_explosion;
 	bool m_explosion_began;
-
-	bool m_pickups_enabled;
 
 	uint8_t m_shot_counter;
 	Turret* m_turret;
