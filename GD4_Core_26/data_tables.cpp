@@ -8,50 +8,48 @@
 #include "particle_type.hpp"
 #include "turret_type.hpp"
 
-// Chat-GPT generated function to generate based on spacing & start positions
 std::vector<sf::Vector2f> InitializeTankPositions()
 {
-	std::vector<sf::Vector2f> data;
+	std::vector<sf::Vector2f> data(15);
 
-	float startX = 400.f;
-	float startY = 200.f;
-	float spacingX = 300.f;
-	float spacingY = 150.f;
-
-	for (int row = 0; row < 4; ++row)
-	{
-		for (int col = 0; col < 4; ++col)
-		{
-			data.emplace_back(
-				startX + col * spacingX,
-				startY + row * spacingY
-			);
-		}
-	}
+	data[0] = sf::Vector2f(56, 56);
+	data[1] = sf::Vector2f(1736, 840);
+	data[2] = sf::Vector2f(1736, 56);
+	data[3] = sf::Vector2f(56, 840);
+	data[4] = sf::Vector2f(896, 56);
+	data[5] = sf::Vector2f(896, 840);
+	data[6] = sf::Vector2f(56, 448);
+	data[7] = sf::Vector2f(1736, 448);
+	data[8] = sf::Vector2f(504, 56);
+	data[9] = sf::Vector2f(1288, 840);
+	data[10] = sf::Vector2f(1288, 56);
+	data[11] = sf::Vector2f(504, 840);
+	data[12] = sf::Vector2f(448, 448);
+	data[13] = sf::Vector2f(1344, 448);
+	data[14] = sf::Vector2f(896, 448);
 
 	return data;
 }
 
 std::vector<sf::Color> InitializeTankColours()
 {
-	std::vector<sf::Color> data(16);
+	std::vector<sf::Color> data(15);
 
-	data[0] = sf::Color::Red;
-	data[1] = sf::Color::Green;
-	data[2] = sf::Color::Blue;
-	data[3] = sf::Color::Yellow;
-	data[4] = sf::Color::Magenta;
-	data[5] = sf::Color::Cyan;
-	data[6] = sf::Color(255, 128, 0); // Orange
-	data[7] = sf::Color(128, 0, 255); // Purple
-	data[8] = sf::Color(0, 255, 128); // Aqua
-	data[9] = sf::Color(255, 0, 128); // Pink
-	data[10] = sf::Color(128, 255, 0); // Lime
-	data[11] = sf::Color(255, 255, 0); // Yellow
-	data[12] = sf::Color(0, 128, 255); // Sky Blue
-	data[13] = sf::Color(128, 255, 255); // Light Cyan
-	data[14] = sf::Color(255, 128, 128); // Light Red
-	data[15] = sf::Color(128, 128, 255); // Light Blue
+	data[0] = sf::Color(230,70,70);			// Red
+	data[1] = sf::Color(50, 160, 50);		// Green
+	data[2] = sf::Color(80, 140, 210);		// Blue
+	data[3] = sf::Color(220, 220, 70);		// Yellow
+	data[4] = sf::Color(160, 90, 230);		// Purple
+	data[5] = sf::Color(240, 120, 240);		// Pink
+	data[6] = sf::Color(240, 120, 70);		// Orange
+	data[7] = sf::Color(100, 220, 220);		// Cyan
+	data[8] = sf::Color(50, 50, 50);		// Black
+	data[9] = sf::Color(250, 250, 250);		// White
+	data[10] = sf::Color(150, 150, 150);	// Grey
+	data[11] = sf::Color(120, 90, 70);		// Brown
+	data[12] = sf::Color(220, 120, 140);	// Tan
+	data[13] = sf::Color(40, 50, 100);		// Navy
+	data[14] = sf::Color(110, 130, 90);		// Lime
 
 	return data;
 }

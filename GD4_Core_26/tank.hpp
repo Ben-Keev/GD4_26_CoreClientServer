@@ -15,12 +15,11 @@ struct PlayerDetails;
 class Tank : public Entity
 {
 public:
-	Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts, PlayerDetails* details);
+	Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts, uint8_t identifier, PlayerDetails* details);
 	unsigned int GetCategory() const override;
 
 	void DisablePickups();
 	uint8_t GetIdentifier();
-	void SetIdentifier(uint8_t identifier);
 	//int GetMissileAmmo() const;
 	//void SetMissileAmmo(int ammo);
 
@@ -58,6 +57,7 @@ private:
 private:
 	TankType m_type;
 	sf::Sprite m_sprite;
+	uint8_t m_identifier;
 	PlayerDetails* m_details;
 	string m_name;
 	sf::Color m_colour;
@@ -87,8 +87,6 @@ private:
 	bool m_explosion_began;
 
 	bool m_pickups_enabled;
-
-	uint8_t m_identifier;
 
 	Turret* m_turret;
 };

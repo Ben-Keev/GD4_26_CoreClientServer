@@ -23,10 +23,11 @@ TextureID ToTextureID(TankType type)
 	return TextureID::kEntities;
 }
 
-Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts, PlayerDetails* details)
+Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts, uint8_t identifier, PlayerDetails* details)
 	: Entity(Table[static_cast<int>(type)].m_hitpoints)
 	, m_type(type)
 	, m_sprite(textures.Get(Table[static_cast<int>(type)].m_texture), Table[static_cast<int>(type)].m_texture_rect)
+	, m_identifier(identifier)
 	, m_details(details)
 	, m_name(details->m_name)
 	, m_colour(details->m_colour)
@@ -45,8 +46,10 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 	, m_explosion(textures.Get(TextureID::kExplosion))
 	, m_explosion_began(false)
 	, m_pickups_enabled(true)
-	, m_identifier(0)
 {
+	const std::vector<sf::Color> colours = InitializeTankColours();
+	details->m_colour = colours[identifier - 1];
+	m_colour = details->m_colour;
 	m_sprite.setColor(m_colour);
 	m_explosion.SetFrameSize(sf::Vector2i(200, 200));
 	m_explosion.SetNumFrames(9);
@@ -65,6 +68,7 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 	turret = std::unique_ptr<Turret>(new Turret(TurretType::kTurret, textures, m_colour));
 	m_turret = turret.get();
 	AttachChild(std::move(turret));
+	m_turret->SetIdentifier(identifier);
 
 	//m_missile_command.category = static_cast<int>(ReceiverCategories::kScene);
 	//m_missile_command.action = [this, &textures](SceneNode& node, sf::Time dt)
@@ -87,16 +91,6 @@ Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts
 uint8_t	Tank::GetIdentifier()
 {
 	return m_identifier;
-}
-
-void Tank::SetIdentifier(uint8_t identifier)
-{
-	m_identifier = identifier;
-
-	std::cout << "Creating turret for tank with identifier: " << identifier << " and that's the identifier" << std::endl;
-
-	// Tank and turret identifier should match
-	m_turret->SetIdentifier(identifier);
 }
 
 /// <summary>
