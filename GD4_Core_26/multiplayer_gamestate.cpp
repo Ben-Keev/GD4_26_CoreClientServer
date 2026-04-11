@@ -39,7 +39,6 @@ MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context)
     , m_client_timeout(sf::seconds(1.f))        // Disconnect after 1 s with no packet
     , m_time_since_last_packet(sf::seconds(0.f))// Accumulator for the above timeout
     , m_broadcast_text(context.fonts->Get(FontID::kMain))
-    , m_player_invitation_text(context.fonts->Get(FontID::kMain))
     , m_failed_connection_text(context.fonts->Get(FontID::kMain))
     , m_player_dead(false)
     , m_returning_to_lobby(false)
@@ -71,7 +70,6 @@ MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context)
         m_failed_connection_text.setString("No valid socket found in Context");
         Utility::CentreOrigin(m_failed_connection_text);
         m_failed_connection_clock.restart();
-
     }
     else 
     {
@@ -218,8 +216,6 @@ bool MultiplayerGameState::Update(sf::Time dt)
             GetContext().socket->send(packet);
         }
 
-
-
         // --- Send position update at 20 Hz ---
         // Matches the server's tick rate so updates are not sent unnecessarily often.
         if (m_tick_clock.getElapsedTime() > sf::seconds(1.f / 30.f))
@@ -266,7 +262,7 @@ bool MultiplayerGameState::HandleEvent(const sf::Event& event)
 {
     CommandQueue& commands = m_world.GetCommandQueue();
 
-    // Let all local players react to the event (e.g. fire key pressed)
+    // Let all players react to the event (e.g. fire key pressed)
     for (auto& pair : m_players)
     {
         pair.second->HandleEvent(event, commands);
@@ -623,9 +619,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
     {
         m_returning_to_lobby = true;
 
-		RequestStackClear(); // Pop the multiplayer game state
-
-
+		RequestStackClear(); // Pop the multiplayer game state & pause state
 		RequestStackPush(StateID::kRejoinLobby);
     }
     break;
