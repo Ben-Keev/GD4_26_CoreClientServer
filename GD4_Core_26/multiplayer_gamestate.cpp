@@ -435,6 +435,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
         aircraft->setPosition(aircraft_position);
 
 		m_local_player_identifier = aircraft_identifier;
+		m_world.SetLocalPlayerIdentifier(aircraft_identifier);
 
         m_game_started = true;  // Allow game-over checks to run
     }

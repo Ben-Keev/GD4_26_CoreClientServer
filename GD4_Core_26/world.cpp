@@ -21,6 +21,7 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	, m_textures()
 	, m_fonts(font)
 	, m_sounds(sounds)
+	, m_local_player_identifier(identifier)
 	, m_scene_graph(ReceiverCategories::kNone)
 	, m_scene_layers()
 	, m_world_bounds(sf::Vector2f(0.f, 0.f), sf::Vector2f(m_camera.getSize().x, m_camera.getSize().y))
@@ -625,8 +626,10 @@ void World::HandleCollisions()
 			// Don't damage the wall locally — send to server instead
 			if (m_networked_world)
 			{
+				std::cout << "m_local_player_identifier: " << std::to_string(m_local_player_identifier) << std::endl;
+
 				// Let the server decide wall destruction — only the projectile owner sends the event
-				if (m_network_node && projectile.IsLocallyOwned())
+				if (m_network_node && projectile.GetOwner().GetIdentifier() == m_local_player_identifier)
 				{
 					m_network_node->NotifyGameAction(GameActions::kWallDestroyed, wall.getPosition());
 				}
@@ -703,6 +706,10 @@ void World::DestroyWallAt(sf::Vector2f position)
 void World::DestroyEntitiesOutsideView()
 {
 	return;
+}
+
+void World::SetLocalPlayerIdentifier(uint8_t identifier) {
+	m_local_player_identifier = identifier;
 }
 
 void World::UpdateSounds()

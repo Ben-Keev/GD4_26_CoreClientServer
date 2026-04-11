@@ -2,6 +2,7 @@
 #include "entity.hpp"
 #include "wall_type.hpp"
 #include "resource_identifiers.hpp"
+#include "projectile.hpp"
 
 /// <summary>
 /// Authored: Kaylon Riordan D00255039
@@ -30,4 +31,5 @@ private:
 	bool m_is_marked_for_removal;
 
 	uint8_t m_identifier;
+	Projectile* destructor; // Projectile that destroyed the wall
 };

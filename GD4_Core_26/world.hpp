@@ -40,6 +40,7 @@ public:
 	const sf::View& GetCamera() const { return m_camera; };
 
 	void DestroyWallAt(sf::Vector2f position);
+	void SetLocalPlayerIdentifier(uint8_t identifier);
 
 private:
 	void LoadTextures();
