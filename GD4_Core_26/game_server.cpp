@@ -480,6 +480,21 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
     }
     break;
 
+    // (Claude AI)
+    case Client::PacketType::kPlayerDetails:
+    {
+        std::string name;
+        int score;
+        packet >> name >> score;
+
+        receiving_peer.m_name = name;
+        receiving_peer.m_score = score;
+        std::cout << "Player details received: " << name << " score: " << score << "\n";
+
+        SendPlayerList();
+    }
+    break;
+
     // Client notifies the server of a world event (e.g. an enemy exploded).
     // The server can optionally decide to spawn a pickup in response.
     // NOTE: Pickup spawning is currently commented out / disabled.
@@ -552,7 +567,7 @@ void GameServer::HandleIncomingConnections()
     }
 }
 
-/// <summary>
+/// <summary> (Claude AI)
 /// Send a player list to the lobby for everyone. Copilot generated.
 /// </summary>
 void GameServer::SendPlayerList()
@@ -564,9 +579,12 @@ void GameServer::SendPlayerList()
     {
         if (m_peers[i]->m_ready)
         {
-            // For demonstration, we're sending a placeholder name. In a real implementation,
-            // you would want to store and send actual player names.
-            packet << static_cast<uint8_t>(i + 1) << "Player " + std::to_string(i + 1);
+            for (uint8_t id : m_peers[i]->m_aircraft_identifiers)
+            {
+                packet << id
+                    << m_peers[i]->m_name   // from peer
+                    << m_peers[i]->m_score; // from peer
+            }
         }
     }
     SendToAll(packet);
