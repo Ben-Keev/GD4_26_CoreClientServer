@@ -14,7 +14,7 @@ struct PlayerDetails;
 class Player
 {
 public:
-	Player(sf::TcpSocket* socket, uint8_t identifier, const KeyBinding* binding, sf::RenderWindow* window, PlayerDetails* details);
+	Player(sf::TcpSocket* socket, uint8_t identifier, const KeyBinding* binding, sf::RenderWindow* window);
 	Command AnalogueAiming(const sf::Vector2f& mousePos);
 	void HandleEvent(const sf::Event& event, CommandQueue& command_queue);
 	void HandleRealTimeInput(CommandQueue& command_queue, const sf::View& world_view);
@@ -30,9 +30,6 @@ public:
 	void DisableAllRealtimeActions(bool enable);
 	bool IsLocal() const;
 
-	PlayerDetails GetDetails();
-	void SetScore(int score);
-
 	void PushCombinedMoveCommand(CommandQueue& commands, sf::Vector2f velocity);
 	sf::Vector2f GetCombinedNetworkVelocity() const;
 
@@ -40,7 +37,6 @@ private:
 	void InitialiseActions();
 
 private:
-	PlayerDetails* m_details;
 	const KeyBinding* m_key_binding;
 	std::map<Action, Command> m_action_binding;
 	std::map<Action, bool> m_action_proxies;

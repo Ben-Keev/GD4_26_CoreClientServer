@@ -88,13 +88,12 @@ struct AircraftFireTrigger
 };
 
 // Player constructor
-Player::Player(sf::TcpSocket* socket, uint8_t identifier, const KeyBinding* binding, sf::RenderWindow* window, PlayerDetails* details)
+Player::Player(sf::TcpSocket* socket, uint8_t identifier, const KeyBinding* binding, sf::RenderWindow* window)
     : m_key_binding(binding)                 // Key bindings for this player
     , m_current_mission_status(MissionStatus::kMissionRunning)
     , m_identifier(identifier)               // Player ID
     , m_socket(socket)                       // Network socket (nullptr if local game)
     , m_window(window)
-    , m_details(details)
 {
     InitialiseActions(); // Setup all action -> command mappings
 
@@ -180,16 +179,6 @@ bool Player::IsLocal() const
 {
     // No key binding means this player is remote
     return m_key_binding != nullptr;
-}
-
-PlayerDetails Player::GetDetails()
-{
-    return *m_details;
-}
-
-void Player::SetScore(int score)
-{
-    m_details->m_score = score;
 }
 
 // Enables/disables all realtime actions over network

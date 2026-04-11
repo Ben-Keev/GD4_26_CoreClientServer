@@ -2,7 +2,7 @@
 #include "game_state.hpp"
 #include "mission_status.hpp"
 
-GameState::GameState(StateStack& stack, Context context) : State(stack, context), m_world(*context.window, *context.fonts, *context.sound, false), m_player(nullptr, 1, context.keys1, context.window, GetContext().player_details)
+GameState::GameState(StateStack& stack, Context context) : State(stack, context), m_world(*context.window, *context.fonts, *context.sound, false), m_player(nullptr, 1, context.keys1, context.window)
 {
 	m_world.AddAircraft(1, GetContext().player_details, { 512, 288 });
 	m_player.SetMissionStatus(MissionStatus::kMissionRunning);
