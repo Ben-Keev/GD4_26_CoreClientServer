@@ -262,20 +262,6 @@ void GameServer::Tick()
 
     if (!m_lobby_active && m_game_started) 
     {
-        // --- Win condition check ---
-        bool all_aircraft_done = false;
-        for (const auto& current : m_aircraft_info)
-        {
-            // Check condition for aircraft being done here
-        }
-        if (all_aircraft_done)
-        {
-            // Tell every client to show the mission-success screen
-            sf::Packet mission_success_packet;
-            mission_success_packet << static_cast<uint8_t>(Server::PacketType::kMissionSuccess);
-            SendToAll(mission_success_packet);
-        }
-
         // --- Clean up destroyed aircraft ---
         // Iterate through the server's aircraft registry and remove any with 0 HP.
         // Using itr++ (post-increment) ensures the iterator remains valid after erase.
@@ -429,15 +415,6 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
         bool action_enabled;
         packet >> aircraft_identifier >> action >> action_enabled;
         NotifyPlayerRealtimeChange(aircraft_identifier, action, action_enabled);
-    }
-    break;
-
-    // Client requests a second local player (co-op partner).
-    // NOTE: This feature is currently unused/disabled on the client side but
-    // the server still allocates the aircraft and notifies other peers.
-    case Client::PacketType::kRequestCoopPartner:
-    {
-
     }
     break;
 

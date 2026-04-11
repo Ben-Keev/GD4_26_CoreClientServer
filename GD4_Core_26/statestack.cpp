@@ -70,7 +70,6 @@ void StateStack::ApplyPendingChanges()
 			if (!m_stack.empty())
 				m_stack.back()->OnActivate();  // notify the newly exposed state (Claude)
 			break;
-			//TODO should we clear the pending list when queueing up clear
 		case StackActions::kClear:
 			m_stack.clear();
 			break;

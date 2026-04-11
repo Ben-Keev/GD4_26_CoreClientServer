@@ -1,12 +1,10 @@
 #include "application.hpp"
 #include "constants.hpp"
 #include "fontid.hpp"
-#include "game_state.hpp"
 #include "title_state.hpp"
 #include "menu_state.hpp"
 #include "pause_state.hpp"
 #include "settings_state.hpp"
-#include "game_over_state.hpp"
 #include "multiplayer_gamestate.hpp"
 #include "lobby_state.hpp"
 
@@ -81,15 +79,11 @@ void Application::RegisterStates()
 {
 	m_stack.RegisterState<TitleState>(StateID::kTitle);
 	m_stack.RegisterState<MenuState>(StateID::kMenu);
-	m_stack.RegisterState<GameState>(StateID::kGame);
 	m_stack.RegisterState<LobbyState>(StateID::kJoinLobby, true);
 	m_stack.RegisterState<LobbyState>(StateID::kRejoinLobby, false);
 	m_stack.RegisterState<MultiplayerGameState>(StateID::kJoinGame);
-	m_stack.RegisterState<PauseState>(StateID::kPause);
 	m_stack.RegisterState<PauseState>(StateID::kNetworkPause, true);
 	m_stack.RegisterState<SettingsState>(StateID::kSettings);
-	m_stack.RegisterState<GameOverState>(StateID::kGameOver, "Mission Failed!");
-	m_stack.RegisterState<GameOverState>(StateID::kMissionSuccess, "Mission Successful!");
 }
 
 

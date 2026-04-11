@@ -22,21 +22,16 @@ public:
 	unsigned int GetCategory() const override;
 
 	uint8_t GetIdentifier();
-	//int GetMissileAmmo() const;
-	//void SetMissileAmmo(int ammo);
 
 	void IncreaseFireRate();
 	void IncreaseFireSpread();
-	//void CollectMissile(unsigned int count);
 
 	void AddPoints(int points);
 
 	void UpdateTexts();
-	void UpdateMovementPattern(sf::Time dt);
 
 	float GetMaxSpeed() const;
 	void Fire();
-	//void LaunchMissile();
 	void CreateBullet(SceneNode& node, const TextureHolder& textures);
 	void CreateProjectile(SceneNode& node, ProjectileType type, float x_offset, float y_offset, const TextureHolder& textures);
 

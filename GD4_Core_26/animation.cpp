@@ -2,7 +2,6 @@
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 
-
 Animation::Animation(const sf::Texture& texture)
     :m_sprite(texture)
     , m_frame_size()

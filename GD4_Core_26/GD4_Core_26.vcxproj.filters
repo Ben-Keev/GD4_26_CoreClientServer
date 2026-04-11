@@ -57,12 +57,6 @@
     <ClCompile Include="entity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="game_over_state.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="game_state.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="label.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -209,12 +203,6 @@
     <ClInclude Include="fontID.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="game_over_state.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game_state.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="label.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -348,9 +336,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="network_protocol.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="particletype.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="pickup.hpp">

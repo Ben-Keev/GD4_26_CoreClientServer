@@ -4,12 +4,8 @@ enum class StateID
 	kNone,
 	kTitle,
 	kMenu,
-	kGame,
-	kPause,
 	kNetworkPause,
 	kSettings,
-	kGameOver,
-	kMissionSuccess,
 	kJoinGame,
 	kJoinLobby,
 	kRejoinLobby

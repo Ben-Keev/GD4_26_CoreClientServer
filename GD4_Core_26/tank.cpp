@@ -9,6 +9,7 @@
 #include "network_node.hpp"
 #include "tank_type.hpp"
 #include "turret.hpp"
+#include "constants.hpp"
 
 namespace
 {
@@ -126,35 +127,9 @@ void Tank::UpdateTexts()
 	}
 }
 
-void Tank::UpdateMovementPattern(sf::Time dt)
-{
-	////Enemy AI
-	//const std::vector<Direction>& directions = Table[static_cast<int>(m_type)].m_directions;
-	//if (!directions.empty())
-	//{
-	//	//Move along the current direction for distance and then change direction
-	//	if (m_distance_travelled > directions[m_directions_index].m_distance)
-	//	{
-	//		m_directions_index = (m_directions_index + 1) % directions.size();
-	//		m_distance_travelled = 0;
-	//	}
-
-	//	//Compute the velocity
-	//	//Add 90 to move down the screen, 0 degrees is to the right
-	//	double radians = Utility::ToRadians(directions[m_directions_index].m_angle + 90.f);
-	//	float vx = GetMaxSpeed() * std::cos(radians);
-	//	float vy = GetMaxSpeed() * std::sin(radians);
-
-	//	SetVelocity(sf::Vector2f(vx, vy));
-	//	m_distance_travelled += GetMaxSpeed() * dt.asSeconds();
-	//}
-}
-
 float Tank::GetMaxSpeed() const
 {
-	return 100.f;
-
-	//Table[static_cast<int>(m_type)].m_speed;
+	return kPlayerSpeed;
 }
 
 void Tank::Fire()
@@ -167,7 +142,6 @@ void Tank::Fire()
 
 void Tank::CreateBullet(SceneNode& node, const TextureHolder& textures)
 {
-	// It may be an enemy bullet or an allied bullet.
 	ProjectileType type = ProjectileType::kBullet;
 
 	// How many bullets are fired based on the level accquired
@@ -298,7 +272,7 @@ void Tank::UpdateCurrent(sf::Time dt, CommandQueue & commands)
 		return;
 	}
 	Entity::UpdateCurrent(dt, commands);
-	UpdateMovementPattern(dt);
+
 	//Check if bullets or missiles were fired
 	CheckProjectileLaunch(dt, commands);
 }
