@@ -326,12 +326,6 @@
     <ClInclude Include="network_protocol.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pickup.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="pickup_type.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="posteffect.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

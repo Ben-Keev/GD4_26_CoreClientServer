@@ -1,10 +1,9 @@
 #pragma once
 
 /// <summary>
-/// Modified: Kaylon Riordan D00255039
-/// Added reference for new images such as Exterior
+/// Add Lobby Texture
+/// Modified: Kaylon
 /// </summary>
-
 enum class TextureID
 {
 	kLandscape,

@@ -1,5 +1,4 @@
 #pragma once
-#include <SFML/Graphics.hpp>
 #include "resource_identifiers.hpp"
 #include "scene_node.hpp"
 #include "scene_layers.hpp"
@@ -9,11 +8,12 @@
 #include "bloom_effect.hpp"
 #include "sound_player.hpp"
 #include "sprite_node.hpp"
+#include "network_node.hpp"
 #include "wall_type.hpp"
 #include "wall.hpp"
 
+#include <SFML/Graphics.hpp>
 #include <array>
-#include "network_node.hpp"
 
 /// <summary>
 /// World

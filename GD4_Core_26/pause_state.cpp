@@ -2,6 +2,10 @@
 #include "utility.hpp"
 #include "button.hpp"
 
+/// <summary>
+/// Reposition buttons for new UI
+/// Modified: Ben
+/// </summary>
 PauseState::PauseState(StateStack& stack, Context context, bool lets_updates_through)
     : State(stack, context)
     , m_paused_text(context.fonts->Get(FontID::kMain))

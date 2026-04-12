@@ -3,9 +3,10 @@
 #include "projectile_type.hpp"
 #include "wall_type.hpp"
 #include "tank.hpp"
-#include "SFML/Graphics/Rect.hpp"
 #include "particle_type.hpp"
 #include "turret_type.hpp"
+
+#include "SFML/Graphics/Rect.hpp"
 
 /// <summary>
 /// Authored: Ben | Rewritten: Kaylon

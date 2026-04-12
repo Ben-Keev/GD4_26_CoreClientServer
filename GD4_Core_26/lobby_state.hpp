@@ -4,6 +4,7 @@
 #include "container.hpp"
 
 /// <summary>
+/// Lobby between joining game states.
 /// Authored: Ben
 /// Modified: Kaylon
 /// </summary>

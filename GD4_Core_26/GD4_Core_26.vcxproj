@@ -205,8 +205,6 @@
     <ClInclude Include="particle_node.hpp" />
     <ClInclude Include="particle_type.hpp" />
     <ClInclude Include="pause_state.hpp" />
-    <ClInclude Include="pickup.hpp" />
-    <ClInclude Include="pickup_type.hpp" />
     <ClInclude Include="player.hpp" />
     <ClInclude Include="posteffect.hpp" />
     <ClInclude Include="post_effect.hpp" />

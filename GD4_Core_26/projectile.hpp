@@ -5,8 +5,8 @@
 #include <functional>
 
 /// <summary>
-/// Modified: Kaylon Riordan D00255039
-/// Added Methods and variables to keep track of wether a bullet can bounce, and how many times it has bounced
+/// Modified: Kaylon & Ben
+/// Add an ID to index projectiles
 /// </summary>
 
 class Tank;
@@ -45,7 +45,7 @@ private:
 	sf::Sprite m_sprite;
 	sf::Vector2f m_target_direction;
 
-	// Claude
+	// (Ben's Claude) An ID to index projectiles for world
 	uint16_t projectile_id;
 
 	Tank* m_owner;
