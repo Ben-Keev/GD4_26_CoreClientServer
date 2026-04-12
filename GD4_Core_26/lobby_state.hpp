@@ -32,6 +32,8 @@ private:
 
 	sf::RenderWindow& m_window;
 
+	sf::Sprite m_background_sprite;
+
 	std::vector<std::string> m_broadcasts;
 	sf::Text m_broadcast_text;
 	sf::Time m_broadcast_elapsed_time;

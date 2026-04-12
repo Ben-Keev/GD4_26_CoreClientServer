@@ -19,8 +19,9 @@ Application::Application()
 	, m_stack(State::Context(m_window, m_textures, m_fonts, m_music, m_sound, m_key_binding, m_socket, m_player_details))
 {
 	m_window.setKeyRepeatEnabled(false);
-	m_fonts.Load(FontID::kMain, "Media/Fonts/Sansation.ttf");
+	m_fonts.Load(FontID::kMain, "Media/Fonts/Supersonic Rocketship.ttf");
 	m_textures.Load(TextureID::kTitleScreen, "Media/Textures/TitleScreen.png");
+	m_textures.Load(TextureID::kLobbyScreen, "Media/Textures/LobbyScreen.png");
 	m_textures.Load(TextureID::kButtons, "Media/Textures/Buttons.png");
 
 	RegisterStates();
