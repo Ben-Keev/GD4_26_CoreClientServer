@@ -8,6 +8,8 @@
 #include <numeric>
 #include <iostream>
 
+#include "button.hpp"
+
 std::string LoadPlayerName();
 int LoadHighScore();
 void SaveDetails(const std::string& name, int high_score);
@@ -90,7 +92,6 @@ LobbyState::LobbyState(StateStack& stack, Context context, bool firstTime)
 	m_players_list_text.setPosition(
 		sf::Vector2f(300, m_window.getSize().y / 2.f));
 
-
 	// Render one frame immediately so the user sees "Attempting to connect..."
 	// rather than a black screen during the potentially blocking connect() call
 	m_window.clear(sf::Color::Black);
@@ -156,6 +157,27 @@ LobbyState::LobbyState(StateStack& stack, Context context, bool firstTime)
 		details_packet << LoadHighScore();
 		context.socket->send(details_packet);
 	}
+
+	auto vote_skip_button = std::make_shared<gui::Button>(context);
+	vote_skip_button->setPosition(sf::Vector2f(m_window.getSize().x / 2.f - 465.f /2, m_window.getSize().y / 2.f + 100));
+	vote_skip_button->SetText("Vote Skip");
+	vote_skip_button->SetCallback([this]()
+		{
+			ToggleVoteSkipCountdown();
+		});
+
+	auto exit_lobby_button = std::make_shared<gui::Button>(context);
+	exit_lobby_button->setPosition(sf::Vector2f(m_window.getSize().x / 2.f - 465.f /2, m_window.getSize().y / 2.f + 250));
+	exit_lobby_button->SetText("Exit Lobby");
+	exit_lobby_button->SetCallback([this]()
+		{
+			RequestStackClear();
+			RequestStackPush(StateID::kMenu);
+		});
+
+	m_gui_container.Pack(vote_skip_button);
+	m_gui_container.Pack(exit_lobby_button);
+
 }
 
 bool LobbyState::Update(sf::Time delta_time)
@@ -165,9 +187,7 @@ bool LobbyState::Update(sf::Time delta_time)
 		sf::Packet packet;
 		if (GetContext().socket->receive(packet) == sf::Socket::Status::Done)
 		{
-
 			//std::cout << "Packet received!" << std::endl;
-
 			// Reset the timeout accumulator — server is still alive
 			m_time_since_last_packet = sf::seconds(0.f);
 			uint8_t packet_type;
@@ -228,6 +248,7 @@ void LobbyState::Draw()
 		m_window.draw(m_players_connected_text);
 		m_window.draw(m_lobby_countdown_text);
 		m_window.draw(m_players_list_text);
+		m_window.draw(m_gui_container);
 
 		// Show the current broadcast message if the queue is non-empty
 		if (!m_broadcasts.empty())
@@ -252,7 +273,6 @@ void LobbyState::ToggleVoteSkipCountdown()
 
 bool LobbyState::HandleEvent(const sf::Event& event)
 {
-
 	const auto* key_pressed = event.getIf<sf::Event::KeyPressed>();
 	if (key_pressed)
 	{
@@ -269,6 +289,8 @@ bool LobbyState::HandleEvent(const sf::Event& event)
 			ToggleVoteSkipCountdown();
 		}
 	}
+
+	m_gui_container.HandleEvent(event);
 
 	return true;
 }

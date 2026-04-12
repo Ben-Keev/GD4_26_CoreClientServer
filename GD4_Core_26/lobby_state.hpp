@@ -1,6 +1,7 @@
 #pragma once
 #include "State.hpp"
 #include "world.hpp"
+#include "container.hpp"
 
 class LobbyState : public State
 {
@@ -53,4 +54,6 @@ private:
 
 	// Does this client wants to skip the countdown??
 	bool m_vote_skip_countdown;
+
+	gui::Container m_gui_container;
 };

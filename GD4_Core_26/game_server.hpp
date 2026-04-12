@@ -7,6 +7,7 @@
 #include <thread>
 #include <cstdint>
 #include <map>
+#include "container.hpp"
 
 class GameServer
 {
@@ -90,5 +91,7 @@ private:
 	bool m_lobby_active;
 	sf::Time m_lobby_countdown;
 	bool m_game_started;
+
+	gui::Container m_gui_container;
 };
 
