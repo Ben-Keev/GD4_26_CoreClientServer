@@ -41,7 +41,6 @@ GameServer::GameServer(sf::Vector2f battlefield_size)
     , m_connected_players(0)                          // Current number of live connections
     , m_world_height(battlefield_size.y)              // Scrolling world height in pixels
     , m_battlefield_rect(sf::Vector2f(0.f, 0.f), battlefield_size) // AABB of the entire level
-    , m_aircraft_count(0)                             // Total spawned aircraft (players + enemies)
     , m_peers(1)                                      // Start with capacity for 1 peer
     , m_aircraft_identifier_counter(1)                // Unique IDs start at 1 (0 = invalid)
     , m_waiting_thread_end(false)                     // Flag that tells ExecutionThread to quit
@@ -154,7 +153,7 @@ void GameServer::ExecutionThread()
     // Target update intervals
     sf::Time frame_rate = sf::seconds(1.f / 60.f);  // Physics step: 60 fps
     sf::Time frame_time = sf::Time::Zero;             // Accumulated physics debt
-    sf::Time tick_rate = sf::seconds(1.f / 30.f);  // Network tick: 30 Hz
+    sf::Time tick_rate = sf::seconds(kTickRate);  // Network tick: 30 Hz
     sf::Time tick_time = sf::Time::Zero;             // Accumulated tick debt
 
     sf::Clock frame_clock, tick_clock;  // Independent clocks for each accumulator
@@ -203,7 +202,7 @@ void GameServer::Tick()
     if (m_lobby_active) 
     {
         // Heartbeat — send every 500ms to prevent server timeout (Claude)
-        m_heartbeat_timer += sf::seconds(1.f / 30.f);
+        m_heartbeat_timer += sf::seconds(kTickRate);
         if (m_heartbeat_timer >= sf::seconds(0.5f))
         {
             sf::Packet heartbeat;
@@ -216,7 +215,7 @@ void GameServer::Tick()
 
     if (m_lobby_active && m_connected_players >= 2)
     {
-        m_lobby_countdown -= sf::seconds(1.f / 30.f); // Decrease countdown by tick duration
+        m_lobby_countdown -= sf::seconds(kTickRate); // Decrease countdown by tick duration
 
         if (m_lobby_countdown <= sf::Time::Zero)
         {
@@ -485,7 +484,6 @@ void GameServer::HandleIncomingConnections()
         m_peers[m_connected_players]->m_ready = true;
         m_peers[m_connected_players]->m_last_packet_time = Now();
 
-        m_aircraft_count++;
         m_connected_players++;
 
         // Don't send kSpawnSelf here — deferred until lobby ends
@@ -571,7 +569,6 @@ void GameServer::HandleDisconnections()
             }
 
             m_connected_players--;
-            m_aircraft_count -= (*itr)->m_aircraft_identifiers.size();
 
             // Erase the peer and get a valid iterator to the next element
             itr = m_peers.erase(itr);
@@ -615,7 +612,7 @@ void GameServer::InformWorldState(sf::TcpSocket& socket)
         << m_battlefield_rect.position.y + m_battlefield_rect.size.y;
 
     // Number of existing aircraft so the client knows how many records to read
-    packet << static_cast<uint8_t>(m_aircraft_count);
+    packet << static_cast<uint8_t>(m_aircraft_info.size());
 
     // Append each ready peer's aircraft data
     for (std::size_t i = 0; i < m_connected_players; ++i)
@@ -722,7 +719,6 @@ void GameServer::ResetGameState()
     m_lobby_active = true;
     m_game_started = false;
     m_aircraft_info.clear();
-    m_aircraft_count = 0;
     m_aircraft_identifier_counter = 1;
     m_lobby_countdown = sf::seconds(kLobbyCountdown);
     m_total_skip_countdown = 0;
@@ -738,7 +734,6 @@ void GameServer::ResetGameState()
             m_aircraft_info[m_aircraft_identifier_counter].m_position = SpawnPositions[i];
             m_aircraft_info[m_aircraft_identifier_counter].m_hitpoints = 10;
 
-            m_aircraft_count++;
             m_aircraft_identifier_counter++;
         }
     }

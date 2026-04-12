@@ -32,7 +32,6 @@ private:
 	{
 		sf::Vector2f m_position;
 		uint8_t m_hitpoints;
-		// Turret rotation stored in degrees
 		float m_turret_rotation;
 		float m_aircraft_rotation;
 		std::map<uint8_t, bool> m_real_time_actions;
@@ -75,7 +74,6 @@ private:
 	float m_world_height;
 	sf::FloatRect m_battlefield_rect;
 
-	std::size_t m_aircraft_count;
 	std::map<uint8_t, AircraftInfo> m_aircraft_info;
 
 	std::vector<PeerPtr> m_peers;
