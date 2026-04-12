@@ -15,16 +15,15 @@ PauseState::PauseState(StateStack& stack, Context context, bool lets_updates_thr
     m_paused_text.setPosition(sf::Vector2f(0.5f * view_size.x, 0.4f * view_size.y));
 
     auto returnButton = std::make_shared<gui::Button>(context);
-    returnButton->setPosition(sf::Vector2f(0.5f * view_size.x - 100, 0.4f * view_size.y + 75));
+    returnButton->setPosition(sf::Vector2f(view_size.x / 2.f - 465.f / 2, view_size.y / 2.f));
     returnButton->SetText("Return");
     returnButton->SetCallback([this]()
         {
             RequestStackPop();
-
         });
 
     auto backToMenuButton = std::make_shared<gui::Button>(context);
-    backToMenuButton->setPosition(sf::Vector2f(0.5f * view_size.x - 100, 0.4f * view_size.y + 125));
+    backToMenuButton->setPosition(sf::Vector2f(view_size.x / 2.f - 465.f / 2, view_size.y / 2.f + 150));
     backToMenuButton->SetText("Back to menu");
     backToMenuButton->SetCallback([this]()
         {

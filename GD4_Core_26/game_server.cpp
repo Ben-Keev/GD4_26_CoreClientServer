@@ -561,10 +561,7 @@ void GameServer::SendLobbyPacket(bool connected)
     sf::Packet packet;
     packet << static_cast<uint8_t>(Server::PacketType::kLobbyCountdownReset);
 
-    packet << kLobbyCountdown
-        << static_cast<uint8_t>(m_connected_players)
-        << "Placeholder name"
-        << connected;
+    packet << static_cast<uint8_t>(m_connected_players);
 
     //std::cout << "A player has joined or left and the lobby packet was sent." << std::endl;
 

@@ -3,6 +3,10 @@
 #include "world.hpp"
 #include "container.hpp"
 
+/// <summary>
+/// Authored: Ben
+/// Modified: Kaylon
+/// </summary>
 class LobbyState : public State
 {
 public:
@@ -13,7 +17,7 @@ public:
 	virtual bool HandleEvent(const sf::Event& event) override;
 
 private:
-	// (Claude AI)
+	// (Kaylon's Claude) Entry for displaying player data
 	struct PlayerEntry
 	{
 		uint8_t id;
@@ -54,7 +58,6 @@ private:
 	sf::Time m_client_timeout;
 	sf::Time m_time_since_last_packet;
 
-	// Does this client wants to skip the countdown??
 	bool m_vote_skip_countdown;
 
 	gui::Container m_gui_container;

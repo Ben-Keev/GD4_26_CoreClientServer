@@ -5,22 +5,18 @@
 #include <SFML/Network/Packet.hpp>
 #include <SFML/Network/IpAddress.hpp>
 #include <fstream>
-#include <numeric>
-#include <iostream>
 
 #include "button.hpp"
 
+// (Kaylon)
 std::string LoadPlayerName();
 int LoadHighScore();
 void SaveDetails(const std::string& name, int high_score);
 
-// ---------------------------------------------------------------------------
-// GetAddressFromFile
-// Reads the target server IP from "ip.txt" in the working directory.
-// If the file does not exist or is unreadable, creates the file and writes
-// localhost (127.0.0.1) as the default, then returns that address.
-// Returns an optional sf::IpAddress in case resolution fails.
-// ---------------------------------------------------------------------------
+/// <summary>
+/// Read IP Address from file
+/// Modified: Ben (Moved from multiplayer_gamestate.cpp)
+/// </summary>
 sf::IpAddress GetAddressFromFile()
 {
 	{
@@ -43,6 +39,11 @@ sf::IpAddress GetAddressFromFile()
 	return local_address;
 }
 
+/// <summary>
+/// Lobby state between menu and multiplayer game state
+/// Authored: Ben Mc Keever
+/// </summary>
+/// <param name="firstTime">Joining the lobby for the first time from the meny, or rejoining lobby from a game</param>
 LobbyState::LobbyState(StateStack& stack, Context context, bool firstTime)
 	: State(stack, context)
 	, m_background_sprite(context.textures->Get(TextureID::kLobbyScreen))
@@ -54,14 +55,15 @@ LobbyState::LobbyState(StateStack& stack, Context context, bool firstTime)
 	, m_window(*context.window)
 	, m_failed_connection_clock()
 	, m_connected(false)
-	, m_connected_players(0)                          // Number of connections as last reported by the server...
-	, m_heartbeat_timer(sf::Time::Zero)
-	, m_client_timeout(sf::seconds(1.f))        // Disconnect after 1s with no packet
+	, m_connected_players(0)					// Tally how many are connected
+	, m_heartbeat_timer(sf::Time::Zero)			// Track time since the last heartbeat was sent
+	, m_client_timeout(sf::seconds(1.f))        // Disconnect after 1s with no packet from server
 	, m_time_since_last_packet(sf::seconds(0.f))// Accumulator for the above timeout
 {
-	// Broadcast messages appear centred near the top of the screen
+	// (Ben) Borrowed from Multiplayer Gamestate. Broadcast messages appear centred near the top of the screen
 	m_broadcast_text.setPosition(sf::Vector2f(1024.f / 2, 100.f));
 
+	// (Ben) Shows how many players have connected so far
 	m_players_connected_text.setCharacterSize(35);
 	m_players_connected_text.setFillColor(sf::Color::White);
 	m_players_connected_text.setString(std::to_string(m_connected_players) + " players are connected");
@@ -70,6 +72,7 @@ LobbyState::LobbyState(StateStack& stack, Context context, bool firstTime)
 	m_players_connected_text.setPosition(
 		sf::Vector2f(m_window.getSize().x / 2.f, m_window.getSize().y / 2.f));
 
+	// (Ben) Displays countdown until game start. If only one player joined shows waiting for player's text.
 	m_lobby_countdown_text.setCharacterSize(35);
 	m_lobby_countdown_text.setFillColor(sf::Color::White);
 	m_lobby_countdown_text.setString("Waiting for players...");
@@ -77,7 +80,7 @@ LobbyState::LobbyState(StateStack& stack, Context context, bool firstTime)
 	m_lobby_countdown_text.setPosition(
 		sf::Vector2f(m_window.getSize().x / 2.f, m_window.getSize().y / 2.f - 50.f));
 
-	// Configure the connection-status text shown while connecting / on failure
+	// (Ben) Borrowed from Multiplayer Gamestate
 	m_failed_connection_text.setCharacterSize(35);
 	m_failed_connection_text.setFillColor(sf::Color::White);
 	m_failed_connection_text.setString("Attempting to connect...");
@@ -85,7 +88,7 @@ LobbyState::LobbyState(StateStack& stack, Context context, bool firstTime)
 	m_failed_connection_text.setPosition(
 		sf::Vector2f(m_window.getSize().x / 2.f, m_window.getSize().y / 2.f));
 
-	// We'll need the server to tell us who's connected for those that just joined...
+	// (Ben) List of player's which have joined. Starts empty until packets received from server
 	m_players_list_text.setCharacterSize(25);
 	m_players_list_text.setFillColor(sf::Color::White);
 	m_players_list_text.setString("Players:\n");
@@ -93,25 +96,23 @@ LobbyState::LobbyState(StateStack& stack, Context context, bool firstTime)
 	m_players_list_text.setPosition(
 		sf::Vector2f(300, m_window.getSize().y / 2.f));
 
-	// Render one frame immediately so the user sees "Attempting to connect..."
-	// rather than a black screen during the potentially blocking connect() call
+	// (Ben) Borrowed from multiplayer gamestate.
 	m_window.clear(sf::Color::Black);
 	m_window.draw(m_failed_connection_text);
 	m_window.display();
 
-	// Pre-set the failure string now; it will be shown if connect() fails
+	// (Ben) Borrowed from multiplayer gamestate.
 	m_failed_connection_text.setString("Failed to connect");
 	Utility::CentreOrigin(m_failed_connection_text);
 
-	// If started from the menu it's first time and the socket needs to be set up. otherwise it's set up.
+	// (Ben) Check if joining from lobby or game
 	if (firstTime) 
 	{
-		std::cout << "*blushes* it's my first time" << std::endl;
+		// (Ben's Claude) Clean the socket before connecting. Allows exiting and rejoining lobby.
+		context.socket->disconnect();
+		context.socket->setBlocking(true);
 
-		context.socket->disconnect();  // Reset socket to clean state before connecting (Claude)
-		context.socket->setBlocking(true);  // Must be blocking for the connect() handshake (Claude)
-
-		// Read the server address from disk
+		// (Ben) Borrowed from Multiplayer Game State. Read the server address from disk
 		std::optional<sf::IpAddress> ip;
 		ip = GetAddressFromFile();
 
@@ -120,14 +121,14 @@ LobbyState::LobbyState(StateStack& stack, Context context, bool firstTime)
 			// Try to establish a TCP connection — 5 second timeout for the handshake
 			auto status = context.socket->connect(*ip, SERVER_PORT, sf::seconds(5.f));
 
-			// (Claude AI)
+			// (Ben's Claude) Ensure the connection was successful and mark it as such
 			if (status == sf::Socket::Status::Done)
 			{
 				m_connected = true;
 			}
 			else
 			{
-				// Connection failed; start the 5-second "return to menu" countdown
+				// Connection failed; start the 5-second "return to menu" countdowns
 				m_failed_connection_clock.restart();
 			}
 		}
@@ -142,13 +143,14 @@ LobbyState::LobbyState(StateStack& stack, Context context, bool firstTime)
 		context.socket->setBlocking(false);
 	}
 
+	// (Ben) Rejoining from game.
 	if (!firstTime) 
 	{
 		m_connected = true;
 		m_time_since_last_packet = sf::Time::Zero;
 	}
 
-	// (Claude AI) Send our details to the server
+	// (Kaylon's Claude) Send player details to the server
 	if (m_connected)
 	{
 		sf::Packet details_packet;
@@ -159,6 +161,7 @@ LobbyState::LobbyState(StateStack& stack, Context context, bool firstTime)
 		context.socket->send(details_packet);
 	}
 
+	// (Ben) Skip countdown UI
 	auto vote_skip_button = std::make_shared<gui::Button>(context);
 	vote_skip_button->setPosition(sf::Vector2f(m_window.getSize().x / 2.f - 465.f /2, m_window.getSize().y / 2.f + 100));
 	vote_skip_button->SetText("Vote Skip");
@@ -167,6 +170,7 @@ LobbyState::LobbyState(StateStack& stack, Context context, bool firstTime)
 			ToggleVoteSkipCountdown();
 		});
 
+	// (Ben) Exit Lobby UI
 	auto exit_lobby_button = std::make_shared<gui::Button>(context);
 	exit_lobby_button->setPosition(sf::Vector2f(m_window.getSize().x / 2.f - 465.f /2, m_window.getSize().y / 2.f + 250));
 	exit_lobby_button->SetText("Exit Lobby");
@@ -178,13 +182,16 @@ LobbyState::LobbyState(StateStack& stack, Context context, bool firstTime)
 
 	m_gui_container.Pack(vote_skip_button);
 	m_gui_container.Pack(exit_lobby_button);
-
 }
 
+/// <summary>
+/// Update handles packets
+/// Authored: Ben
+/// </summary>
 bool LobbyState::Update(sf::Time delta_time)
 {
 	if (m_connected) {
-		// --- Receive server packets ---
+		// Receive packets from server
 		sf::Packet packet;
 		if (GetContext().socket->receive(packet) == sf::Socket::Status::Done)
 		{
@@ -193,8 +200,6 @@ bool LobbyState::Update(sf::Time delta_time)
 			m_time_since_last_packet = sf::seconds(0.f);
 			uint8_t packet_type;
 			packet >> packet_type;
-
-			//std::cout << "Packet type: " << (int)packet_type << std::endl;
 
 			HandlePacket(packet_type, packet);
 		}
@@ -210,7 +215,7 @@ bool LobbyState::Update(sf::Time delta_time)
 			}
 		}
 
-		// Heartbeat — send every 500ms to prevent server timeout (Claude)
+		// (Ben's Claude) Send a heartbeat packet every 500ms to prevent timeout
 		m_heartbeat_timer += delta_time;
 		if (m_heartbeat_timer >= sf::seconds(0.5f))
 		{
@@ -242,6 +247,10 @@ bool LobbyState::Update(sf::Time delta_time)
 	return true;
 }
 
+/// <summary>
+/// Draw Lobbie GUI
+/// Authored: Ben & Kaylon
+/// </summary>
 void LobbyState::Draw()
 {
 	if (m_connected) 
@@ -265,6 +274,10 @@ void LobbyState::Draw()
 	}
 }
 
+/// <summary>
+/// Toggle whether local player wants to skip the countdown or not
+/// Authored: Ben
+/// </summary>
 void LobbyState::ToggleVoteSkipCountdown() 
 {
 	m_vote_skip_countdown = !m_vote_skip_countdown;
@@ -273,6 +286,10 @@ void LobbyState::ToggleVoteSkipCountdown()
 	GetContext().socket->send(packet);
 }
 
+/// <summary>
+/// Handle keyboard inputs on the lobby
+/// Authored: Ben
+/// </summary>
 bool LobbyState::HandleEvent(const sf::Event& event)
 {
 	const auto* key_pressed = event.getIf<sf::Event::KeyPressed>();
@@ -297,42 +314,42 @@ bool LobbyState::HandleEvent(const sf::Event& event)
 	return true;
 }
 
+/// <summary>
+/// Handle different types of packets intended for the lobby
+/// Author: Ben
+/// </summary>
 void LobbyState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 {
 	switch (static_cast<Server::PacketType>(packet_type))
 	{
-		// This is sent whenever someone connects or disconnects
+	// (Ben) This is received whenever someone connects/disconnects
 	case Server::PacketType::kLobbyCountdownReset:
 	{
-		std::cout << "Lobby countdown was reset" << std::endl;
-		uint8_t countdown;
-		uint8_t connected_players;
-		std::string player_name;
-		bool connect;
+		uint8_t connected_players; // Total players
 
-		// Server has reset the lobby countdown (e.g. a new player joined)
-		packet >> countdown >> connected_players >> player_name >> connect;
-
-		m_players_connected_text.setString(std::to_string(connected_players) + " players are connected");
-		Utility::CentreOrigin(m_players_connected_text);
+		// Receive new total
+		packet >> connected_players;
 
 		m_connected_players = connected_players;
 
-		UpdateCountdownText(countdown);
+		// Display how many players are now connected
+		m_players_connected_text.setString(std::to_string(m_connected_players) + " players are connected");
+		Utility::CentreOrigin(m_players_connected_text);
 	}
 	break;
+	// (Ben) Affirms the client is connected and updates countdown value
 	case Server::PacketType::kLobbyPing:
 	{
 		float countdown;
-
-		std::cout << "[Client] kLobbyPing received" << std::endl;
-
-		// Server has reset the lobby countdown (e.g. a new player joined)
 		packet >> countdown;
 
+		//std::cout << "[Client] kLobbyPing received" << std::endl;
+
+		// Receive the new countdown value from the server
 		UpdateCountdownText(countdown);
 	}
 	break;
+	// (Ben) Borrowed from Multiplayer_Game_State
 	case Server::PacketType::kBroadcastMessage:
 	{
 		std::string message;
@@ -348,17 +365,18 @@ void LobbyState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 		}
 	}
 	break;
+	// (Ben) Signify it's time to start the game
 	case Server::PacketType::kGameStart:
 	{
 		//std::cout << "Game start packet was received" << std::endl;
 
-		RequestStackPop();
+		RequestStackPop(); // Exit the lobby state
 		// Server has started the game — transition to the multiplayer game state
 		RequestStackPush(StateID::kJoinGame);
 	}
 	break;
 
-	// (Claude AI)
+	// (Ben, Kaylon's Claude) Receive a list of connected players
 	case Server::PacketType::kPlayerList:
 	{
 		m_ids_players.clear();
@@ -388,6 +406,10 @@ void LobbyState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 	}
 }
 
+/// <summary>
+/// Display countdown depending on how many players are connected
+/// Authored: Ben
+/// </summary>
 void LobbyState::UpdateCountdownText(uint8_t countdown) 
 {
 	if (m_connected_players > 1)
@@ -402,12 +424,9 @@ void LobbyState::UpdateCountdownText(uint8_t countdown)
 	}
 }
 
-// ---------------------------------------------------------------------------
-// UpdateBroadcastMessage
-// Ticks the display timer for the current broadcast message.
-// Each message is shown for 2 seconds; when it expires it is dequeued and
-// the next message in the queue (if any) begins displaying immediately.
-// ---------------------------------------------------------------------------
+/// <summary>
+/// Borrowed from Multiplayer_Game_State
+/// </summary>
 void LobbyState::UpdateBroadcastMessage(sf::Time elapsed_time)
 {
 	if (m_broadcasts.empty())
