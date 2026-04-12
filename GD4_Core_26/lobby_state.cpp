@@ -45,6 +45,7 @@ sf::IpAddress GetAddressFromFile()
 
 LobbyState::LobbyState(StateStack& stack, Context context, bool firstTime)
 	: State(stack, context)
+	, m_background_sprite(context.textures->Get(TextureID::kLobbyScreen))
 	, m_broadcast_text(context.fonts->Get(FontID::kMain))
 	, m_lobby_countdown_text(context.fonts->Get(FontID::kMain))
 	, m_failed_connection_text(context.fonts->Get(FontID::kMain))
@@ -245,6 +246,7 @@ void LobbyState::Draw()
 {
 	if (m_connected) 
 	{
+		m_window.draw(m_background_sprite);
 		m_window.draw(m_players_connected_text);
 		m_window.draw(m_lobby_countdown_text);
 		m_window.draw(m_players_list_text);
