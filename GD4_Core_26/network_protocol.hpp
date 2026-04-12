@@ -70,7 +70,7 @@ namespace PacketStructs
 	struct AircraftStatePacket
 	{
 		uint8_t identifier;
-		float x, y;
+		uint16_t x, y;
 		uint8_t hitpoints;
 		uint8_t turret_rotation;
 		uint8_t hull_rotation;

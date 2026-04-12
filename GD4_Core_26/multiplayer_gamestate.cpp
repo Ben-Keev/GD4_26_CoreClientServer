@@ -205,8 +205,8 @@ bool MultiplayerGameState::Update(sf::Time dt)
             {
                 PacketStructs::AircraftStatePacket state;
                 state.identifier = m_local_player_identifier;
-                state.x = aircraft->getPosition().x;
-                state.y = aircraft->getPosition().y;
+                state.x = static_cast<uint16_t>(aircraft->getPosition().x);
+                state.y = static_cast<uint16_t>(aircraft->getPosition().y);
                 state.hitpoints = static_cast<uint8_t>(aircraft->GetHitPoints());
                 state.turret_rotation = static_cast<uint8_t>(aircraft->GetTurret()->getRotation().asDegrees() / 360.f * 255.f);
                 state.hull_rotation = static_cast<uint8_t>(aircraft->getRotation().asDegrees() / 360.f * 255.f);
@@ -375,9 +375,10 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
 
         // Receive the identifier and spawn position
         uint8_t aircraft_identifier;
-        sf::Vector2f aircraft_position;
 
-        packet >> aircraft_identifier >> aircraft_position.x >> aircraft_position.y;
+        uint16_t px, py;
+        packet >> aircraft_identifier >> px >> py;
+        sf::Vector2f aircraft_position(static_cast<float>(px), static_cast<float>(py));
 
         // Log for clarity
         //std::cout << "Client kSpawnSelf " << +aircraft_identifier << std::endl;
@@ -411,9 +412,11 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
     case Server::PacketType::kPlayerConnect:
     {
         uint8_t aircraft_identifier;
-        sf::Vector2f aircraft_position;
         std::string name;
-        packet >> aircraft_identifier >> aircraft_position.x >> aircraft_position.y >> name;
+
+        uint16_t px, py;
+        packet >> aircraft_identifier >> px >> py >> name;
+        sf::Vector2f aircraft_position(static_cast<float>(px), static_cast<float>(py));
 
         m_remote_player_details[aircraft_identifier] = *GetContext().player_details;
         m_remote_player_details[aircraft_identifier].m_name = name;
@@ -456,16 +459,17 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
         {
             uint8_t aircraft_identifier;
             uint8_t hitpoints;
-            sf::Vector2f aircraft_position;
+            uint16_t px, py;
             float turret_rotation;
-
             std::string name;
+
             packet >> aircraft_identifier
-                >> aircraft_position.x
-                >> aircraft_position.y
+                >> px
+                >> py
                 >> hitpoints
-                >> turret_rotation // (Ben) where the turret is facing
-                >> name; // (Kaylon) Name taken from player_Details
+                >> turret_rotation  // (Ben) where the turret is facing
+                >> name;            // (Kaylon) Name taken from player_Details
+            sf::Vector2f aircraft_position(static_cast<float>(px), static_cast<float>(py)); // (Kaylon) 
 
             // (Ben's Claude Code) Skip spawning local players here to avoid duplicates.
 			if (aircraft_identifier == m_local_player_identifier)

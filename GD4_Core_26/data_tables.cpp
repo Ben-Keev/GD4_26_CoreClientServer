@@ -7,25 +7,25 @@
 #include "particle_type.hpp"
 #include "turret_type.hpp"
 
-std::vector<sf::Vector2f> InitializeTankPositions()
+std::vector<sf::Vector2<uint16_t>> InitializeTankPositions()
 {
-	std::vector<sf::Vector2f> data(15);
+	std::vector<sf::Vector2<uint16_t>> data(15);
 
-	data[0] = sf::Vector2f(56, 56);
-	data[1] = sf::Vector2f(1736, 840);
-	data[2] = sf::Vector2f(1736, 56);
-	data[3] = sf::Vector2f(56, 840);
-	data[4] = sf::Vector2f(896, 56);
-	data[5] = sf::Vector2f(896, 840);
-	data[6] = sf::Vector2f(56, 448);
-	data[7] = sf::Vector2f(1736, 448);
-	data[8] = sf::Vector2f(504, 56);
-	data[9] = sf::Vector2f(1288, 840);
-	data[10] = sf::Vector2f(1288, 56);
-	data[11] = sf::Vector2f(504, 840);
-	data[12] = sf::Vector2f(448, 448);
-	data[13] = sf::Vector2f(1344, 448);
-	data[14] = sf::Vector2f(896, 448);
+	data[0] = sf::Vector2<uint16_t>(56, 56);
+	data[1] = sf::Vector2<uint16_t>(1736, 840);
+	data[2] = sf::Vector2<uint16_t>(1736, 56);
+	data[3] = sf::Vector2<uint16_t>(56, 840);
+	data[4] = sf::Vector2<uint16_t>(896, 56);
+	data[5] = sf::Vector2<uint16_t>(896, 840);
+	data[6] = sf::Vector2<uint16_t>(56, 448);
+	data[7] = sf::Vector2<uint16_t>(1736, 448);
+	data[8] = sf::Vector2<uint16_t>(504, 56);
+	data[9] = sf::Vector2<uint16_t>(1288, 840);
+	data[10] = sf::Vector2<uint16_t>(1288, 56);
+	data[11] = sf::Vector2<uint16_t>(504, 840);
+	data[12] = sf::Vector2<uint16_t>(448, 448);
+	data[13] = sf::Vector2<uint16_t>(1344, 448);
+	data[14] = sf::Vector2<uint16_t>(896, 448);
 
 	return data;
 }

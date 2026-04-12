@@ -23,7 +23,7 @@ namespace
 {
     // Pre-computed list of world-space positions where newly connected players
     // spawn.  Populated once at startup from the data table.
-    const std::vector<sf::Vector2f> SpawnPositions = InitializeTankPositions();
+    const std::vector<sf::Vector2<uint16_t>> SpawnPositions = InitializeTankPositions();
 }
 
 // ---------------------------------------------------------------------------
@@ -243,8 +243,8 @@ void GameServer::Tick()
                         sf::Packet spawn_packet;
                         spawn_packet << static_cast<uint8_t>(Server::PacketType::kSpawnSelf);
                         spawn_packet << identifier;
-                        spawn_packet << m_aircraft_info[identifier].m_position.x;
-                        spawn_packet << m_aircraft_info[identifier].m_position.y;
+                        spawn_packet << static_cast<uint16_t>(m_aircraft_info[identifier].m_position.x);
+                        spawn_packet << static_cast<uint16_t>(m_aircraft_info[identifier].m_position.y);
                         m_peers[i]->m_socket.send(spawn_packet);
                     }
                 }
@@ -436,7 +436,7 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
             auto itr = m_aircraft_info.find(state.identifier);
             if (itr != m_aircraft_info.end())
             {
-                itr->second.m_position = sf::Vector2f(state.x, state.y);
+                itr->second.m_position = sf::Vector2<uint16_t>(state.x, state.y);
                 itr->second.m_hitpoints = state.hitpoints;
                 itr->second.m_turret_rotation = (static_cast<float>(state.turret_rotation) / 255.f) * 360.f;
                 itr->second.m_aircraft_rotation = (static_cast<float>(state.hull_rotation) / 255.f) * 360.f;
