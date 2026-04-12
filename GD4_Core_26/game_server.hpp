@@ -1,4 +1,6 @@
 #pragma once
+#include "container.hpp"
+
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Network/TcpSocket.hpp>
 #include <SFML/Network/TcpListener.hpp>
@@ -7,8 +9,12 @@
 #include <thread>
 #include <cstdint>
 #include <map>
-#include "container.hpp"
 
+/// <summary>
+/// Server
+/// Modified: Ben Mc Keever, Kaylon Riordan, Assisted by Claude
+/// </summary>
+/// 
 class GameServer
 {
 public:
@@ -32,6 +38,7 @@ private:
 		int m_high_score = 0;
 	};
 
+	// (Ben & Kaylon) Add extra parameters
 	struct AircraftInfo
 	{
 		sf::Vector2f m_position;

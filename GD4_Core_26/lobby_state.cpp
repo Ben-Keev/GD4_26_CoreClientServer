@@ -1,12 +1,11 @@
 #include "lobby_state.hpp"
 #include "utility.hpp"
+#include "button.hpp"
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Network/Packet.hpp>
 #include <SFML/Network/IpAddress.hpp>
 #include <fstream>
-
-#include "button.hpp"
 
 // (Kaylon)
 std::string LoadPlayerName();

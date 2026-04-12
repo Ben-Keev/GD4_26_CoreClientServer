@@ -1,12 +1,11 @@
 #include "multiplayer_gamestate.hpp"
 #include "music_player.hpp"
 #include "utility.hpp"
+#include "constants.hpp"
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Network/Packet.hpp>
-
 #include <iostream>
-#include "constants.hpp"
 
 std::string LoadPlayerName();
 int LoadHighScore();
