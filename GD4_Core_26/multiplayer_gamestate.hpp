@@ -34,7 +34,6 @@ private:
 	std::map<uint8_t, PlayerDetails> m_remote_player_details;
 
 	bool m_connected;
-	std::unique_ptr<GameServer> m_game_server;
 	sf::Clock m_tick_clock;
 
 	std::vector<std::string> m_broadcasts;

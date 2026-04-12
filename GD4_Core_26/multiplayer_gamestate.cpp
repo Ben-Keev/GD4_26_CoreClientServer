@@ -18,39 +18,36 @@
 #include <SFML/Network/Packet.hpp>
 
 #include <iostream>
+#include "constants.hpp"
 
 std::string LoadPlayerName();
 int LoadHighScore();
 void SaveDetails(const std::string& name, int high_score);
 
-// ---------------------------------------------------------------------------
-// MultiplayerGameState constructor
-// Initialises the world, UI text objects, and attempts to connect to the
-// server whose IP is stored in ip.txt.  A brief "Attempting to connect..."
-// frame is rendered immediately so the user gets visual feedback before the
-// 5-second TCP handshake timeout.
-// ---------------------------------------------------------------------------
+/// <summary>
+/// Initialise Multiplayer Game State
+/// Class Authors: John Loane, Ben Mc Keever, Kaylon Riordan, with assistance from Claude AI
+/// </summary>
 MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context)
     : State(stack, context)
     , m_world(*context.window, *context.fonts, *context.sound, true) // true = multiplayer mode
     , m_window(*context.window)
     , m_texture_holder(*context.textures)
-    , m_connected(false)           // Not yet connected to the server
-    , m_game_server(nullptr)       // Only set if this client is also hosting
-    , m_active_state(true)         // Whether real-time input should be processed
-    , m_has_focus(true)            // Whether the application window has OS focus
-    , m_game_started(false)        // Set true once the server sends kSpawnSelf
-    , m_client_timeout(sf::seconds(1.f))        // Disconnect after 1 s with no packet
-    , m_time_since_last_packet(sf::seconds(0.f))// Accumulator for the above timeout
+    , m_connected(false)           // Connection isn't confirmed. Assume false.
+    , m_active_state(true)         // Enabled/Disabled depending on if in pause menu
+    , m_has_focus(true)            // Whether the window is focused
+    , m_game_started(false)        // Exited lobby state and in game
+	, m_client_timeout(sf::seconds(1.f))        // If no packet received for 1 second, assume connection lost and return to menu
+    , m_time_since_last_packet(sf::seconds(0.f))
     , m_broadcast_text(context.fonts->Get(FontID::kMain))
     , m_failed_connection_text(context.fonts->Get(FontID::kMain))
-    , m_player_dead(false)
-    , m_returning_to_lobby(false)
+    , m_player_dead(false)          // Whether the player has died
+    , m_returning_to_lobby(false)   // Whether we're in the process of returning to the lobby
 {
-    // Broadcast messages appear centred near the top of the screen
+    // Messages received over network show up at the top of the screen
     m_broadcast_text.setPosition(sf::Vector2f(1024.f / 2, 100.f));
 
-    // Configure the connection-status text shown while connecting / on failure
+    // Connection status while transitioning from lobby
     m_failed_connection_text.setCharacterSize(35);
     m_failed_connection_text.setFillColor(sf::Color::White);
     m_failed_connection_text.setString("Attempting to connect...");
@@ -58,16 +55,16 @@ MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context)
     m_failed_connection_text.setPosition(
         sf::Vector2f(m_window.getSize().x / 2.f, m_window.getSize().y / 2.f));
 
-    // Render one frame immediately so the user sees "Attempting to connect..."
-    // rather than a black screen during the potentially blocking connect() call
+    // Black screen to facillitate transition and make text readable.
     m_window.clear(sf::Color::Black);
     m_window.draw(m_failed_connection_text);
     m_window.display();
 
-    // Pre-set the failure string now; it will be shown if connect() fails
+    // Shown if connection fails from hereon.
     m_failed_connection_text.setString("Failed to connect to server");
     Utility::CentreOrigin(m_failed_connection_text);
 
+    // The socket wasn't passed from lobby to multiplayer gamestate correctly.
     if(context.socket == nullptr)
     {
         m_connected = false;
@@ -75,21 +72,19 @@ MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context)
         Utility::CentreOrigin(m_failed_connection_text);
         m_failed_connection_clock.restart();
     }
-    else 
+    else
     {
-		m_connected = true;  // Assume the socket is already connected (handshake done in LobbyState)
+		m_connected = true;  // Assume the socket was correctly transitioned
     }
 
     // Start the in-game music
     context.music->Play(MusicThemes::kMissionTheme);
 }
 
-// ---------------------------------------------------------------------------
-// Draw
-// If connected: renders the game world and any active HUD overlays
-//   (broadcast messages, "waiting for second player" invitation).
-// If not connected: shows the connection-status/error message.
-// ---------------------------------------------------------------------------
+/// <summary>
+/// Draw the World to the client's window
+/// Unmodified
+/// </summary>
 void MultiplayerGameState::Draw()
 {
     if (m_connected)
@@ -112,40 +107,35 @@ void MultiplayerGameState::Draw()
     }
 }
 
-// ---------------------------------------------------------------------------
-// Update
-// Per-frame update logic split into two main branches:
-//   Connected    — advance the world, process local/network input, receive
-//                  server packets, send position updates, check game-over.
-//   Not connected — wait up to 5 seconds then bail back to the main menu.
-// Returns true so the state stack continues processing states below this one.
-// ---------------------------------------------------------------------------
+/// <summary>
+/// Perframe logic while the client is ingame
+/// Modified by: Ben Mc Keever
+/// </summary>
+/// <param name="dt">Deltatime</param>
+/// <returns>Whether loop succesfully completed</returns>
 bool MultiplayerGameState::Update(sf::Time dt)
 {
-    if (m_connected)
+    if (m_connected) // (Copilot Comment) Connected branch — run the game as normal, processing server packets and
+                     // driving the world simulation. If connection is lost, this branch
+                     // will be exited and the failure message will be shown until the
+					 // 5-second timeout expires and we return to the menu.
     {
-        m_world.Update(dt);
+        m_world.Update(dt); // Update the world
 
-        // --- Check for destroyed / missing local aircraft ---
+        // Check if the local player is alive
         bool found_local_plane = false;
         for (auto itr = m_players.begin(); itr != m_players.end();)
         {
-            // Track whether the local player's aircraft exists
+            // Check if the player's identifier matches the local player's
             if (itr->first == m_local_player_identifier)
             {
                 found_local_plane = true;
             }
 
-            // If the world has removed this aircraft (it was destroyed), erase it
+            // If the tank doesn't exist in the world remove it from the players list
             if (!m_world.GetAircraft(itr->first))
             {
                 itr = m_players.erase(itr);
-
-                // If ALL players are gone, trigger the game-over state
-                if (m_players.empty())
-                {
-                    //RequestStackPush(StateID::kGameOver);
-                }
             }
             else
             {
@@ -153,17 +143,15 @@ bool MultiplayerGameState::Update(sf::Time dt)
             }
         }
 
-        // If none of our own aircraft are alive (and the game was already running),
-        // push the game-over state (handles the case where local planes despawn
-        // without the players map becoming empty)
+        // The local player died
+        // Pause the game so the player can exit or continue to spectate
         if (!found_local_plane && m_game_started && !m_player_dead)
         {
             m_player_dead = true;
             RequestStackPush(StateID::kNetworkPause);
         }
 
-        // --- Local real-time input ---
-        // Only process keyboard/gamepad state if the window is focused and unpaused
+        // Process realtime inputs if the window is focused and the game is unpaused
         if (m_active_state && m_has_focus)
         {
             CommandQueue& commands = m_world.GetCommandQueue();
@@ -173,15 +161,14 @@ bool MultiplayerGameState::Update(sf::Time dt)
             }
         }
 
-        // --- Network real-time input ---
-        // Always applied regardless of window focus (mirrors remote players' actions)
+        // Always apply the remaining actions in the command queue regardless of the world
         CommandQueue& commands = m_world.GetCommandQueue();
         for (auto& pair : m_players)
         {
             pair.second->HandleRealtimeNetworkInput(commands);
         }
 
-        // Claude - Receive server packets
+		// (Claude Code) Process all packets received from the server this frame.
         sf::Packet packet;
         while (GetContext().socket->receive(packet) == sf::Socket::Status::Done)
         {
@@ -193,7 +180,7 @@ bool MultiplayerGameState::Update(sf::Time dt)
             if (m_returning_to_lobby) break;
         }
 
-        // No packet arrived this frame; check for timeout
+        // If time since last packet exceeds timeout disconnect
         if (m_time_since_last_packet > m_client_timeout)
         {
             m_connected = false;
@@ -202,12 +189,10 @@ bool MultiplayerGameState::Update(sf::Time dt)
             m_failed_connection_clock.restart(); // Begin the 5-second return-to-menu countdown
         }
 
-        // Advance the broadcast message display timer
+        // Continue ticking the broadcast message
         UpdateBroadcastMessage(dt);
 
-        // --- Send game events to the server ---
-        // World events (e.g. enemy destroyed) are polled from the world's event queue
-        // and forwarded to the server so it can decide on consequences (pickups, etc.)
+        // Send game vents to the server
         GameActions::Action game_action;
         while (m_world.PollGameAction(game_action))
         {
@@ -216,19 +201,18 @@ bool MultiplayerGameState::Update(sf::Time dt)
             packet << static_cast<uint8_t>(game_action.type);
             packet << game_action.position.x;
             packet << game_action.position.y;
-            packet << game_action.identifier;  // (Claude)
+            packet << game_action.identifier;  // (Ben's Claude Code) Pass an identifier with the action
             GetContext().socket->send(packet);
         }
 
-        // --- Send position update at 20 Hz ---
-        // Matches the server's tick rate so updates are not sent unnecessarily often.
-        if (m_tick_clock.getElapsedTime() > sf::seconds(1.f / 30.f))
+        // Send updates at the server's tickrate
+        if (m_tick_clock.getElapsedTime() > sf::seconds(kTickRate))
         {
             sf::Packet position_update_packet;
             position_update_packet << static_cast<uint8_t>(Client::PacketType::kStateUpdate);
             position_update_packet << static_cast<uint8_t>(1);
 
-            // Claude - use packet struct
+            // (Ben's Claude Code) - use packet struct to ensure consistent communication
             if (Tank* aircraft = m_world.GetAircraft(m_local_player_identifier))
             {
                 PacketStructs::AircraftStatePacket state;
@@ -248,24 +232,23 @@ bool MultiplayerGameState::Update(sf::Time dt)
             m_tick_clock.restart();
         }
 
-        // Accumulate time since the last received packet to detect server timeout
+        // Add time since last received packet
         m_time_since_last_packet += dt;
     }
-    // Not connected branch — failed to connect (or lost connection)
+    // Lost connection or failed to connect
     else if (m_failed_connection_clock.getElapsedTime() >= sf::seconds(5.f))
     {
-        // After 5 seconds of showing the failure message, return to the main menu
+        // Show failure message for five seconds
         RequestStackClear();
         RequestStackPush(StateID::kMenu);
     }
     return true;
 }
 
-// ---------------------------------------------------------------------------
-// HandleEvent
-// Processes discrete SFML events (key presses, window focus changes).
-// Forwards all events to local players first, then handles state-level keys.
-// ---------------------------------------------------------------------------
+/// <summary>
+/// Handle input events
+/// Modified: Ben Mc Keever
+/// </summary>
 bool MultiplayerGameState::HandleEvent(const sf::Event& event)
 {
     CommandQueue& commands = m_world.GetCommandQueue();
@@ -279,9 +262,11 @@ bool MultiplayerGameState::HandleEvent(const sf::Event& event)
     const auto* key_pressed = event.getIf<sf::Event::KeyPressed>();
     if (key_pressed)
     {
-        // Escape opens the network pause screen and disables real-time input
+        // Esc pauses the game
         if (key_pressed->scancode == sf::Keyboard::Scancode::Escape)
         {
+            // (Ben) if the local player is not dead disable its input
+            // Removing this line will cause a nullptr crash
             if (!m_player_dead)
                 DisableAllRealtimeActions(false);
 
@@ -301,29 +286,29 @@ bool MultiplayerGameState::HandleEvent(const sf::Event& event)
     return true;
 }
 
-// ---------------------------------------------------------------------------
-// OnActivate
-// Called by the state stack when this state becomes the top-most active state
-// (e.g. after the pause screen is popped). Re-enables input processing.
-// ---------------------------------------------------------------------------
+/// <summary>
+/// On Activiate
+/// Modified: Ben Mc Keever
+/// </summary>
 void MultiplayerGameState::OnActivate()
 {
     m_active_state = true;
 
+    // (Ben) Ensure the local player exists in the m_players vector to prevent a nullptr error
     if (m_players.count(m_local_player_identifier))
-        m_players[m_local_player_identifier]->DisableAllRealtimeActions(false);
+        m_players[m_local_player_identifier]->DisableAllRealtimeActions(false); // Return from pause by enabling input
 }
 
-// ---------------------------------------------------------------------------
-// OnDestroy
-// Called just before the state is removed from the stack.
-// If this client is NOT the host and is still connected, sends a kQuit packet
-// so the server can cleanly remove this peer immediately rather than waiting
-// for the timeout.
-// ---------------------------------------------------------------------------
+/// <summary>
+/// Runs when this state is destroyed
+/// Modified: Ben (Claude Assisted)
+/// Note: This isn't currently triggerd from the state stack
+/// </summary>
 void MultiplayerGameState::OnDestroy()
 {
     //std::cout << "OnDestroy called, returning_to_lobby: " << m_returning_to_lobby << "\n";
+
+    // (Ben's Claude Code) Ensure you aren't returning to the lobby to verify you intend to quit
     if (m_connected && !m_returning_to_lobby)
     {
         //std::cout << "Sending kQuit\n";
@@ -333,25 +318,23 @@ void MultiplayerGameState::OnDestroy()
     }
 }
 
-// ---------------------------------------------------------------------------
-// DisableAllRealtimeActions
-// Propagates the active/paused state to every local Player object so their
-// held-key inputs (move, fire) are suppressed while the game is paused.
-// The parameter name "enable" is slightly misleading — passing false disables
-// real-time actions (pause), passing true re-enables them (resume).
-// ---------------------------------------------------------------------------
+/// <summary>
+/// Disables input when on pause menu.
+/// Modified: Ben Mc Keever
+/// </summary>
 void MultiplayerGameState::DisableAllRealtimeActions(bool enable)
 {
     m_active_state = enable;
+
+    // (Ben) Remove the loop and use the now singular local player identifier
     m_players[m_local_player_identifier]->DisableAllRealtimeActions(enable);
 }
 
-// ---------------------------------------------------------------------------
-// UpdateBroadcastMessage
-// Ticks the display timer for the current broadcast message.
-// Each message is shown for 2 seconds; when it expires it is dequeued and
-// the next message in the queue (if any) begins displaying immediately.
-// ---------------------------------------------------------------------------
+/// <summary>
+/// Display broadcast message for time period
+/// Unmodified
+/// </summary>
+/// <param name="elapsed_time"></param>
 void MultiplayerGameState::UpdateBroadcastMessage(sf::Time elapsed_time)
 {
     if (m_broadcasts.empty())
@@ -373,19 +356,15 @@ void MultiplayerGameState::UpdateBroadcastMessage(sf::Time elapsed_time)
     }
 }
 
-// ---------------------------------------------------------------------------
-// HandlePacket
-// Central dispatcher for packets received from the server.
-// Reads the packet type (already extracted by the caller) and routes the
-// remaining payload to the appropriate handler block.
-// ---------------------------------------------------------------------------
+/// <summary>
+/// Handle different packet types.
+/// Modified: Ben Mc Keever assisted by Claude AI
+/// </summary>
 void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet, sf::Time dt)
 {
     switch (static_cast<Server::PacketType>(packet_type))
     {
-    // --- kBroadcastMessage ---
-    // Server is sending a text message to display on screen (e.g. "New player").
-    // Messages are queued; each is shown for 2 seconds before the next appears.
+    // (Unmodified) Display Broadcast Messages
     case Server::PacketType::kBroadcastMessage:
     {
         std::string message;
@@ -401,45 +380,46 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
         }
     }
     break;
-    // --- kSpawnSelf ---
-    // Sent once, right after connection, to tell this client which aircraft
-    // identifier it owns and where to place it.  Creates the local Player
-    // object with the correct key bindings (keys1) and marks the game as started.
+    // (Ben & Kaylon with assistance from Claude) Spawn the local player
     case Server::PacketType::kSpawnSelf:
     {
         GetContext().player_details->m_score = 0;
 
+        // Receive the identifier and spawn position
         uint8_t aircraft_identifier;
         sf::Vector2f aircraft_position;
 
         packet >> aircraft_identifier >> aircraft_position.x >> aircraft_position.y;
 
-        std::cout << "Client kSpawnSelf " << +aircraft_identifier << std::endl;
+        // Log for clarity
+        //std::cout << "Client kSpawnSelf " << +aircraft_identifier << std::endl;
 
-        // Create a Player with actual key bindings (keys) — this is a local player
+        // Create a player with keys bound to the local machine
         m_players[aircraft_identifier].reset(
             new Player(GetContext().socket, aircraft_identifier, GetContext().keys, GetContext().window));
 
-        // Spawn the aircraft in the world scene graph and position it
+        // Spawn the aircraft with the local player details. Spawn position passed here is temporary.
         Tank* aircraft = m_world.AddAircraft(
             aircraft_identifier, 
             GetContext().player_details,
             { 512, 288 }
         );
 
+        // Set the aircraft to the correct spawn position for this player
         aircraft->setPosition(aircraft_position);
 
+        // (Ben) Remember this identifier to find the local player later
 		m_local_player_identifier = aircraft_identifier;
+
+        // (Ben) Store this identifier in world as well
 		m_world.SetLocalPlayerIdentifier(aircraft_identifier);
 
-        m_game_started = true;  // Allow game-over checks to run
+        // (Ben, suggested by Claude) Signify that the game is started
+        m_game_started = true;
     }
     break;
 
-    // --- kPlayerConnect --- (Claude AI)
-    // A new remote player has joined.  Create a Player WITHOUT key bindings
-    // (nullptr) since this client does not control it; the server will send
-    // position updates to animate it.
+    // (Kaylon) Add Player details
     case Server::PacketType::kPlayerConnect:
     {
         uint8_t aircraft_identifier;
@@ -461,9 +441,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
     }
     break;
 
-    // --- kPlayerDisconnect ---
-    // A remote player has left.  Remove their aircraft from the world and
-    // erase their Player entry.
+    // Unmodified
     case Server::PacketType::kPlayerDisconnect:
     {
         uint8_t aircraft_identifier;
@@ -473,20 +451,18 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
     }
     break;
 
-    // --- kInitialState --- (Context AI)
-    // Sent to a newly connected client to describe all aircraft that already
-    // exist in the game world (players who were connected before us).
-    // Also communicates the current battlefield scroll position.
+    // (Ben, Kaylon) Pass in the initial state
     case Server::PacketType::kInitialState:
     {
         uint8_t aircraft_count;
         float world_height, current_scroll;
         packet >> world_height >> current_scroll;
 
-        // Synchronise the world's internal dimensions with the server's values
+        // Sync world dimentions with server values
         m_world.SetWorldHeight(world_height);
         m_world.SetCurrentBattleFieldPosition(current_scroll);
 
+        // Spawn each tank
         packet >> aircraft_count;
         for (uint8_t i = 0; i < aircraft_count; ++i)
         {
@@ -500,37 +476,37 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
                 >> aircraft_position.x
                 >> aircraft_position.y
                 >> hitpoints
-                >> turret_rotation
-                >> name;
+                >> turret_rotation // (Ben) where the turret is facing
+                >> name; // (Kaylon) Name taken from player_Details
 
-            // Skip if this is our own aircraft — already spawned via kSpawnSelf (Claude)
+            // (Ben's Claude Code) Skip spawning local players here to avoid duplicates.
 			if (aircraft_identifier == m_local_player_identifier)
             {
                 continue;
             }
 
-            m_remote_player_details[aircraft_identifier] = *GetContext().player_details;
+            // (Kaylon) Set remote player's name
             m_remote_player_details[aircraft_identifier].m_name = name;
 
-            // All existing players are remote from this client's perspective (nullptr keys)
+            // Remote players get nullptr keybindings. They can't be controlled from this machine
             m_players[aircraft_identifier].reset(
                 new Player(GetContext().socket, aircraft_identifier, nullptr, GetContext().window));
 
+            // (Kaylon) Initialise with remote player details
             Tank* aircraft = m_world.AddAircraft(
                 aircraft_identifier,
                 &m_remote_player_details[aircraft_identifier],
                 { 512, 288 });
             
             aircraft->setPosition(aircraft_position);
+
+            // (Ben) Set turret rotation to received value. Convert to degrees.
             aircraft->GetTurret()->setRotation(sf::degrees(turret_rotation));
         }
     }
     break;
 
-    // --- kPlayerEvent ---
-    // A remote player performed a one-shot action (e.g. fired a missile).
-    // The event is routed to the correct Player object which applies it to
-    // the world's command queue.
+    // Unmodified
     case Server::PacketType::kPlayerEvent:
     {
         uint8_t aircraft_identifier;
@@ -548,10 +524,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
     }
     break;
 
-    // --- kPlayerRealtimeChange ---
-    // A remote player's continuous input state changed (key held / released).
-    // Forwarded to the Player object so it can start/stop the corresponding
-    // movement or action on the remote aircraft.
+    // Unmodified
     case Server::PacketType::kPlayerRealtimeChange:
     {
         uint8_t aircraft_identifier;
@@ -562,26 +535,19 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
         auto itr = m_players.find(aircraft_identifier);
         if (itr != m_players.end())
         {
-            itr->second->HandleNetworkRealtimeChange(
-                static_cast<Action>(action), action_enabled);
+            itr->second->HandleNetworkRealtimeChange(static_cast<Action>(action), action_enabled);
         }
     }
     break;
 
-    // --- kUpdateClientState ---
-    // Periodic (20 Hz) authoritative state snapshot from the server.
-    // For each aircraft described, the client:
-    //   - Ignores local aircraft (we already have authoritative local state).
-    //   - Interpolates remote aircraft towards their reported positions
-    //     (10% blend per frame) to smooth out network jitter.
-    //   - Updates the remote turret rotation directly (no interpolation needed).
+    // Update Remote Aircraft Values at TickRate for local client
     case Server::PacketType::kUpdateClientState:
     {
         float current_world_position;
         uint8_t aircraft_count;
         packet >> current_world_position >> aircraft_count;
 
-        // Claude - use packet struct
+        // (Ben's Claude) Use packet struct for consistency
         for (uint8_t i = 0; i < aircraft_count; ++i)
         {
             PacketStructs::AircraftStatePacket state;
@@ -590,6 +556,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
             Tank* aircraft = m_world.GetAircraft(state.identifier);
             bool is_local = state.identifier == m_local_player_identifier;
 
+            // (Kaylon) Modify interpolation code (Ben) Set turret and hull rotation
             if (aircraft && !is_local)
             {
                 float blend = 1.f - std::pow(0.5f, dt.asSeconds() * 30.f);
@@ -600,10 +567,10 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
         }
     }
     break;
-    // (Claude AI)
+    // (Ben & Kaylon's Claude) Begin returning to lobby after win condition met
     case Server::PacketType::kReturnToLobby :
     {
-        // Check and update high score
+        // (Kaylon) Check and update high score
         int current_score = GetContext().player_details->m_score;
         int high_score = LoadHighScore();
 
@@ -613,13 +580,14 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
             std::cout << "New high score: " << current_score << "\n";
         }
 
+        // (Ben) Signify returning to lobby to prevent sending kQuit packet onDestroy
         m_returning_to_lobby = true;
 
-		RequestStackClear(); // Pop the multiplayer game state & pause state
+		RequestStackClear(); // (Ben) Pop the multiplayer game state & pause state, not just the pause state
 		RequestStackPush(StateID::kRejoinLobby);
     }
     break;
-    //(Claude AI)
+    // (Kaylon's Claude) Flush lobby packets received while ingame to prevent player's being booted from the lobby
     case Server::PacketType::kLobbyCountdownReset:
     {
         std::cout << "kLobbyCountdownReset received in game state - ignoring\n";
@@ -630,7 +598,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
         packet >> countdown >> player_count >> name >> connected;
     }
     break;
-
+    // (Kaylon's Claude) Flush lobby packets received while ingame to prevent player's being booted from the lobby
     case Server::PacketType::kPlayerList:
     {
         uint8_t count;
@@ -645,22 +613,22 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
         }
     }
     break;
-
+    // (Kaylon's Claude) Flush lobby packets received while ingame to prevent player's being booted from the lobby
     case Server::PacketType::kLobbyPing:
     {
         float countdown;
         packet >> countdown;
     }
     break;
-
+    // (Ben's Claude) Ensure wooden wall destruction stays synced. Receive instructions from server for where to destroy)
     case Server::PacketType::kWallDestroyed:
     {
-        // Claude - destroy a wall at the given position according to server
-        float x, y;
-        uint16_t id;
+        // 
+        float x, y; // Position of wall
+        uint16_t id; // Projectile's id
         packet >> x >> y >> id;
         m_world.DestroyWallAt(sf::Vector2f(x, y));
-		m_world.DestroyProjectile(id);  // Also destroy the projectile that hit the wall (if it still exists on the client
+		m_world.DestroyProjectile(id);  // Destroy projectiles from remote players that collided with the wall
     }
     break;
     default:
