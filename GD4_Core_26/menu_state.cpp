@@ -1,12 +1,14 @@
 #include "menu_state.hpp"
 #include "fontID.hpp"
-#include <SFML/Graphics/Text.hpp>
-#include "utility.hpp"
-#include "menu_options.hpp"
 #include "button.hpp"
+
+#include <SFML/Graphics/Text.hpp>
 #include <fstream>
 
-// (Claude AI) Load name from details.txt
+/// <summary>
+/// Read name from file
+/// Authored: Kaylon's Claude
+/// </summary>
 std::string LoadPlayerName()
 {
     std::ifstream input_file("details.txt");
@@ -22,7 +24,11 @@ std::string LoadPlayerName()
     output_file << "Guest\n" << 0;
     return "Guest";
 }
-// (Claude AI)
+
+/// <summary>
+/// Read Score from file
+/// Authored: Kaylon's Claude
+/// </summary>
 int LoadHighScore()
 {
     std::ifstream input_file("details.txt");
@@ -34,23 +40,30 @@ int LoadHighScore()
     }
     return 0;
 }
-// (Claude AI)
+
+/// <summary>
+/// Write data to file
+/// Authored: Kaylon's Claude
+/// </summary>
 void SaveDetails(const std::string& name, int high_score)
 {
     std::ofstream output_file("details.txt");
     output_file << name << "\n" << high_score;
 }
 
+/// <summary>
+/// Modified: Ben, Kaylon with assistance of Claude
+/// </summary>
 MenuState::MenuState(StateStack& stack, Context context) 
     : State(stack, context)
     , m_background_sprite(context.textures->Get(TextureID::kTitleScreen))
     , m_name_input_text(context.fonts->Get(FontID::kMain))
 {
-    // (Claude AI) Load saved name and apply to context
+    // (Kaylon's Claude) Load saved name and apply to context
     m_name_input = LoadPlayerName();
     context.player_details->m_name = m_name_input;
 
-    // (Claude AI) Setup name input display
+    // (Kaylon's Claude) Setup name input display
     m_name_input_text.setCharacterSize(50);
     m_name_input_text.setFillColor(sf::Color::White);
     m_name_input_text.setOutlineColor(sf::Color::Black);
@@ -64,6 +77,7 @@ MenuState::MenuState(StateStack& stack, Context context)
     m_name_input_box.setOutlineThickness(2.f);
     m_name_input_box.setOutlineColor(sf::Color::White);
 
+    // (Ben) Remove host and play locally
     auto join_play_button = std::make_shared<gui::Button>(context);
     join_play_button->setPosition(sf::Vector2f(100, 150));
     join_play_button->SetText("Join");
@@ -112,10 +126,13 @@ bool MenuState::Update(sf::Time dt)
     return true;
 }
 
-// (Claude AI)
+/// <summary>
+/// Add Name Field Handling
+/// Modified: Kaylon's Claude
+/// </summary>
 bool MenuState::HandleEvent(const sf::Event& event)
 {
-    // Check for click on name field
+    // (Kaylon's Claude) Check for click on name field
     const auto* mouse_pressed = event.getIf<sf::Event::MouseButtonPressed>();
     if (mouse_pressed)
     {
@@ -133,7 +150,7 @@ bool MenuState::HandleEvent(const sf::Event& event)
         }
     }
 
-    // Only handle text input when field is active
+    // (Kaylon's Claude) Only handle text input when field is active
     const auto* text_entered = event.getIf<sf::Event::TextEntered>();
     if (text_entered && m_name_field_active)
     {
@@ -157,7 +174,7 @@ bool MenuState::HandleEvent(const sf::Event& event)
         SaveDetails(m_name_input, LoadHighScore());
     }
 
-    // Only forward events to GUI when name field is not active
+    // (Kaylon's Claude) Only forward events to GUI when name field is not active
     if (!m_name_field_active)
         m_gui_container.HandleEvent(event);
 

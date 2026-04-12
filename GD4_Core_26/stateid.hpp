@@ -1,4 +1,9 @@
 #pragma once
+
+/// <summary>
+/// Remove Local Game State
+/// Modified: Ben
+/// </summary>
 enum class StateID
 {
 	kNone,

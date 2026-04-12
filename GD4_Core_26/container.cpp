@@ -18,9 +18,14 @@ bool gui::Container::IsSelectable() const
     return false;
 }
 
+/// <summary>
+/// Now checks for mouse events
+/// Modified: Ben's Claude
+/// </summary>
+/// <param name="event"></param>
 void gui::Container::HandleEvent(const sf::Event& event)
 {
-    // Claude - Forward mouse events to all children so any button can respond to hover/click
+    // (Ben's Claude) Forward mouse events to all children so any button can respond to hover/click
     if (event.getIf<sf::Event::MouseMoved>() || event.getIf<sf::Event::MouseButtonPressed>())
     {
         for (auto& child : m_children)

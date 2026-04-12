@@ -76,6 +76,11 @@ void Application::Render()
 	m_window.display();
 }
 
+/// <summary>
+/// Remove Local States
+/// Register Lobby states
+/// Modified: Ben
+/// </summary>
 void Application::RegisterStates()
 {
 	m_stack.RegisterState<TitleState>(StateID::kTitle);

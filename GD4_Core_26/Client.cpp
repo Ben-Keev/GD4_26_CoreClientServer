@@ -1,13 +1,13 @@
-#include "Client.hpp"
 #include "application.hpp"
+
 #include <iostream>
 
+/// <summary>
+/// Start server from a separate project
+/// Authored: Ben Mc Keever
+/// </summary>
 int main()
 {
-	std::cout << "YOU IN THE CLIENT BOAH" << std::endl;
-
-	// RUN THE CA1 GAME ====================================================================
-
 	sf::Joystick::update();
 
 	try
@@ -19,6 +19,4 @@ int main()
 	{
 		std::cout << e.what() << std::endl;
 	}
-
-	// RUN THE CA1 GAME ====================================================================
 }

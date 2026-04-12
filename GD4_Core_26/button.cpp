@@ -4,6 +4,10 @@
 #include "SFML/Graphics/Rect.hpp"
 #include "texture_id.hpp"
 
+/// <summary>
+/// Add mouse support
+/// Modified: Ben's Claude
+/// </summary>
 gui::Button::Button(State::Context context)
     : m_sprite(context.textures->Get(TextureID::kButtons))
     , m_text(context.fonts->Get(FontID::kMain), "", 50)
@@ -82,7 +86,10 @@ void gui::Button::Deactivate()
     }
 }
 
-// Claude - Add mouse support
+/// <summary>
+/// Add mouse support
+/// Modified: Ben's Claude
+/// </summary>
 void gui::Button::HandleEvent(const sf::Event& event)
 {
     const auto* mouse_moved = event.getIf<sf::Event::MouseMoved>();
@@ -114,7 +121,10 @@ void gui::Button::HandleEvent(const sf::Event& event)
     }
 }
 
-// Claude - Add a function to get the bounding rect of the button, taking into account its transform
+/// <summary>
+/// Get this buttons bounding rect
+/// Authored: Ben's Claude
+/// </summary>
 sf::FloatRect gui::Button::GetBoundingRect() const
 {
     return getTransform().transformRect(m_sprite.getGlobalBounds());
