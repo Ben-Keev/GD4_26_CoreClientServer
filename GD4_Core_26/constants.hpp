@@ -5,7 +5,8 @@ constexpr auto kTimePerFrame = 1.f / 60.f;
 constexpr auto kGameOverToMenuPause = 6;
 constexpr int kMaxPacketSize = 1300;
 constexpr int kMaxPlayers = 16;
-constexpr float kLobbyCountdown = 15.f;
+
+constexpr uint8_t kLobbyCountdown = 15;
 
 // Server Constants
 constexpr sf::Time kClientTimeout = sf::seconds(1.f);

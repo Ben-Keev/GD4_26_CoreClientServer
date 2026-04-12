@@ -14,7 +14,7 @@ public:
 private:
 	void HandlePacket(uint8_t packet_type, sf::Packet& packet);
 
-	void UpdateCountdownText(float countdown);
+	void UpdateCountdownText(uint8_t countdown);
 
 	void UpdateBroadcastMessage(sf::Time elapsed_time);
 

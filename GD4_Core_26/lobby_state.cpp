@@ -265,7 +265,7 @@ void LobbyState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 	case Server::PacketType::kLobbyCountdownReset:
 	{
 		std::cout << "Lobby countdown was reset" << std::endl;
-		float countdown;
+		uint8_t countdown;
 		uint8_t connected_players;
 		std::string player_name;
 		bool connect;
@@ -310,7 +310,7 @@ void LobbyState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 	break;
 	case Server::PacketType::kGameStart:
 	{
-		std::cout << "Game start packet was received" << std::endl;
+		//std::cout << "Game start packet was received" << std::endl;
 
 		RequestStackPop();
 		// Server has started the game — transition to the multiplayer game state
@@ -340,7 +340,7 @@ void LobbyState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 	}
 }
 
-void LobbyState::UpdateCountdownText(float countdown) 
+void LobbyState::UpdateCountdownText(uint8_t countdown) 
 {
 	if (m_connected_players > 1)
 	{

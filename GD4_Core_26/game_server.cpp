@@ -537,7 +537,7 @@ void GameServer::SendLobbyPacket(bool connected)
         << "Placeholder name"
         << connected;
 
-    std::cout << "A player has joined or left and the lobby packet was sent." << std::endl;
+    //std::cout << "A player has joined or left and the lobby packet was sent." << std::endl;
 
     // Send the updated countdown to all clients
     SendToAll(packet);
