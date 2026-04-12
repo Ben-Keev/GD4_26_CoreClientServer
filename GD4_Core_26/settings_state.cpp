@@ -17,7 +17,7 @@ SettingsState::SettingsState(StateStack& stack, Context context)
     UpdateLabels();
 
     auto back_button = std::make_shared<gui::Button>(context);
-    back_button->setPosition(sf::Vector2f(80.f, 620.f));
+    back_button->setPosition(sf::Vector2f(100.f, 750.f));
     back_button->SetText("Back");
     back_button->SetCallback(std::bind(&SettingsState::RequestStackPop, this));
     m_gui_container.Pack(back_button);
@@ -88,12 +88,12 @@ void SettingsState::AddButtonLabel(std::size_t index, std::size_t x, std::size_t
     index += static_cast<int>(Action::kActionCount) * x;
 
     m_binding_buttons[index] = std::make_shared<gui::Button>(context);
-    m_binding_buttons[index]->setPosition(sf::Vector2f(400.f * x + 80.f, 50.f * y + 300.f));
+    m_binding_buttons[index]->setPosition(sf::Vector2f(400.f * x + 100.f, 150.f * y + 0.f));
     m_binding_buttons[index]->SetText(text);
     m_binding_buttons[index]->SetToggle(true);
 
     m_binding_labels[index] = std::make_shared<gui::Label>("", *context.fonts);
-    m_binding_labels[index]->setPosition(sf::Vector2f(400.f * x + 300.f, 50.f * y + 315.f));
+    m_binding_labels[index]->setPosition(sf::Vector2f(400.f * x + 480.f, 150.f * y + 40.f));
 
     m_gui_container.Pack(m_binding_buttons[index]);
     m_gui_container.Pack(m_binding_labels[index]);

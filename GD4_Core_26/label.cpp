@@ -1,7 +1,7 @@
 #include "label.hpp"
 #include "button.hpp"
 
-gui::Label::Label(const std::string& text, const FontHolder& font) : m_text(font.Get(FontID::kMain), text, 16)
+gui::Label::Label(const std::string& text, const FontHolder& font) : m_text(font.Get(FontID::kMain), text, 50)
 {
 }
 

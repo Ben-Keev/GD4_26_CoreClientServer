@@ -51,21 +51,21 @@ MenuState::MenuState(StateStack& stack, Context context)
     context.player_details->m_name = m_name_input;
 
     // (Claude AI) Setup name input display
-    m_name_input_text.setCharacterSize(20);
+    m_name_input_text.setCharacterSize(50);
     m_name_input_text.setFillColor(sf::Color::White);
     m_name_input_text.setOutlineColor(sf::Color::Black);
     m_name_input_text.setOutlineThickness(1.f);
-    m_name_input_text.setPosition(sf::Vector2f(100.f, 270.f));
+    m_name_input_text.setPosition(sf::Vector2f(180.f, 60.f));
     m_name_input_text.setString("Name: " + m_name_input);
 
-    m_name_input_box.setSize(sf::Vector2f(200.f, 30.f));
-    m_name_input_box.setPosition(sf::Vector2f(100.f, 265.f));
+    m_name_input_box.setSize(sf::Vector2f(400.f, 80.f));
+    m_name_input_box.setPosition(sf::Vector2f(130.f, 50.f));
     m_name_input_box.setFillColor(sf::Color(0, 0, 0, 150));
     m_name_input_box.setOutlineThickness(2.f);
     m_name_input_box.setOutlineColor(sf::Color::White);
 
     auto join_play_button = std::make_shared<gui::Button>(context);
-    join_play_button->setPosition(sf::Vector2f(100, 300));
+    join_play_button->setPosition(sf::Vector2f(100, 150));
     join_play_button->SetText("Join");
     join_play_button->SetCallback([this]()
         {
@@ -74,7 +74,7 @@ MenuState::MenuState(StateStack& stack, Context context)
         });
 
     auto settings_button = std::make_shared<gui::Button>(context);
-    settings_button->setPosition(sf::Vector2f(100, 350));
+    settings_button->setPosition(sf::Vector2f(100, 300));
     settings_button->SetText("Settings");
     settings_button->SetCallback([this]()
         {
@@ -82,7 +82,7 @@ MenuState::MenuState(StateStack& stack, Context context)
         });
 
     auto exit_button = std::make_shared<gui::Button>(context);
-    exit_button->setPosition(sf::Vector2f(100, 400));
+    exit_button->setPosition(sf::Vector2f(100, 450));
     exit_button->SetText("Exit");
     exit_button->SetCallback([this]()
         {

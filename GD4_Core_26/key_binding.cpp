@@ -48,7 +48,7 @@ sf::Keyboard::Scancode KeyBinding::GetAssignedKey(Action action) const
 			return pair.first;
 	}
 
-	return sf::Keyboard::Scancode::Unknown;
+	return sf::Keyboard::Scancode::Hyphen;
 }
 
 bool KeyBinding::CheckAction(sf::Keyboard::Scancode key, Action& out) const
