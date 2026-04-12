@@ -4,11 +4,8 @@
 #include "resource_identifiers.hpp"
 
 /// <summary>
-/// Authored: Kaylon Riordan D00255039
-/// Created a Turret class which is attached to a tank and visualy indicated what direction the tank is aiming
+/// Authored: Kaylon Riordan | Modified: Ben Mc Keever
 /// </summary>
-
-// Make SceneNode the parrent instead of entity because, this is a visual element with no need for collision or other interactions
 class Turret : public SceneNode
 {
 public:

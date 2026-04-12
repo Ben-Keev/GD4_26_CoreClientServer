@@ -2,7 +2,7 @@
 #include "utility.hpp"
 
 /// <summary>
-/// Modified: Kaylon Riodan
+/// Modified: Kaylon Riordan
 /// </summary>
 
 SceneNode::SceneNode(ReceiverCategories category):m_children(), m_parent(nullptr), m_default_category(category)
@@ -65,7 +65,7 @@ sf::Angle SceneNode::GetWorldRotation() const
 }
 
 /// <summary>
-/// Authored: Kaylon Riodan
+/// Authored: Kaylon Riordan
 /// Returns the nodes parent, used by turrets which need to get parent tank's rotation so it can subtract it and get an absolute world rotation when setting aiming direction
 /// </summary>
 SceneNode* SceneNode::GetParent() const

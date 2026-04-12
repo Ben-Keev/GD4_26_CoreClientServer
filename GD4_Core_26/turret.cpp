@@ -2,16 +2,15 @@
 #include "utility.hpp"
 #include "data_tables.hpp"
 
-/// <summary>
-/// Authored: Kaylon Riodan | Modified: Ben Mc Keever
-/// </summary>
-
 namespace
 {
 	const std::vector<TurretData> Table = InitializeTurretData();
 }
 
-
+/// <summary>
+/// Calculate where turret should face relative to mouse position
+/// Authored: Ben's Claude
+/// </summary>
 sf::Angle Turret::CalculateMouseRotation(const sf::Vector2f& turret_position, const sf::Vector2f& mouse_position)
 {
 	sf::Vector2f delta = mouse_position - turret_position;
@@ -20,6 +19,9 @@ sf::Angle Turret::CalculateMouseRotation(const sf::Vector2f& turret_position, co
 	return sf::radians(radians);
 }
 
+/// <summary>
+/// Authored: Kaylon Riordan | Modified: Ben Mc Keever
+/// </summary>
 Turret::Turret(TurretType type, const TextureHolder& textures, sf::Color colour)
 	: m_identifier(0)
     , m_type(type)
@@ -35,7 +37,7 @@ unsigned int Turret::GetCategory() const
 }
 
 /// <summary>
-/// Authored: Kaylon Riodan
+/// Authored: Kaylon Riordan
 /// Method to stop drawing the turret, used by tank when they die so turret isnt visible inside explosion
 /// </summary>
 void Turret::Hide() {
@@ -50,6 +52,7 @@ void Turret::DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) cons
 	}
 }
 
+// Identifier Getter & Setters
 uint8_t	Turret::GetIdentifier()
 {
 	return m_identifier;

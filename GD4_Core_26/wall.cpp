@@ -2,16 +2,15 @@
 #include "utility.hpp"
 #include "data_tables.hpp"
 
-/// <summary>
-/// Authored: Kaylon Riodan
-/// Create a wall tyoe which is a basic entity, used in colsion logic to block players movment and bounce projectiles
-/// </summary>
-
 namespace
 {
 	const std::vector<WallData> Table = InitializeWallData();
 }
 
+/// <summary>
+/// /// Create a wall tyoe which is a basic entity, used in colsion logic to block players movment and bounce projectiles
+/// Authored: Kaylon Riordan | Modified: Ben Mc Keever
+/// </summary>
 Wall::Wall(WallType type, const TextureHolder& textures)
 	: Entity(10)
 	, m_type(type)
@@ -52,11 +51,19 @@ void Wall::DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const
 	}
 }
 
+/// <summary>
+/// Store a unique ID for a wall
+/// Authored: Ben
+/// </summary>
 void Wall::SetIdentifier(uint8_t id)
 {	
 	m_identifier = id;
 }
 
+/// <summary>
+/// Store a unique ID for a wall
+/// Authored: Ben
+/// </summary>
 uint8_t Wall::GetIdentifier() const
 {
 	return m_identifier;

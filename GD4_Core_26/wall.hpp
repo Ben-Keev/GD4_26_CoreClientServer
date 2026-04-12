@@ -2,13 +2,11 @@
 #include "entity.hpp"
 #include "wall_type.hpp"
 #include "resource_identifiers.hpp"
-#include "projectile.hpp"
 
 /// <summary>
-/// Authored: Kaylon Riordan D00255039
-/// Created a wall entity which blocks players paths and bounces projectiles
+/// Create a wall tyoe which is a basic entity, used in colsion logic to block players movment and bounce projectiles
+/// Authored: Kaylon Riordan | Modified: Ben Mc Keever
 /// </summary>
-
 class Wall : public Entity
 {
 public:

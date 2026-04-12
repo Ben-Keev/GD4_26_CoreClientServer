@@ -56,7 +56,7 @@ std::vector<sf::Color> InitializeTankColours()
 /// <summary>
 /// Modified: Ben Mc Keever D00254413
 /// 
-/// Modified: Kaylon Riodan D00255039
+/// Modified: Kaylon Riordan D00255039
 /// Reduced hit points so every player dies in 1 shot
 /// Slowed down fireing to reduce spamming in game
 /// Updated texture ids and rectangles to work with new sprite sheet
@@ -90,7 +90,7 @@ std::vector<TurretData> InitializeTurretData()
 }
 
 /// <summary>
-/// Modified: Kaylon Riodan D00255039
+/// Modified: Kaylon Riordan D00255039
 /// Added a setting for how many times bullets can bounce before being destroyed
 /// Updated texture ids and rectangles to work with new sprite sheet
 /// </summary>
