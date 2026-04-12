@@ -604,30 +604,23 @@ void World::HandleCollisions()
 			tank.setPosition(sf::Vector2f(currentPosition.x, currentPosition.y));
 		}
 		// Handle projectile/breakable wall collisions
-		else if (MatchesCategories(pair, ReceiverCategories::kTank, ReceiverCategories::kProjectile))
+		else if (MatchesCategories(pair, ReceiverCategories::kProjectile, ReceiverCategories::kWoodWall))
 		{
-			// Claude -> send a wall destruction as a game event
-			auto& tank = static_cast<Tank&>(*pair.first);
-			auto& projectile = static_cast<Projectile&>(*pair.second);
-
-			std::cout << "Projectile owner id: " << projectile.GetOwner().GetIdentifier()
-				<< " tank id: " << tank.GetIdentifier() << std::endl;
-
+			auto& projectile = static_cast<Projectile&>(*pair.first);
 			auto& wall = static_cast<Wall&>(*pair.second);
 
 			projectile.Destroy();
 
-			// Don't damage the wall locally — send to server instead
 			if (m_networked_world)
 			{
-				std::cout << "m_local_player_identifier: " << std::to_string(m_local_player_identifier) << std::endl;
-
-				// Let the server decide wall destruction — only the projectile owner sends the event
 				if (m_network_node && projectile.GetOwner().GetIdentifier() == m_local_player_identifier)
 				{
 					m_network_node->NotifyGameAction(GameActions::kWallDestroyed, wall.getPosition(), projectile.GetIdentifier());
 				}
-				// Don't damage the wall here — wait for server kWallDestroyed packet
+			}
+			else
+			{
+				wall.Damage(projectile.GetDamage());
 			}
 		}
 		// Handle projectile/durable wall collisions
