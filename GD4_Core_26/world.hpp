@@ -106,4 +106,7 @@ private:
 
 	// Claude - Prevent crash when a projectile hits its own tank
 	std::shared_ptr<bool> m_alive_token = std::make_shared<bool>(true);
+
+	// Claude - Bugfix for projectiles that are destroyed before they can be registered in m_projectile_map
+	std::set<uint16_t> m_pending_destroy_ids;
 };

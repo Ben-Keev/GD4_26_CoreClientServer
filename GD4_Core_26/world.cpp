@@ -108,10 +108,18 @@ Tank* World::AddAircraft(uint8_t identifier, PlayerDetails* details, sf::Vector2
 	{
 		m_projectile_map[p->GetIdentifier()] = p;
 
-		std::weak_ptr<bool> alive = m_alive_token;  // capture weak reference
+		// Check if this projectile was already scheduled for destruction
+		if (m_pending_destroy_ids.count(p->GetIdentifier()))
+		{
+			p->Destroy();
+			m_projectile_map.erase(p->GetIdentifier());
+			m_pending_destroy_ids.erase(p->GetIdentifier());
+			return;
+		}
+
+		std::weak_ptr<bool> alive = m_alive_token;
 		p->m_on_destroyed = [this, alive](uint16_t id)
 			{
-				// Only erase if the World still exists
 				if (auto token = alive.lock())
 				{
 					m_projectile_map.erase(id);
@@ -609,6 +617,10 @@ void World::HandleCollisions()
 			auto& projectile = static_cast<Projectile&>(*pair.first);
 			auto& wall = static_cast<Wall&>(*pair.second);
 
+			// Claude - Ignore collision if projectile just spawned and hasn't cleared the owner yet
+			if (projectile.IsMarkedForRemoval())
+				continue;
+
 			projectile.Destroy();
 
 			if (m_networked_world)
@@ -675,16 +687,19 @@ void World::HandleCollisions()
 	}
 }
 
-// Clausde - DestroyProjectile becomes a simple lookup
+// Claude - DestroyProjectile becomes a simple lookup
 void World::DestroyProjectile(uint16_t id)
 {
-	std::cout << "Destroying projectile with id: " << std::to_string(id) << std::endl;
-
 	auto itr = m_projectile_map.find(id);
 	if (itr != m_projectile_map.end())
 	{
 		itr->second->Destroy();
 		m_projectile_map.erase(itr);
+	}
+	else
+	{
+		// Projectile not registered yet — queue it for destruction when it arrives
+		m_pending_destroy_ids.insert(id);
 	}
 }
 

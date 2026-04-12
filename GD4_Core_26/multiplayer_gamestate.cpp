@@ -622,7 +622,12 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
     //(Claude AI)
     case Server::PacketType::kLobbyCountdownReset:
     {
-        std::cout << "kLobbyCountdownReset received in game state - ignoring" << std::endl;
+        std::cout << "kLobbyCountdownReset received in game state - ignoring\n";
+        float countdown;
+        uint8_t player_count;
+        std::string name;
+        bool connected;
+        packet >> countdown >> player_count >> name >> connected;
     }
     break;
 
@@ -643,7 +648,8 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
 
     case Server::PacketType::kLobbyPing:
     {
-        std::cout << "kLobbyPing received in game state - ignoring" << std::endl;
+        float countdown;
+        packet >> countdown;
     }
     break;
 
