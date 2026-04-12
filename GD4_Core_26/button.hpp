@@ -27,6 +27,8 @@ namespace gui
 		virtual void Deactivate() override;
 		virtual void HandleEvent(const sf::Event& event) override;
 
+		sf::FloatRect GetBoundingRect() const;
+
 	private:
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 		void ChangeTexture(ButtonType button_type);

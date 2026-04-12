@@ -20,6 +20,16 @@ bool gui::Container::IsSelectable() const
 
 void gui::Container::HandleEvent(const sf::Event& event)
 {
+    // Claude - Forward mouse events to all children so any button can respond to hover/click
+    if (event.getIf<sf::Event::MouseMoved>() || event.getIf<sf::Event::MouseButtonPressed>())
+    {
+        for (auto& child : m_children)
+        {
+            child->HandleEvent(event);
+        }
+        return;
+    }
+
     const auto* key_released = event.getIf<sf::Event::KeyReleased>();
     if (HasSelection() && m_children[m_selected_child]->IsActive())
     {

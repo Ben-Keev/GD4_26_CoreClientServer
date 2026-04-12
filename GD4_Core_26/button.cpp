@@ -82,8 +82,42 @@ void gui::Button::Deactivate()
     }
 }
 
+// Claude - Add mouse support
 void gui::Button::HandleEvent(const sf::Event& event)
 {
+    const auto* mouse_moved = event.getIf<sf::Event::MouseMoved>();
+    if (mouse_moved)
+    {
+        sf::Vector2f mouse(static_cast<float>(mouse_moved->position.x),
+            static_cast<float>(mouse_moved->position.y));
+
+        if (GetBoundingRect().contains(mouse))
+        {
+            Select();
+        }
+        else
+        {
+            Deselect();
+        }
+    }
+
+    const auto* mouse_pressed = event.getIf<sf::Event::MouseButtonPressed>();
+    if (mouse_pressed && mouse_pressed->button == sf::Mouse::Button::Left)
+    {
+        sf::Vector2f mouse(static_cast<float>(mouse_pressed->position.x),
+            static_cast<float>(mouse_pressed->position.y));
+
+        if (GetBoundingRect().contains(mouse))
+        {
+            Activate();
+        }
+    }
+}
+
+// Claude - Add a function to get the bounding rect of the button, taking into account its transform
+sf::FloatRect gui::Button::GetBoundingRect() const
+{
+    return getTransform().transformRect(m_sprite.getGlobalBounds());
 }
 
 void gui::Button::draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -98,3 +132,4 @@ void gui::Button::ChangeTexture(ButtonType buttonType)
     sf::IntRect textureRect({ 0, 50 * static_cast<int>(buttonType) }, { 200, 50 });
     m_sprite.setTextureRect(textureRect);
 }
+
