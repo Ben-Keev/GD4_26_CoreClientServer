@@ -63,7 +63,7 @@ struct ParticleData
 /// Initialized wall and turret data
 /// </summary>
 
-std::vector<sf::Vector2f> InitializeTankPositions();
+std::vector<sf::Vector2<uint16_t>> InitializeTankPositions();
 std::vector<sf::Color> InitializeTankColours();
 std::vector<TankData> InitializeTankData();
 std::vector<TurretData> InitializeTurretData();

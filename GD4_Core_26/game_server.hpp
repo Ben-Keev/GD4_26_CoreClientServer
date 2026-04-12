@@ -41,7 +41,7 @@ private:
 	// (Ben & Kaylon) Add extra parameters
 	struct AircraftInfo
 	{
-		sf::Vector2f m_position;
+		sf::Vector2<uint16_t> m_position;
 		uint8_t m_hitpoints;
 		float m_turret_rotation;
 		float m_aircraft_rotation;

@@ -3,13 +3,14 @@
 #include "data_tables.hpp"
 
 /// <summary>
-/// Authored: Kaylon Riodan
+/// Authored: Kaylon Riodan | Modified: Ben Mc Keever
 /// </summary>
 
 namespace
 {
 	const std::vector<TurretData> Table = InitializeTurretData();
 }
+
 
 sf::Angle Turret::CalculateMouseRotation(const sf::Vector2f& turret_position, const sf::Vector2f& mouse_position)
 {
