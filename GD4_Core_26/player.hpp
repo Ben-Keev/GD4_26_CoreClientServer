@@ -1,15 +1,20 @@
 #pragma once
+#include "action.hpp"
+#include "command.hpp"
 #include "command_queue.hpp"
+#include "key_binding.hpp"
+
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
-#include "action.hpp"
-#include <map>
-#include "command.hpp"
-#include "key_binding.hpp"
 #include <SFML/Network/TcpSocket.hpp>
+#include <map>
 
 struct PlayerDetails;
 
+/// <summary>
+/// Modified to take window as a parameter. This allows for mouse aiming to be implemented.
+/// Class modified: Ben with assistance of Claude, Kaylon with assistance of claude
+/// </summary>
 class Player
 {
 public:
@@ -27,7 +32,6 @@ public:
 	bool IsLocal() const;
 
 	void PushCombinedMoveCommand(CommandQueue& commands, sf::Vector2f velocity);
-	sf::Vector2f GetCombinedNetworkVelocity() const;
 
 private:
 	void InitialiseActions();

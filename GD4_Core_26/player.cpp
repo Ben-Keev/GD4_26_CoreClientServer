@@ -1,16 +1,15 @@
 #include "player.hpp"
 #include "command_queue.hpp"
 #include "tank.hpp"
-#include "turret_type.hpp"
-
 #include "network_protocol.hpp"
-#include <SFML/Network/Packet.hpp>
-
-#include <map>
 #include "turret.hpp"
-#include "application.hpp"
-#include "multiplayer_gamestate.hpp"
 
+#include <SFML/Network/Packet.hpp>
+#include <map>
+
+/// <summary>
+/// CA1 Unmodified
+/// </summary>
 sf::Angle CalculateRotation(float x, float y)
 {
     // Returns radians
@@ -19,7 +18,10 @@ sf::Angle CalculateRotation(float x, float y)
     return sf::radians(radians);
 }
 
-// Modified heavily to work with mouses
+/// <summary>
+/// Updated to take mouse position. Updated to only message turrets whose IDs match.
+/// CA1 Modified Ben
+/// </summary>
 struct TurretRotator
 {
     TurretRotator(const sf::Vector2f& mousePos, int identifier)
@@ -30,7 +32,7 @@ struct TurretRotator
 
     void operator()(Turret& turret, sf::Time) const
     {
-        // Only move the aircraft that belongs to this player
+        // (Ben) Only move the turret that belongs to this player
         if (turret.GetIdentifier() == turret_id)
         {
             sf::Angle angle = Turret::CalculateMouseRotation(turret.GetWorldPosition(), mouse_position);
@@ -42,7 +44,9 @@ struct TurretRotator
     int turret_id;
 };
 
-// Functor that moves an aircraft when a command is executed
+/// <summary>
+/// Updated to take id
+/// </summary>
 struct AircraftMover
 {
     AircraftMover(float vx, float vy, int identifier)
@@ -54,9 +58,10 @@ struct AircraftMover
     // This runs when the command is executed
     void operator()(Tank& aircraft, sf::Time) const
     {
+        // (Ben) Rotate tank
         sf::Angle angle = CalculateRotation(velocity.x, velocity.y);
 
-        // Only move the aircraft that belongs to this player
+        // Only move the tank that belongs to this player
         if (aircraft.GetIdentifier() == aircraft_id)
         {
             aircraft.setRotation(angle);
@@ -64,11 +69,13 @@ struct AircraftMover
         }
     }
 
-    sf::Vector2f velocity; // Direction of movement
-    int aircraft_id;       // Which aircraft to control
+    sf::Vector2f velocity;
+    int aircraft_id;
 };
 
-// Functor that triggers bullet firing
+/// <summary>
+/// Unmodified
+/// </summary>
 struct AircraftFireTrigger
 {
     AircraftFireTrigger(int identifier)
@@ -86,11 +93,14 @@ struct AircraftFireTrigger
     int aircraft_id;
 };
 
-// Player constructor
+/// <summary>
+/// Modified to take window as a parameter. This allows for mouse aiming to be implemented.
+/// Class modified: Ben with assistance of Claude, Kaylon with assistance of claude
+/// </summary>
 Player::Player(sf::TcpSocket* socket, uint8_t identifier, const KeyBinding* binding, sf::RenderWindow* window)
-    : m_key_binding(binding)                 // Key bindings for this player
-    , m_identifier(identifier)               // Player ID
-    , m_socket(socket)                       // Network socket (nullptr if local game)
+    : m_key_binding(binding)                 // Keybindings
+    , m_identifier(identifier)               // ID
+    , m_socket(socket)                       // Network socket
     , m_window(window)
 {
     InitialiseActions(); // Setup all action -> command mappings
@@ -102,6 +112,10 @@ Player::Player(sf::TcpSocket* socket, uint8_t identifier, const KeyBinding* bind
     }
 }
 
+/// <summary>
+/// Updated to aim using mouse position instead of joystick
+/// CA1 Modified: Ben
+/// </summary>
 Command Player::AnalogueAiming(const sf::Vector2f& mousePos)
 {
     Command rotate;
@@ -110,7 +124,9 @@ Command Player::AnalogueAiming(const sf::Vector2f& mousePos)
     return rotate;
 }
 
-// Handles key press/release events
+/// <summary>
+/// Unmodified
+/// </summary>
 void Player::HandleEvent(const sf::Event& event, CommandQueue& command_queue)
 {
     const auto* key_pressed = event.getIf<sf::Event::KeyPressed>();
@@ -150,17 +166,16 @@ void Player::HandleEvent(const sf::Event& event, CommandQueue& command_queue)
     // Detect press
     if (const auto* press = event.getIf<sf::Event::KeyPressed>())
         keyData = { press->scancode, true };
+
     // Detect release
     else if (const auto* release = event.getIf<sf::Event::KeyReleased>())
         keyData = { release->scancode, false };
 
-    // Handle realtime input over network (movement keys)
     if (keyData && m_socket)
     {
         Action action;
         if (m_key_binding && m_key_binding->CheckAction(keyData->code, action) && IsRealtimeAction(action))
         {
-            // Send realtime input change to server
             sf::Packet packet;
             packet << static_cast<uint8_t>(Client::PacketType::kPlayerRealtimeChange);
             packet << m_identifier;
@@ -171,14 +186,18 @@ void Player::HandleEvent(const sf::Event& event, CommandQueue& command_queue)
     }
 }
 
-// Returns true if this player is controlled locally
+/// <summary>
+/// Unmodified
+/// </summary>
 bool Player::IsLocal() const
 {
     // No key binding means this player is remote
     return m_key_binding != nullptr;
 }
 
-// Enables/disables all realtime actions over network
+/// <summary>
+/// Unmodified
+/// </summary>
 void Player::DisableAllRealtimeActions(bool enable)
 {
     for (auto& action : m_action_proxies)
@@ -192,8 +211,11 @@ void Player::DisableAllRealtimeActions(bool enable)
     }
 }
 
-
-// Claude - added diagonal movement
+/// <summary>
+/// Updated to add diagonal movement using a combined vector
+/// Modified: Ben's Claude
+/// </summary>
+/// <param name="commands"></param>
 void Player::HandleRealtimeNetworkInput(CommandQueue& commands)
 {
     if (m_socket && !IsLocal())
@@ -218,14 +240,18 @@ void Player::HandleRealtimeNetworkInput(CommandQueue& commands)
     }
 }
 
-// Claude - added diagonal movement
+/// <summary>
+/// Updated to add diagonal movement using a combined vector. Modified to pass mouse position for aiming
+/// Modified: Ben's Claude
+/// </summary>
+/// <param name="commands"></param>
 void Player::HandleRealTimeInput(CommandQueue& command_queue, const sf::View& world_view)
 {
     if ((m_socket && IsLocal()) || !m_socket)
     {
         std::vector<Action> activeActions = m_key_binding->GetRealtimeActions();
 
-        // Accumulate all active movement directions into one vector
+        // (Claude) Accumulate all active movement directions into one vector
         sf::Vector2f combined_velocity(0.f, 0.f);
         for (Action action : activeActions)
         {
@@ -236,16 +262,16 @@ void Player::HandleRealTimeInput(CommandQueue& command_queue, const sf::View& wo
             case Action::kMoveUp:    combined_velocity.y -= 1.f; break;
             case Action::kMoveDown:  combined_velocity.y += 1.f; break;
             default:
-                // Non-movement realtime actions still push their own commands
+                // (Claude) Non-movement realtime actions still push their own commands
                 command_queue.Push(m_action_binding[action]);
                 break;
             }
         }
 
-        // Only push a move command if there's actual input
+        // (Claude) Only push a move command if there's actual input
         if (combined_velocity.x != 0.f || combined_velocity.y != 0.f)
         {
-            // Normalise so diagonal speed matches cardinal speed
+            // (Claude) Normalise so diagonal speed matches cardinal speed
             float length = std::sqrt(combined_velocity.x * combined_velocity.x
                 + combined_velocity.y * combined_velocity.y);
             combined_velocity /= length;
@@ -257,13 +283,19 @@ void Player::HandleRealTimeInput(CommandQueue& command_queue, const sf::View& wo
             command_queue.Push(move);
         }
 
+        // (Ben's Claude) Trigger analogue aiming on mouse
         sf::Vector2i mouseScreen = sf::Mouse::getPosition(*m_window);
         sf::Vector2f mouseWorld = m_window->mapPixelToCoords(mouseScreen, world_view);
         command_queue.Push(AnalogueAiming(mouseWorld));
     }
 }
 
-// Claude - added diagonal movement
+/// <summary>
+/// Calculate velocity and pass it into a command
+/// Author: Ben's Claude
+/// </summary>
+/// <param name="commands"></param>
+/// <param name="velocity"></param>
 void Player::PushCombinedMoveCommand(CommandQueue& commands, sf::Vector2f velocity)
 {
     if (velocity.x != 0.f || velocity.y != 0.f)
@@ -278,24 +310,26 @@ void Player::PushCombinedMoveCommand(CommandQueue& commands, sf::Vector2f veloci
     }
 }
 
-sf::Vector2f Player::GetCombinedNetworkVelocity() const
-{
-    return sf::Vector2f();
-}
-
-// Handles a network event (like fire)
+/// <summary>
+/// Unmodified
+/// </summary>
 void Player::HandleNetworkEvent(Action action, CommandQueue& commands)
 {
     commands.Push(m_action_binding[action]);
 }
 
-// Handles realtime network input change (key pressed/released)
+/// <summary>
+/// Unmodified
+/// </summary>
 void Player::HandleNetworkRealtimeChange(Action action, bool actionEnabled)
 {
     m_action_proxies[action] = actionEnabled;
 }
 
-// Setup action -> command mappings
+/// <summary>
+/// Modified to remove missile action
+/// Modified: Ben
+/// </summary>
 void Player::InitialiseActions()
 {
     // Movement
