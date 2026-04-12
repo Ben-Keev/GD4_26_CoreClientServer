@@ -209,7 +209,7 @@ bool MultiplayerGameState::Update(sf::Time dt)
                 state.y = aircraft->getPosition().y;
                 state.hitpoints = static_cast<uint8_t>(aircraft->GetHitPoints());
                 state.turret_rotation = static_cast<uint8_t>(aircraft->GetTurret()->getRotation().asDegrees() / 360.f * 255.f);
-                state.hull_rotation = aircraft->getRotation().asDegrees();
+                state.hull_rotation = static_cast<uint8_t>(aircraft->getRotation().asDegrees() / 360.f * 255.f);
 
                 sf::Packet position_update_packet;
                 position_update_packet << static_cast<uint8_t>(Client::PacketType::kStateUpdate);
@@ -544,13 +544,13 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
             Tank* aircraft = m_world.GetAircraft(state.identifier);
             bool is_local = state.identifier == m_local_player_identifier;
 
-            // (Kaylon) Modify interpolation code (Ben) Set turret and hull rotation
+            // (Kaylon) Modify interpolation code, update rotation to account for int 8 compression (Ben) Set turret and hull rotation
             if (aircraft && !is_local)
             {
                 float blend = 1.f - std::pow(0.5f, dt.asSeconds() * 30.f);
                 aircraft->setPosition(aircraft->getPosition() + (sf::Vector2f(state.x, state.y) - aircraft->getPosition()) * blend);
-                aircraft->setRotation(sf::degrees(state.hull_rotation));
-                aircraft->GetTurret()->setRotation(sf::degrees(state.turret_rotation));
+                aircraft->setRotation(sf::degrees((static_cast<float>(state.hull_rotation) / 255.f) * 360.f));
+                aircraft->GetTurret()->setRotation(sf::degrees((static_cast<float>(state.turret_rotation) / 255.f) * 360.f));
             }
         }
     }

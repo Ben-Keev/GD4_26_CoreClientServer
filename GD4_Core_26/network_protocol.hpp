@@ -72,8 +72,8 @@ namespace PacketStructs
 		uint8_t identifier;
 		float x, y;
 		uint8_t hitpoints;
-		float turret_rotation;
-		float hull_rotation;
+		uint8_t turret_rotation;
+		uint8_t hull_rotation;
 
 		void Write(sf::Packet& p) const { p << identifier << x << y << hitpoints << turret_rotation << hull_rotation; }
 		void Read(sf::Packet& p) { p >> identifier >> x >> y >> hitpoints >> turret_rotation >> hull_rotation; }

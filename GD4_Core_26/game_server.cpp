@@ -439,7 +439,7 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
                 itr->second.m_position = sf::Vector2f(state.x, state.y);
                 itr->second.m_hitpoints = state.hitpoints;
                 itr->second.m_turret_rotation = (static_cast<float>(state.turret_rotation) / 255.f) * 360.f;
-                itr->second.m_aircraft_rotation = state.hull_rotation;
+                itr->second.m_aircraft_rotation = (static_cast<float>(state.hull_rotation) / 255.f) * 360.f;
             }
         }
     }
@@ -721,8 +721,8 @@ void GameServer::UpdateClientState()
         state.x = aircraft.second.m_position.x;
         state.y = aircraft.second.m_position.y;
         state.hitpoints = aircraft.second.m_hitpoints;
-        state.turret_rotation = aircraft.second.m_turret_rotation;
-        state.hull_rotation = aircraft.second.m_aircraft_rotation;
+        state.turret_rotation = static_cast<uint8_t>(aircraft.second.m_turret_rotation / 360.f * 255.f);
+        state.hull_rotation = static_cast<uint8_t>(aircraft.second.m_aircraft_rotation / 360.f * 255.f);
         state.Write(update_packet);
     }
 
