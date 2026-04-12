@@ -502,8 +502,8 @@ void GameServer::HandleIncomingConnections()
     {
         std::cout << "[Server] New connection accepted. Connected players before: " << std::to_string(m_connected_players) << std::endl;
 
-        m_aircraft_info[m_aircraft_identifier_counter].m_position = SpawnPositions[m_connected_players];
-        m_aircraft_info[m_aircraft_identifier_counter].m_hitpoints = 10;
+        m_aircraft_info[m_aircraft_info.size() - 1].m_position = SpawnPositions[m_connected_players];
+        m_aircraft_info[m_aircraft_info.size() - 1].m_hitpoints = 10;
 
         m_peers[m_connected_players]->m_aircraft_identifiers.emplace_back(m_aircraft_identifier_counter);
         m_peers[m_connected_players]->m_ready = true;
@@ -654,7 +654,7 @@ void GameServer::InformWorldState(sf::TcpSocket& socket)
                     << m_aircraft_info[identifier].m_position.x
                     << m_aircraft_info[identifier].m_position.y
                     << m_aircraft_info[identifier].m_hitpoints
-                    << m_aircraft_info[identifier].m_turret_rotation;      // Already in degrees (server-side)
+                    << m_aircraft_info[identifier].m_turret_rotation      // Already in degrees (server-side)
                     << m_peers[i]->m_name;
             }
         }
@@ -749,22 +749,18 @@ void GameServer::ResetGameState()
     m_lobby_active = true;
     m_game_started = false;
     m_aircraft_info.clear();
-    m_aircraft_identifier_counter = 1;
     m_lobby_countdown = sf::seconds(kLobbyCountdown);
     m_total_skip_countdown = 0;
 
-    // Reassign identifiers to existing connected peers — don't touch the sockets
     for (std::size_t i = 0; i < m_connected_players; ++i)
     {
         if (m_peers[i]->m_ready)
         {
             m_peers[i]->m_aircraft_identifiers.clear();
-            m_peers[i]->m_aircraft_identifiers.emplace_back(m_aircraft_identifier_counter);
+            m_peers[i]->m_aircraft_identifiers.emplace_back(i);
 
-            m_aircraft_info[m_aircraft_identifier_counter].m_position = SpawnPositions[i];
-            m_aircraft_info[m_aircraft_identifier_counter].m_hitpoints = 10;
-
-            m_aircraft_identifier_counter++;
+            m_aircraft_info[i].m_position = SpawnPositions[i];
+            m_aircraft_info[i].m_hitpoints = 10;
         }
     }
 }

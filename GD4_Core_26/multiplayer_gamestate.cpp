@@ -500,7 +500,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
                 >> aircraft_position.x
                 >> aircraft_position.y
                 >> hitpoints
-                >> turret_rotation;
+                >> turret_rotation
                 >> name;
 
             // Skip if this is our own aircraft — already spawned via kSpawnSelf (Claude)

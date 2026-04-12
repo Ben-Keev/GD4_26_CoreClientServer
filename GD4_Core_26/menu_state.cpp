@@ -64,15 +64,6 @@ MenuState::MenuState(StateStack& stack, Context context)
     m_name_input_box.setOutlineThickness(2.f);
     m_name_input_box.setOutlineColor(sf::Color::White);
 
-    auto play_button = std::make_shared<gui::Button>(context);
-    play_button->setPosition(sf::Vector2f(100, 300));
-    play_button->SetText("Play");
-    play_button->SetCallback([this]()
-        {
-            RequestStackPop();
-            RequestStackPush(StateID::kGame);
-        });
-
     auto join_play_button = std::make_shared<gui::Button>(context);
     join_play_button->setPosition(sf::Vector2f(100, 300));
     join_play_button->SetText("Join");
