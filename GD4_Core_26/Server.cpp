@@ -2,6 +2,10 @@
 
 #include <iostream>
 
+/// <summary>
+/// Start server from a separate project
+/// Authored: Ben Mc Keever
+/// </summary>
 int main()
 {
     std::cout << "Starting server..." << std::endl;

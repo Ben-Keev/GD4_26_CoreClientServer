@@ -1,14 +1,19 @@
 #pragma once
 #include <memory>
 #include "resource_identifiers.hpp"
-#include <SFML/Graphics/RenderWindow.hpp>
 #include "stateid.hpp"
 #include "music_player.hpp"
 #include "sound_player.hpp"
+
 #include <string>
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Network/TcpSocket.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
 
+/// <summary>
+/// Authored by Kaylon. Modified by Ben to be passed into context.
+/// Authored: Kaylon | Modified: Ben
+/// </summary>
 struct PlayerDetails
 {
 	std::string m_name;
@@ -24,6 +29,10 @@ class State
 public:
 	typedef std::unique_ptr<State> Ptr;
 
+	/// <summary>
+	/// Remove two sets of keybindings. Add Socket so connection can be accessed between states. Add player details so this is also accessible from every state
+	/// Modified: Ben
+	/// </summary>
 	struct Context
 	{
 		Context(sf::RenderWindow& window, TextureHolder& textures, FontHolder& fonts, MusicPlayer& music, SoundPlayer& sound, KeyBinding& keys, sf::TcpSocket& socket, PlayerDetails& player_details);

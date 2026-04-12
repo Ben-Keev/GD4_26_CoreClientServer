@@ -7,6 +7,9 @@
 #include "particle_type.hpp"
 #include "turret_type.hpp"
 
+/// <summary>
+/// Authored: Ben | Rewritten: Kaylon
+/// </summary>
 std::vector<sf::Vector2<uint16_t>> InitializeTankPositions()
 {
 	std::vector<sf::Vector2<uint16_t>> data(15);
@@ -30,6 +33,9 @@ std::vector<sf::Vector2<uint16_t>> InitializeTankPositions()
 	return data;
 }
 
+/// <summary>
+/// Authored: Ben | Rewritten: Kaylon
+/// </summary>
 std::vector<sf::Color> InitializeTankColours()
 {
 	std::vector<sf::Color> data(15);
@@ -54,12 +60,8 @@ std::vector<sf::Color> InitializeTankColours()
 }
 
 /// <summary>
-/// Modified: Ben Mc Keever D00254413
-/// 
-/// Modified: Kaylon Riordan D00255039
-/// Reduced hit points so every player dies in 1 shot
-/// Slowed down fireing to reduce spamming in game
-/// Updated texture ids and rectangles to work with new sprite sheet
+/// Only takes one tank type
+/// Modified: Ben & Kaylon
 /// </summary>
 std::vector<TankData> InitializeTankData()
 {
@@ -75,8 +77,7 @@ std::vector<TankData> InitializeTankData()
 }
 
 /// <summary>
-/// Authored: Kaylon Riordan D00255039
-/// Created texture data for new turret objects
+/// Authored: Kaylon
 /// </summary>
 std::vector<TurretData> InitializeTurretData()
 {
@@ -90,9 +91,7 @@ std::vector<TurretData> InitializeTurretData()
 }
 
 /// <summary>
-/// Modified: Kaylon Riordan D00255039
-/// Added a setting for how many times bullets can bounce before being destroyed
-/// Updated texture ids and rectangles to work with new sprite sheet
+/// Modified: Kaylon
 /// </summary>
 std::vector<ProjectileData> InitializeProjectileData()
 {
@@ -109,8 +108,7 @@ std::vector<ProjectileData> InitializeProjectileData()
 }
 
 /// <summary>
-/// Authored: Kaylon Riordan D00255039
-/// Created texture data for new wall objects
+/// Authored: Kaylon
 /// </summary>
 std::vector<WallData> InitializeWallData()
 {

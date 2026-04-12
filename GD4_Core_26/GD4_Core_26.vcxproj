@@ -148,7 +148,6 @@
     <ClCompile Include="key_binding.cpp" />
     <ClCompile Include="label.cpp" />
     <ClCompile Include="lobby_state.cpp" />
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="menu_state.cpp" />
     <ClCompile Include="multiplayer_gamestate.cpp" />
     <ClCompile Include="music_player.cpp" />
@@ -182,7 +181,6 @@
     <ClInclude Include="bloom_effect.hpp" />
     <ClInclude Include="button.hpp" />
     <ClInclude Include="button_type.hpp" />
-    <ClInclude Include="choice.hpp" />
     <ClInclude Include="command.hpp" />
     <ClInclude Include="command_queue.hpp" />
     <ClInclude Include="component.hpp" />

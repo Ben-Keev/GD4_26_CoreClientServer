@@ -68,7 +68,7 @@ void StateStack::ApplyPendingChanges()
 		case StackActions::kPop:
 			m_stack.pop_back();
 			if (!m_stack.empty())
-				m_stack.back()->OnActivate();  // notify the newly exposed state (Claude)
+				m_stack.back()->OnActivate();  // (Ben's Claude) Trigger onActivate for the new state on top.
 			break;
 		case StackActions::kClear:
 			m_stack.clear();

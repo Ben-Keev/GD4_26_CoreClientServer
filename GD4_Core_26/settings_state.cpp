@@ -3,6 +3,10 @@
 #include "action.hpp"
 #include "key_binding.hpp"
 
+/// <summary>
+/// Remove 2nd local player bindings
+/// Modified: Ben with assistance of Claude
+/// </summary>
 SettingsState::SettingsState(StateStack& stack, Context context)
     : State(stack, context)
     , m_gui_container()
@@ -39,7 +43,7 @@ bool SettingsState::HandleEvent(const sf::Event& event)
 {
     bool is_key_binding = false;
 
-    //Iterate through all of the key binding buttons to see if they are being pressed, waiting for input from the user
+    // (Ben) Remove two player logic
     for (std::size_t action = 0; action < static_cast<int>(Action::kActionCount); ++action)
     {
         if (m_binding_buttons[action]->IsActive())
@@ -68,6 +72,10 @@ bool SettingsState::HandleEvent(const sf::Event& event)
     return false;
 }
 
+/// <summary>
+/// Remove 2 local player logic
+/// Modified: Ben
+/// </summary>
 void SettingsState::UpdateLabels()
 {
     for (std::size_t i = 0; i < static_cast<int>(Action::kActionCount); ++i)
@@ -84,7 +92,6 @@ void SettingsState::UpdateLabels()
 
 void SettingsState::AddButtonLabel(std::size_t index, std::size_t x, std::size_t y, const std::string& text, Context context)
 {
-    // For x==0, start at index 0, otherwise start at half of array
     index += static_cast<int>(Action::kActionCount) * x;
 
     m_binding_buttons[index] = std::make_shared<gui::Button>(context);

@@ -60,9 +60,6 @@
     <ClCompile Include="label.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="menu_state.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -146,9 +143,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="choice.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Server.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

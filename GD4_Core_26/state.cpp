@@ -9,6 +9,12 @@ State::~State()
 {
 }
 
+/// <summary>
+/// Add socket, Player details, and keys
+/// Modified: Ben
+/// </summary>
+/// <param name="keys">One player, one keybinding</param>
+/// <param name="socket">Connection is maintained between states</param>
 State::Context::Context(sf::RenderWindow& window, TextureHolder& textures, FontHolder& fonts, MusicPlayer& music, SoundPlayer& sound, KeyBinding& keys, sf::TcpSocket& socket, PlayerDetails& player_details) : window(&window), textures(&textures), fonts(&fonts), music(&music), sound(&sound), keys(&keys), socket(&socket), player_details(&player_details)
 {
 }
