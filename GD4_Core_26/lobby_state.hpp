@@ -12,6 +12,17 @@ public:
 	virtual bool HandleEvent(const sf::Event& event) override;
 
 private:
+	// (Claude AI)
+	struct PlayerEntry
+	{
+		uint8_t id;
+		std::string name;
+		int score;
+		int high_score;
+	};
+
+	std::vector<PlayerEntry> m_ids_players;
+
 	void HandlePacket(uint8_t packet_type, sf::Packet& packet);
 
 	void UpdateCountdownText(uint8_t countdown);
@@ -39,8 +50,6 @@ private:
 
 	sf::Time m_client_timeout;
 	sf::Time m_time_since_last_packet;
-
-	std::vector<std::pair<uint8_t, std::string>> m_ids_players;
 
 	// Does this client wants to skip the countdown??
 	bool m_vote_skip_countdown;

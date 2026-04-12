@@ -8,6 +8,10 @@
 #include <numeric>
 #include <iostream>
 
+std::string LoadPlayerName();
+int LoadHighScore();
+void SaveDetails(const std::string& name, int high_score);
+
 // ---------------------------------------------------------------------------
 // GetAddressFromFile
 // Reads the target server IP from "ip.txt" in the working directory.
@@ -84,7 +88,7 @@ LobbyState::LobbyState(StateStack& stack, Context context, bool firstTime)
 	m_players_list_text.setString("Players:\n");
 	Utility::CentreOrigin(m_players_list_text);
 	m_players_list_text.setPosition(
-		sf::Vector2f(100, m_window.getSize().y / 2.f));
+		sf::Vector2f(300, m_window.getSize().y / 2.f));
 
 
 	// Render one frame immediately so the user sees "Attempting to connect..."
@@ -114,9 +118,10 @@ LobbyState::LobbyState(StateStack& stack, Context context, bool firstTime)
 			// Try to establish a TCP connection — 5 second timeout for the handshake
 			auto status = context.socket->connect(*ip, SERVER_PORT, sf::seconds(5.f));
 
+			// (Claude AI)
 			if (status == sf::Socket::Status::Done)
 			{
-				m_connected = true;  // Handshake succeeded
+				m_connected = true;
 			}
 			else
 			{
@@ -139,6 +144,17 @@ LobbyState::LobbyState(StateStack& stack, Context context, bool firstTime)
 	{
 		m_connected = true;
 		m_time_since_last_packet = sf::Time::Zero;
+	}
+
+	// (Claude AI) Send our details to the server
+	if (m_connected)
+	{
+		sf::Packet details_packet;
+		details_packet << static_cast<uint8_t>(Client::PacketType::kPlayerDetails);
+		details_packet << context.player_details->m_name;
+		details_packet << context.player_details->m_score;
+		details_packet << LoadHighScore();
+		context.socket->send(details_packet);
 	}
 }
 
@@ -317,9 +333,10 @@ void LobbyState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 		RequestStackPush(StateID::kJoinGame);
 	}
 	break;
+
+	// (Claude AI)
 	case Server::PacketType::kPlayerList:
 	{
-		// Copilot generated
 		m_ids_players.clear();
 		uint8_t num_players;
 		packet >> num_players;
@@ -328,12 +345,19 @@ void LobbyState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 		{
 			uint8_t id;
 			std::string name;
-			packet >> id >> name;
-			m_ids_players.push_back({ id, name });
+			int score;
+			int high_score;
+			packet >> id >> name >> score >> high_score;
+			m_ids_players.push_back({ id, name, score, high_score }); // update struct to include score
 		}
 
-		m_players_list_text.setString("Players:\n" + std::accumulate(m_ids_players.begin(), m_ids_players.end(), std::string(),
-			[](const std::string& acc, const std::pair<uint8_t, std::string>& p) { return acc + "- " + p.second + "\n"; }));
+		std::string list = "Players:\n";
+		for (auto& p : m_ids_players)
+		{
+			list += "- " + p.name + " (MatchScore: " + std::to_string(p.score)
+				+ ", HighScore: " + std::to_string(p.high_score) + ")\n";
+		}
+		m_players_list_text.setString(list);
 		Utility::CentreOrigin(m_players_list_text);
 	}
 	break;

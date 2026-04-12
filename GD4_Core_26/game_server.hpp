@@ -26,6 +26,9 @@ private:
 		std::vector<uint8_t> m_aircraft_identifiers;
 		bool m_ready;
 		bool m_timed_out;
+		std::string m_name;
+		int m_score = 0;
+		int m_high_score = 0;
 	};
 
 	struct AircraftInfo
@@ -35,6 +38,8 @@ private:
 		float m_turret_rotation;
 		float m_aircraft_rotation;
 		std::map<uint8_t, bool> m_real_time_actions;
+		std::string m_name;
+		int m_score;
 	};
 
 	typedef std::unique_ptr<RemotePeer> PeerPtr;

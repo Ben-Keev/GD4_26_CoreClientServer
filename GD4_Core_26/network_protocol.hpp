@@ -32,6 +32,7 @@ namespace Client
 		kStateUpdate, //sf::Int32 with number of local aircraft, for each aircraft send sf::Int32 identifier, two floats for position, health and ammo 
 		kGameEvent, //This is for explosions
 		kQuit,
+		kPlayerDetails,
 		kHeartbeat, // This is a keep-alive packet sent periodically by the client to prevent server timeout in the lobby. No parameters
 		kVoteSkipCountdown // This is sent by the client when the user presses the "Skip Countdown" button in the lobby. The parameter is a boolean indicating whether the user wants to skip the countdown or not.
 	};

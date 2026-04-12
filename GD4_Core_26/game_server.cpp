@@ -66,20 +66,30 @@ GameServer::~GameServer()
 }
 
 // ---------------------------------------------------------------------------
-// NotifyPlayerSpawn
+// (Claude AI) NotifyPlayerSpawn
 // Broadcasts a kPlayerConnect packet to ALL peers so every client knows a
 // new aircraft has entered the game and where it spawned.
 // ---------------------------------------------------------------------------
 void GameServer::NotifyPlayerSpawn(uint8_t aircraft_identifier)
 {
-    sf::Packet packet;
-    // Every packet begins with its type identifier (cast to uint8_t for compactness)
-    packet << static_cast<uint8_t>(Server::PacketType::kPlayerConnect);
-    // Append the new aircraft's unique ID and its initial world position
-    packet << aircraft_identifier
-        << m_aircraft_info[aircraft_identifier].m_position.x
-        << m_aircraft_info[aircraft_identifier].m_position.y;
-    SendToAll(packet);
+    // Find the peer that owns this identifier
+    for (std::size_t i = 0; i < m_connected_players; ++i)
+    {
+        for (uint8_t id : m_peers[i]->m_aircraft_identifiers)
+        {
+            if (id == aircraft_identifier)
+            {
+                sf::Packet packet;
+                packet << static_cast<uint8_t>(Server::PacketType::kPlayerConnect);
+                packet << aircraft_identifier
+                    << m_aircraft_info[aircraft_identifier].m_position.x
+                    << m_aircraft_info[aircraft_identifier].m_position.y
+                    << m_peers[i]->m_name;
+                SendToAll(packet);
+                return;
+            }
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -435,6 +445,21 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
     }
     break;
 
+    // (Claude AI)
+    case Client::PacketType::kPlayerDetails:
+    {
+        std::string name;
+        int score;
+        int high_score;
+        packet >> name >> score >> high_score;
+        receiving_peer.m_name = name;
+        receiving_peer.m_score = score;
+        receiving_peer.m_high_score = high_score;
+        SendPlayerList();
+    }
+    break;
+    break;
+
     // Client notifies the server of a world event (e.g. an enemy exploded).
     // The server can optionally decide to spawn a pickup in response.
     // NOTE: Pickup spawning is currently commented out / disabled.
@@ -505,7 +530,7 @@ void GameServer::HandleIncomingConnections()
     }
 }
 
-/// <summary>
+/// <summary> (Claude AI)
 /// Send a player list to the lobby for everyone. Copilot generated.
 /// </summary>
 void GameServer::SendPlayerList()
@@ -517,9 +542,13 @@ void GameServer::SendPlayerList()
     {
         if (m_peers[i]->m_ready)
         {
-            // For demonstration, we're sending a placeholder name. In a real implementation,
-            // you would want to store and send actual player names.
-            packet << static_cast<uint8_t>(i + 1) << "Player " + std::to_string(i + 1);
+            for (uint8_t id : m_peers[i]->m_aircraft_identifiers)
+            {
+                packet << id
+                    << m_peers[i]->m_name    // from peer
+                    << m_peers[i]->m_score   // from peer
+                    << m_peers[i]->m_high_score;
+            }
         }
     }
     SendToAll(packet);
@@ -626,6 +655,7 @@ void GameServer::InformWorldState(sf::TcpSocket& socket)
                     << m_aircraft_info[identifier].m_position.y
                     << m_aircraft_info[identifier].m_hitpoints
                     << m_aircraft_info[identifier].m_turret_rotation;      // Already in degrees (server-side)
+                    << m_peers[i]->m_name;
             }
         }
     }

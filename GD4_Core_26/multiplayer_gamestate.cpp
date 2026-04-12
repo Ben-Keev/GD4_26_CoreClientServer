@@ -19,6 +19,10 @@
 
 #include <iostream>
 
+std::string LoadPlayerName();
+int LoadHighScore();
+void SaveDetails(const std::string& name, int high_score);
+
 // ---------------------------------------------------------------------------
 // MultiplayerGameState constructor
 // Initialises the world, UI text objects, and attempts to connect to the
@@ -403,6 +407,8 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
     // object with the correct key bindings (keys1) and marks the game as started.
     case Server::PacketType::kSpawnSelf:
     {
+        GetContext().player_details->m_score = 0;
+
         uint8_t aircraft_identifier;
         sf::Vector2f aircraft_position;
 
@@ -430,7 +436,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
     }
     break;
 
-    // --- kPlayerConnect ---
+    // --- kPlayerConnect --- (Claude AI)
     // A new remote player has joined.  Create a Player WITHOUT key bindings
     // (nullptr) since this client does not control it; the server will send
     // position updates to animate it.
@@ -438,19 +444,19 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
     {
         uint8_t aircraft_identifier;
         sf::Vector2f aircraft_position;
-        packet >> aircraft_identifier >> aircraft_position.x >> aircraft_position.y;
+        std::string name;
+        packet >> aircraft_identifier >> aircraft_position.x >> aircraft_position.y >> name;
 
-        // nullptr key bindings = remote player; input handled via network packets only
+        m_remote_player_details[aircraft_identifier] = *GetContext().player_details;
+        m_remote_player_details[aircraft_identifier].m_name = name;
+
         m_players[aircraft_identifier].reset(
             new Player(GetContext().socket, aircraft_identifier, nullptr, GetContext().window));
 
-        // Spawn the aircraft in the world scene graph and position it
         Tank* aircraft = m_world.AddAircraft(
-            aircraft_identifier, 
-            GetContext().player_details,
-            { 512, 288 }
-        );
-
+            aircraft_identifier,
+            &m_remote_player_details[aircraft_identifier],
+            { 512, 288 });
         aircraft->setPosition(aircraft_position);
     }
     break;
@@ -467,7 +473,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
     }
     break;
 
-    // --- kInitialState ---
+    // --- kInitialState --- (Context AI)
     // Sent to a newly connected client to describe all aircraft that already
     // exist in the game world (players who were connected before us).
     // Also communicates the current battlefield scroll position.
@@ -489,11 +495,13 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
             sf::Vector2f aircraft_position;
             float turret_rotation;
 
+            std::string name;
             packet >> aircraft_identifier
                 >> aircraft_position.x
                 >> aircraft_position.y
                 >> hitpoints
                 >> turret_rotation;
+                >> name;
 
             // Skip if this is our own aircraft — already spawned via kSpawnSelf (Claude)
 			if (aircraft_identifier == m_local_player_identifier)
@@ -501,13 +509,16 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
                 continue;
             }
 
+            m_remote_player_details[aircraft_identifier] = *GetContext().player_details;
+            m_remote_player_details[aircraft_identifier].m_name = name;
+
             // All existing players are remote from this client's perspective (nullptr keys)
             m_players[aircraft_identifier].reset(
                 new Player(GetContext().socket, aircraft_identifier, nullptr, GetContext().window));
 
             Tank* aircraft = m_world.AddAircraft(
                 aircraft_identifier,
-                GetContext().player_details,
+                &m_remote_player_details[aircraft_identifier],
                 { 512, 288 });
             
             aircraft->setPosition(aircraft_position);
@@ -589,8 +600,19 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
         }
     }
     break;
+    // (Claude AI)
     case Server::PacketType::kReturnToLobby :
     {
+        // Check and update high score
+        int current_score = GetContext().player_details->m_score;
+        int high_score = LoadHighScore();
+
+        if (current_score > high_score)
+        {
+            SaveDetails(GetContext().player_details->m_name, current_score);
+            std::cout << "New high score: " << current_score << "\n";
+        }
+
         m_returning_to_lobby = true;
 
 		RequestStackClear(); // Pop the multiplayer game state & pause state
@@ -606,7 +628,16 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
 
     case Server::PacketType::kPlayerList:
     {
-        std::cout << "kPlayerList received in game state - ignoring" << std::endl;
+        uint8_t count;
+        packet >> count;
+        for (uint8_t i = 0; i < count; ++i)
+        {
+            uint8_t id;
+            std::string name;
+            int score;
+            int high_score;
+            packet >> id >> name >> score >> high_score;
+        }
     }
     break;
 
