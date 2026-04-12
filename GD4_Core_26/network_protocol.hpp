@@ -1,5 +1,6 @@
 #pragma once
 #include <SFML/System/Vector2.hpp>
+#include <SFML/Network/Packet.hpp>
 const unsigned short SERVER_PORT = 50000; //Greater than 49151, in dynamic port range
 namespace Server
 {
@@ -59,6 +60,22 @@ namespace GameActions
 		Type type;
 		sf::Vector2f position;
 		uint16_t identifier; // An identifier which can carry extra information if needed.
+	};
+}
+
+namespace PacketStructs
+{
+	// Claude suggested - a struct to hold the state of an aircraft for packing into the kUpdateClientState packet. Reduce duplicate code.
+	struct AircraftStatePacket
+	{
+		uint8_t identifier;
+		float x, y;
+		uint8_t hitpoints;
+		float turret_rotation;
+		float hull_rotation;
+
+		void Write(sf::Packet& p) const { p << identifier << x << y << hitpoints << turret_rotation << hull_rotation; }
+		void Read(sf::Packet& p) { p >> identifier >> x >> y >> hitpoints >> turret_rotation >> hull_rotation; }
 	};
 }
 

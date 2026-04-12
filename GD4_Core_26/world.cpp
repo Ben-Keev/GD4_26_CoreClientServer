@@ -103,14 +103,19 @@ Tank* World::AddAircraft(uint8_t identifier, PlayerDetails* details, sf::Vector2
 
 	// Claude - Plant a callback on tanks so that projectiles can be registered
 	// Remove projectiles that are marked for removal
+	// Claude - modified to prevent a crash
 	tank->m_on_projectile_fired = [this](Projectile* p)
 	{
 		m_projectile_map[p->GetIdentifier()] = p;
 
-		// When this projectile is destroyed, remove it from the map
-		p->m_on_destroyed = [this](uint16_t id)
+		std::weak_ptr<bool> alive = m_alive_token;  // capture weak reference
+		p->m_on_destroyed = [this, alive](uint16_t id)
 			{
-				m_projectile_map.erase(id);
+				// Only erase if the World still exists
+				if (auto token = alive.lock())
+				{
+					m_projectile_map.erase(id);
+				}
 			};
 	};
 
@@ -545,15 +550,22 @@ void World::HandleCollisions()
 		{
 			auto& tank = static_cast<Tank&>(*pair.first);
 			auto& projectile = static_cast<Projectile&>(*pair.second);
+
+			// Claude - Guard against already-destroyed tanks or projectiles
+			if (tank.IsMarkedForRemoval() || projectile.IsMarkedForRemoval())
+				continue;
+
 			if (&tank == &projectile.GetOwner() && projectile.GetBounces() >= 1)
 			{
-				projectile.GetOwner().AddPoints(-1);
+				tank.AddPoints(-1);
 				tank.Damage(projectile.GetDamage());
 				projectile.Destroy();
 			}
+			// Claude
 			else if (&tank != &projectile.GetOwner())
 			{
-				projectile.GetOwner().AddPoints(1);
+				if (!projectile.GetOwner().IsMarkedForRemoval())
+					projectile.GetOwner().AddPoints(1);
 				tank.Damage(projectile.GetDamage());
 				projectile.Destroy();
 			}
@@ -592,10 +604,15 @@ void World::HandleCollisions()
 			tank.setPosition(sf::Vector2f(currentPosition.x, currentPosition.y));
 		}
 		// Handle projectile/breakable wall collisions
-		else if (MatchesCategories(pair, ReceiverCategories::kProjectile, ReceiverCategories::kWoodWall))
+		else if (MatchesCategories(pair, ReceiverCategories::kTank, ReceiverCategories::kProjectile))
 		{
 			// Claude -> send a wall destruction as a game event
-			auto& projectile = static_cast<Projectile&>(*pair.first);
+			auto& tank = static_cast<Tank&>(*pair.first);
+			auto& projectile = static_cast<Projectile&>(*pair.second);
+
+			std::cout << "Projectile owner id: " << projectile.GetOwner().GetIdentifier()
+				<< " tank id: " << tank.GetIdentifier() << std::endl;
+
 			auto& wall = static_cast<Wall&>(*pair.second);
 
 			projectile.Destroy();
@@ -612,7 +629,6 @@ void World::HandleCollisions()
 				}
 				// Don't damage the wall here — wait for server kWallDestroyed packet
 			}
-
 		}
 		// Handle projectile/durable wall collisions
 		else if (MatchesCategories(pair, ReceiverCategories::kProjectile, ReceiverCategories::kWall))
@@ -717,4 +733,9 @@ void World::UpdateSounds()
 
 	m_sounds.SetListenerPosition(listener_position);
 	m_sounds.RemoveStoppedSounds();
+}
+
+World::~World()
+{
+	*m_alive_token = false;
 }

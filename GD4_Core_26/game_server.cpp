@@ -197,7 +197,8 @@ void GameServer::ExecutionThread()
 void GameServer::Tick()
 {
     // Broadcast the latest aircraft positions/HP to every connected client
-    UpdateClientState();
+    if (m_game_started && !m_lobby_active)
+        UpdateClientState();
 
     if (m_lobby_active) 
     {
@@ -417,31 +418,20 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
         uint8_t num_aircraft;
         packet >> num_aircraft;  // How many local aircraft this client is reporting
 
+        // Claude - use packet struct
         for (uint8_t i = 0; i < num_aircraft; ++i)
         {
-            uint8_t aircraft_identifier;
-            uint8_t aircraft_hitpoints;
-            sf::Vector2f aircraft_position;
-            uint8_t turret_byte;      // Compressed turret rotation: 0-255 maps to 0-360 degrees
-            float aircraft_rotation;  // Hull rotation in degrees (uncompressed)
+            PacketStructs::AircraftStatePacket state;
+            state.Read(packet);
 
-            packet >> aircraft_identifier
-                >> aircraft_position.x
-                >> aircraft_position.y
-                >> aircraft_hitpoints
-                >> turret_byte
-                >> aircraft_rotation;
-
-            // Only update if the server still recognises this aircraft, prevent generation of duplicate aircraft (Claude)
-            auto itr = m_aircraft_info.find(aircraft_identifier);
+            auto itr = m_aircraft_info.find(state.identifier);
             if (itr != m_aircraft_info.end())
             {
-                itr->second.m_position = aircraft_position;
-                itr->second.m_hitpoints = aircraft_hitpoints;
-                itr->second.m_turret_rotation = (static_cast<float>(turret_byte) / 255.f) * 360.f;
-                itr->second.m_aircraft_rotation = aircraft_rotation;
+                itr->second.m_position = sf::Vector2f(state.x, state.y);
+                itr->second.m_hitpoints = state.hitpoints;
+                itr->second.m_turret_rotation = (static_cast<float>(state.turret_rotation) / 255.f) * 360.f;
+                itr->second.m_aircraft_rotation = state.hull_rotation;
             }
-            // If not found, silently discard — the aircraft has already been removed
         }
     }
     break;
@@ -691,28 +681,25 @@ void GameServer::SendToAll(sf::Packet& packet)
 // ---------------------------------------------------------------------------
 void GameServer::UpdateClientState()
 {
-    sf::Packet update_client_state_packet;
-    update_client_state_packet << static_cast<uint8_t>(Server::PacketType::kUpdateClientState);
+    sf::Packet update_packet;
+    update_packet << static_cast<uint8_t>(Server::PacketType::kUpdateClientState);
+    update_packet << static_cast<float>(m_battlefield_rect.position.y + m_battlefield_rect.size.y);
+    update_packet << static_cast<uint8_t>(m_aircraft_info.size());
 
-    // Current bottom edge of the battlefield scroll region (used by clients to
-    // determine the view position relative to the world)
-    update_client_state_packet << static_cast<float>(m_battlefield_rect.position.y + m_battlefield_rect.size.y);
-
-    // Total number of aircraft entries that follow in the packet (Replace to use more accurate m_aircraft_infor_size.
-    update_client_state_packet << static_cast<uint8_t>(m_aircraft_info.size());
-
+	// Claude - Use packet struct to write aircraft state
     for (const auto& aircraft : m_aircraft_info)
     {
-        update_client_state_packet
-            << aircraft.first                        // Unique aircraft identifier
-            << aircraft.second.m_position.x          // World X
-            << aircraft.second.m_position.y          // World Y
-            << aircraft.second.m_hitpoints           // Current HP (0-100)
-            << aircraft.second.m_turret_rotation        // Turret angle (stored as degrees on server)
-		    << aircraft.second.m_aircraft_rotation; // Hull rotation (degrees)
+        PacketStructs::AircraftStatePacket state;
+        state.identifier = aircraft.first;
+        state.x = aircraft.second.m_position.x;
+        state.y = aircraft.second.m_position.y;
+        state.hitpoints = aircraft.second.m_hitpoints;
+        state.turret_rotation = aircraft.second.m_turret_rotation;
+        state.hull_rotation = aircraft.second.m_aircraft_rotation;
+        state.Write(update_packet);
     }
 
-    SendToAll(update_client_state_packet);
+    SendToAll(update_packet);
 }
 
 // ---------------------------------------------------------------------------

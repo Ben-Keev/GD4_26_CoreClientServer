@@ -44,6 +44,8 @@ public:
 	void DestroyProjectile(uint16_t id);
 	void OnProjectileDestroyed(uint16_t id);
 
+	~World();
+
 private:
 	void LoadTextures();
 	void BuildScene();
@@ -101,4 +103,7 @@ private:
 
 	// In world.hpp
 	std::map<uint16_t, Projectile*> m_projectile_map;
+
+	// Claude - Prevent crash when a projectile hits its own tank
+	std::shared_ptr<bool> m_alive_token = std::make_shared<bool>(true);
 };

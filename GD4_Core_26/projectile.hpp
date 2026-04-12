@@ -28,6 +28,7 @@ public:
 	bool CanBounce() const;
 	void AddBounce();
 
+	bool IsMarkedForRemoval() const override;
 	uint16_t GetIdentifier() const;
 
 	std::function<void(uint16_t)> m_on_destroyed;

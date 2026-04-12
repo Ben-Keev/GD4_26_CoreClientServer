@@ -114,3 +114,8 @@ void Projectile::DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) 
 uint16_t Projectile::GetIdentifier() const {
     return projectile_id;
 }
+
+bool Projectile::IsMarkedForRemoval() const
+{
+    return IsDestroyed();
+}

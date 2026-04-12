@@ -224,18 +224,23 @@ bool MultiplayerGameState::Update(sf::Time dt)
             position_update_packet << static_cast<uint8_t>(Client::PacketType::kStateUpdate);
             position_update_packet << static_cast<uint8_t>(1);
 
+            // Claude - use packet struct
             if (Tank* aircraft = m_world.GetAircraft(m_local_player_identifier))
             {
-                // Compress turret rotation from [0, 360] degrees into a uint8_t [0, 255]
-                // to save bandwidth. The server decompresses back to degrees when relaying.
-                position_update_packet << m_local_player_identifier
-                    << aircraft->getPosition().x
-                    << aircraft->getPosition().y
-                    << static_cast<uint8_t>(aircraft->GetHitPoints())
-                    << static_cast<uint8_t>(aircraft->GetTurret()->getRotation().asDegrees() / 360.f * 255.f)
-                    << aircraft->getRotation().asDegrees();  // Hull rotation — full float precision
+                PacketStructs::AircraftStatePacket state;
+                state.identifier = m_local_player_identifier;
+                state.x = aircraft->getPosition().x;
+                state.y = aircraft->getPosition().y;
+                state.hitpoints = static_cast<uint8_t>(aircraft->GetHitPoints());
+                state.turret_rotation = static_cast<uint8_t>(aircraft->GetTurret()->getRotation().asDegrees() / 360.f * 255.f);
+                state.hull_rotation = aircraft->getRotation().asDegrees();
+
+                sf::Packet position_update_packet;
+                position_update_packet << static_cast<uint8_t>(Client::PacketType::kStateUpdate);
+                position_update_packet << static_cast<uint8_t>(1);
+                state.Write(position_update_packet);
+                GetContext().socket->send(position_update_packet);
             }
-            GetContext().socket->send(position_update_packet);
             m_tick_clock.restart();
         }
 
@@ -565,47 +570,21 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
         uint8_t aircraft_count;
         packet >> current_world_position >> aircraft_count;
 
-        // current_view_position could be used to reconcile the scroll, but is
-        // currently calculated and unused (kept for potential future use)
-        float current_view_position =
-            m_world.GetViewBounds().position.y + m_world.GetViewBounds().size.y;
-
+        // Claude - use packet struct
         for (uint8_t i = 0; i < aircraft_count; ++i)
         {
-            sf::Vector2f aircraft_position;
-            uint8_t aircraft_identifier;
-            uint8_t hitpoints;
-            float turret_rotation;  // Server sends this in degrees (decompressed server-side)
-            float aircraft_rotation;
+            PacketStructs::AircraftStatePacket state;
+            state.Read(packet);
 
-            packet >> aircraft_identifier
-                >> aircraft_position.x
-                >> aircraft_position.y
-                >> hitpoints
-                >> turret_rotation
-                >> aircraft_rotation;
+            Tank* aircraft = m_world.GetAircraft(state.identifier);
+            bool is_local = state.identifier == m_local_player_identifier;
 
-            Tank* aircraft = m_world.GetAircraft(aircraft_identifier);
-
-            // Check if this is the aircraft we control locally
-			bool is_local_plane = aircraft_identifier == m_local_player_identifier;
-
-            if (aircraft && !is_local_plane)
+            if (aircraft && !is_local)
             {
-                // (Claude AI)
-                // Framerate-independent exponential interpolation towards server position.
-                // 0.1f controls smoothing (lower = snappier), 30.f should match server tick rate.
                 float blend = 1.f - std::pow(0.5f, dt.asSeconds() * 30.f);
-                sf::Vector2f interpolated_position =
-                    aircraft->getPosition()
-                    + (aircraft_position - aircraft->getPosition()) * blend;
-                aircraft->setPosition(interpolated_position);
-
-                aircraft->setRotation(sf::degrees(aircraft_rotation));
-
-                // Turret angle is snapped directly — the rotation is small and
-                // frequent enough that interpolation is not necessary
-                aircraft->GetTurret()->setRotation(sf::degrees(turret_rotation));
+                aircraft->setPosition(aircraft->getPosition() + (sf::Vector2f(state.x, state.y) - aircraft->getPosition()) * blend);
+                aircraft->setRotation(sf::degrees(state.hull_rotation));
+                aircraft->GetTurret()->setRotation(sf::degrees(state.turret_rotation));
             }
         }
     }
