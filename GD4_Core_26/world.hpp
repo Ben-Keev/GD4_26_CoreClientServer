@@ -15,6 +15,10 @@
 #include <array>
 #include "network_node.hpp"
 
+/// <summary>
+/// World
+/// Class Authors: John Loane, Ben Mc Keever, Kaylon Riordan, with assistance from Claude AI
+/// </summary>
 class World
 {
 public:
@@ -38,11 +42,14 @@ public:
 
 	const sf::View& GetCamera() const { return m_camera; };
 
+	// (Ben's Claude)
 	void DestroyWallAt(sf::Vector2f position);
+	
+	// (Ben)
 	void SetLocalPlayerIdentifier(uint8_t identifier);
 
+	// (Ben's Claude)
 	void DestroyProjectile(uint16_t id);
-	void OnProjectileDestroyed(uint16_t id);
 
 	~World();
 
@@ -82,16 +89,11 @@ private:
 	std::array<SceneNode*, static_cast<int>(SceneLayers::kLayerCount)> m_scene_layers;
 	sf::FloatRect m_world_bounds;
 	sf::Vector2f m_center;
-	float m_scroll_speed;
-	float m_scrollspeed_compensation;
 
 	std::vector<Tank*> m_player_tank;
 	uint8_t m_local_player_identifier;
 
 	CommandQueue m_command_queue;
-
-	std::vector<SpawnPoint> m_enemy_spawn_points;
-	std::vector<Tank*> m_active_enemies;
 
 	BloomEffect m_bloom_effect;
 	bool m_networked_world;
@@ -101,12 +103,12 @@ private:
 	std::map<uint8_t, Wall*> m_wall_map;
 	uint8_t m_wall_id_counter = 0;
 
-	// In world.hpp
+	// (Ben's Claude) Track all projectiles
 	std::map<uint16_t, Projectile*> m_projectile_map;
 
-	// Claude - Prevent crash when a projectile hits its own tank
+	// (Ben's Claude) Prevent crash when projectile hit's its owner
 	std::shared_ptr<bool> m_alive_token = std::make_shared<bool>(true);
 
-	// Claude - Bugfix for projectiles that are destroyed before they can be registered in m_projectile_map
+	// (Ben's Claude) Fix desync caused by projectiles destroyed before the map could register them
 	std::set<uint16_t> m_pending_destroy_ids;
 };

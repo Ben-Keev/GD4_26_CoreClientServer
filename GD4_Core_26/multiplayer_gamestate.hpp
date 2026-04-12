@@ -2,9 +2,12 @@
 #include "state.hpp"
 #include "world.hpp"
 #include "player.hpp"
-#include "game_server.hpp"
 #include "network_protocol.hpp"
 
+/// <summary>
+/// Initialise Multiplayer Game State
+/// Class Authors: John Loane, Ben Mc Keever, Kaylon Riordan, with assistance from Claude AI
+/// </summary>
 class MultiplayerGameState : public State
 {
 public:

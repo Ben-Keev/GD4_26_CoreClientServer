@@ -7,6 +7,10 @@
 #include "particle_node.hpp"
 #include "sound_node.hpp"
 
+/// <summary>
+/// World
+/// Class Authors: John Loane, Ben Mc Keever, Kaylon Riordan, with assistance from Claude AI
+/// </summary>
 World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sounds, bool networked)
 	: m_target(output_target)
 	, m_camera(output_target.getDefaultView())
@@ -17,11 +21,7 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	, m_scene_layers()
 	, m_world_bounds(sf::Vector2f(0.f, 0.f), sf::Vector2f(m_camera.getSize().x, m_camera.getSize().y))
 	, m_center(m_camera.getSize().x / 2.f, m_world_bounds.size.y - m_camera.getSize().y / 2.f)
-	, m_scroll_speed(0)
-	, m_scrollspeed_compensation(1.f)
-	, m_player_tank()
-	, m_enemy_spawn_points()
-	, m_active_enemies()
+	, m_player_tank()				// tanks
 	, m_networked_world(networked)
 	, m_network_node(nullptr)
 	, m_finish_sprite(nullptr)
@@ -32,6 +32,11 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	m_camera.setCenter(m_center);
 }
 
+/// <summary>
+/// World update
+/// Modified: Ben - Remove enemy and scrolling
+/// </summary>
+/// <param name="dt"></param>
 void World::Update(sf::Time dt)
 {
 	for (Tank* t : m_player_tank)
@@ -57,6 +62,10 @@ void World::Update(sf::Time dt)
 	AdaptPlayerPosition();
 }
 
+/// <summary>
+/// Draw world to screen
+/// Unmodified
+/// </summary>
 void World::Draw()
 {
 	if (PostEffect::IsSupported())
@@ -74,6 +83,10 @@ void World::Draw()
 	}
 }
 
+/// <summary>
+/// Get tank given id
+/// Unmodified
+/// </summary>
 Tank* World::GetAircraft(int identifier) const
 {
 	for (Tank* t : m_player_tank)
@@ -86,6 +99,10 @@ Tank* World::GetAircraft(int identifier) const
 	return nullptr;
 }
 
+/// <summary>
+/// Delete an aircraft
+/// Modified: (Ben) Remove vector of player aircrafts
+/// </summary>
 void World::RemoveAircraft(uint8_t identifier)
 {
 	Tank* tank = GetAircraft(identifier);
@@ -95,20 +112,24 @@ void World::RemoveAircraft(uint8_t identifier)
 	}
 }
 
+/// <summary>
+/// Add an aircraft
+/// Modified: Ben with the assistance of Claude, Kaylon
+/// </summary>
 Tank* World::AddAircraft(uint8_t identifier, PlayerDetails* details, sf::Vector2f position)
 {
 	std::unique_ptr<Tank> tank(new Tank(TankType::kTank, m_textures, m_fonts, identifier, details));
-
+	
+	// Default position given with call
 	tank->setPosition(position);
 
-	// Claude - Plant a callback on tanks so that projectiles can be registered
-	// Remove projectiles that are marked for removal
-	// Claude - modified to prevent a crash
+	// (Ben's Claude) A callback lambda on the tank registers projectiles in a map in world
+	// This way world can keep track of projectiles and remove them when packet kWallDestroyed is received
 	tank->m_on_projectile_fired = [this](Projectile* p)
 	{
 		m_projectile_map[p->GetIdentifier()] = p;
 
-		// Check if this projectile was already scheduled for destruction
+		// (Ben's Claude) Check if this projectile was already scheduled for destruction
 		if (m_pending_destroy_ids.count(p->GetIdentifier()))
 		{
 			p->Destroy();
@@ -117,6 +138,7 @@ Tank* World::AddAircraft(uint8_t identifier, PlayerDetails* details, sf::Vector2
 			return;
 		}
 
+		// (Ben's Claude) add this to prevent a crash when tank shoots itself
 		std::weak_ptr<bool> alive = m_alive_token;
 		p->m_on_destroyed = [this, alive](uint16_t id)
 			{
@@ -128,34 +150,50 @@ Tank* World::AddAircraft(uint8_t identifier, PlayerDetails* details, sf::Vector2
 	};
 
 	// std::cout << "Spawning player at position " << player->getPosition().x << ", " << player->getPosition().y << std::endl;
-	std::cout << "World::AddTank " << +identifier << std::endl;
+	//std::cout << "World::AddTank " << +identifier << std::endl;
 
+	// Unmodified
 	m_player_tank.emplace_back(tank.get());
 	m_scene_layers[static_cast<int>(SceneLayers::kTanks)]->AttachChild(std::move(tank));
 	return m_player_tank.back();
 }
 
+/// <summary>
+/// Unmodified
+/// </summary>
 bool World::PollGameAction(GameActions::Action& out)
 {
 	return m_network_node->PollGameAction(out);
 }
 
+/// <summary>
+/// Unmodified
+/// </summary>
 void World::SetCurrentBattleFieldPosition(float lineY)
 {
 	m_camera.setCenter(sf::Vector2f(m_camera.getCenter().x, lineY - m_camera.getSize().y / 2));
 	m_center.y = m_world_bounds.size.y;
 }
 
+/// <summary>
+/// Unmodified
+/// </summary>
 void World::SetWorldHeight(float height)
 {
 	m_world_bounds.size.y = height;
 }
 
+/// <summary>
+/// Unmodified
+/// </summary>
 CommandQueue& World::GetCommandQueue()
 {
 	return m_command_queue;
 }
 
+/// <summary>
+/// Unmodified. Unused for our game.
+/// </summary>
 bool World::HasAlivePlayer() const
 {
 	return !m_player_tank.empty();
@@ -170,6 +208,10 @@ void World::LoadTextures()
 	m_textures.Load(TextureID::kExterior, "Media/Textures/Exterior.png");
 }
 
+/// <summary>
+/// Modified: Ben
+/// Tanks are no longer spawned in here.
+/// </summary>
 void World::BuildScene()
 {
 	//Initialise the different layers
@@ -215,6 +257,9 @@ void World::BuildScene()
 	m_scene_layers[static_cast<int>(SceneLayers::kParticles)]->AttachChild(std::move(propellantNode));
 }
 
+/// <summary>
+/// Unmodified
+/// </summary>
 void World::AdaptPlayerVelocity()
 {
 	for (Tank* tank : m_player_tank)
@@ -226,11 +271,12 @@ void World::AdaptPlayerVelocity()
 		{
 			tank->SetVelocity(velocity / std::sqrt(2.f));
 		}
-		//Add scrolling velocity
-		tank->Accelerate(0.f, m_scroll_speed);
 	}
 }
 
+/// <summary>
+/// Unmodified
+/// </summary>
 void World::AdaptPlayerPosition()
 {
 	//keep player on the screen
@@ -478,7 +524,7 @@ void World::AddWalls()
 }
 
 /// <summary>
-/// Authored: Kaylon Riordan D00255039
+/// Authored: Kaylon Riordan D00255039 Modified: Ben
 /// Spawn a wall, on the wall layer, based on specified type, position quordinates, and rotation given in degrees
 /// </summary>
 void World::SpawnWall(WallType type, float x, float y, float rotation)
@@ -487,7 +533,7 @@ void World::SpawnWall(WallType type, float x, float y, float rotation)
     wall->setPosition(sf::Vector2f(x, y));
     wall->setRotation(sf::degrees(rotation));
 
-	// Claude - Store a pointer to the wooden walls.
+	// (Ben's CLaude) Store woodenwalls to a map so they can be accessed via an ID.
 	if (type == WallType::kWoodWall)
 	{
 		Wall* wall_ptr = wall.get();
@@ -495,15 +541,20 @@ void World::SpawnWall(WallType type, float x, float y, float rotation)
 		wall_ptr->SetIdentifier(m_wall_id_counter - 1);
 	}
 
-
     m_scene_layers[static_cast<int>(SceneLayers::kWalls)]->AttachChild(std::move(wall));
 }
 
+/// <summary>
+/// Unmodified
+/// </summary>
 sf::FloatRect World::GetViewBounds() const
 {
 	return sf::FloatRect(m_camera.getCenter() - m_camera.getSize() / 2.f, m_camera.getSize());
 }
 
+/// <summary>
+/// Unmodified
+/// </summary>
 sf::FloatRect World::GetBattleFieldBounds() const
 {
 	sf::FloatRect bounds = GetViewBounds();
@@ -512,6 +563,9 @@ sf::FloatRect World::GetBattleFieldBounds() const
 	return bounds;
 }
 
+/// <summary>
+/// Unmodified
+/// </summary>
 bool MatchesCategories(SceneNode::Pair& colliders, ReceiverCategories type1, ReceiverCategories type2)
 {
 	unsigned int category1 = colliders.first->GetCategory();
@@ -532,6 +586,9 @@ bool MatchesCategories(SceneNode::Pair& colliders, ReceiverCategories type1, Rec
 	}
 }
 
+/// <summary>
+/// Modified: Ben & Kaylon with assistance from claude
+/// </summary>
 void World::HandleCollisions()
 {
 	std::set<SceneNode::Pair> collision_pairs;
@@ -611,20 +668,24 @@ void World::HandleCollisions()
 			// Update position to one with no wall collision
 			tank.setPosition(sf::Vector2f(currentPosition.x, currentPosition.y));
 		}
-		// Handle projectile/breakable wall collisions
+		// (Ben's Claude) Handle Projectile & Destructible wall collision
 		else if (MatchesCategories(pair, ReceiverCategories::kProjectile, ReceiverCategories::kWoodWall))
 		{
 			auto& projectile = static_cast<Projectile&>(*pair.first);
 			auto& wall = static_cast<Wall&>(*pair.second);
 
-			// Claude - Ignore collision if projectile just spawned and hasn't cleared the owner yet
+			// (Ben's Claude) Ignore collision if projectile just spawned and hasn't cleared the owner yet
+			// Fixes a bug where projectiles would travel on remote clients if they were spawned inside the wooden wall
 			if (projectile.IsMarkedForRemoval())
 				continue;
 
+			// Destroy the projectile locally
 			projectile.Destroy();
 
+			// (Ben's Claude)
 			if (m_networked_world)
 			{
+				// Send a packet that signifies the wall to destroy and the projectile which destroyed it
 				if (m_network_node && projectile.GetOwner().GetIdentifier() == m_local_player_identifier)
 				{
 					m_network_node->NotifyGameAction(GameActions::kWallDestroyed, wall.getPosition(), projectile.GetIdentifier());
@@ -687,7 +748,10 @@ void World::HandleCollisions()
 	}
 }
 
-// Claude - DestroyProjectile becomes a simple lookup
+/// <summary>
+/// Destory a Projectile of a given ID by looking it up in the map
+/// Authored: Ben's Claude
+/// </summary>
 void World::DestroyProjectile(uint16_t id)
 {
 	auto itr = m_projectile_map.find(id);
@@ -703,7 +767,10 @@ void World::DestroyProjectile(uint16_t id)
 	}
 }
 
-// Claude - Drestroy a wall at a certain position
+/// <summary>
+/// Destroy a wall at a given position
+/// Authored: Ben's Claude
+/// </summary>
 void World::DestroyWallAt(sf::Vector2f position)
 {
 	for (auto& pair : m_wall_map)
@@ -718,10 +785,17 @@ void World::DestroyWallAt(sf::Vector2f position)
 	}
 }
 
+/// <summary>
+/// Set the identifier of the local player so it can be accessed within world
+/// Authored: Ben
+/// </summary>
 void World::SetLocalPlayerIdentifier(uint8_t identifier) {
 	m_local_player_identifier = identifier;
 }
 
+/// <summary>
+/// Unmodified
+/// </summary>
 void World::UpdateSounds()
 {
 	sf::Vector2f listener_position;
@@ -743,6 +817,10 @@ void World::UpdateSounds()
 	m_sounds.RemoveStoppedSounds();
 }
 
+/// <summary>
+/// Signal to lambda's that the world no longer exists. Prevent crashes.
+/// Authored: Ben's Claude
+/// </summary>
 World::~World()
 {
 	*m_alive_token = false;

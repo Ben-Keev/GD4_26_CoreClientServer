@@ -1,18 +1,6 @@
-// ============================================================
-// GEN AI - Commented by Claude
-// multiplayer_gamestate.cpp
-// Implements the client-side multiplayer game state.
-// This state manages the connection to the game server,
-// drives the local world simulation, and translates incoming
-// server packets into scene-graph mutations (spawning aircraft,
-// updating positions, removing dead planes, etc.).
-// It sits in the State Stack alongside the menu, pause, and
-// game-over states, and is pushed when a multiplayer session begins.
-// ============================================================
-
 #include "multiplayer_gamestate.hpp"
 #include "music_player.hpp"
-#include "utility.hpp"                // CentreOrigin helper
+#include "utility.hpp"
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Network/Packet.hpp>
