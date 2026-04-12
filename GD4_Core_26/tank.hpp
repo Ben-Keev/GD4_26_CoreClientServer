@@ -14,6 +14,10 @@
 
 struct PlayerDetails;
 
+/// <summary>
+/// Formerly Aircraft.cpp
+/// Modified: Ben with assistance of Claude, Kaylon
+/// </summary>
 class Tank : public Entity
 {
 public:
