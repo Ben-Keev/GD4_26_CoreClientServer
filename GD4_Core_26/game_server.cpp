@@ -16,6 +16,7 @@ namespace
 /// <summary>
 /// Server
 /// Modified: Ben Mc Keever, Kaylon Riordan, Assisted by Claude
+/// (Kaylon)
 /// </summary>
 GameServer::GameServer(sf::Vector2f battlefield_size)
     : m_thread(&GameServer::ExecutionThread, this)  
@@ -124,6 +125,7 @@ void GameServer::SetListening(bool enable)
 
 /// <summary>
 /// Loop that handles tickrate and framerate
+/// (Kaylon) Increase tick rate to 30 to improve performance noticably
 /// </summary>
 void GameServer::ExecutionThread()
 {
@@ -162,7 +164,7 @@ void GameServer::ExecutionThread()
             tick_time -= tick_rate;
         }
 
-        // Run client at the same time as server. Reduced to 10ms.
+        // (Kaylon) Run client at the same time as server. Reduced to 10ms.
         sf::sleep(sf::milliseconds(10));
     }
 }
@@ -320,7 +322,7 @@ void GameServer::HandleIncomingPackets()
 
 /// <summary>
 /// Handle Packets from clients
-/// Modified: Ben with assistance from Claude
+/// Modified: Ben and Kaylon with assistance from Claude
 /// </summary>
 void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving_peer, bool& detected_timeout)
 {
@@ -398,6 +400,7 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
             {
                 itr->second.m_position = sf::Vector2<uint16_t>(state.x, state.y);
                 itr->second.m_hitpoints = state.hitpoints;
+                // (Kaylon's Claude) multiplyrotation down to 255 points so it only uses 1 byte over the network
                 itr->second.m_turret_rotation = (static_cast<float>(state.turret_rotation) / 255.f) * 360.f;
                 itr->second.m_aircraft_rotation = (static_cast<float>(state.hull_rotation) / 255.f) * 360.f;
             }
@@ -646,7 +649,7 @@ void GameServer::SendToAll(sf::Packet& packet)
 }
 
 /// <summary>
-/// Modified: Ben with assistance of claude
+/// Modified: Ben and Kaylon with assistance of claude
 /// </summary>
 void GameServer::UpdateClientState()
 {
@@ -663,6 +666,7 @@ void GameServer::UpdateClientState()
         state.x = aircraft.second.m_position.x;
         state.y = aircraft.second.m_position.y;
         state.hitpoints = aircraft.second.m_hitpoints;
+        // (Kaylon's Claude) multiplyrotation down to 255 points so it only uses 1 byte over the network
         state.turret_rotation = static_cast<uint8_t>(aircraft.second.m_turret_rotation / 360.f * 255.f);
         state.hull_rotation = static_cast<uint8_t>(aircraft.second.m_aircraft_rotation / 360.f * 255.f);
         state.Write(update_packet);

@@ -7,6 +7,7 @@
 #include <SFML/Network/Packet.hpp>
 #include <iostream>
 
+// (Kaylon's Claude) Initialize file reading and writing methods from Menu State
 std::string LoadPlayerName();
 int LoadHighScore();
 void SaveDetails(const std::string& name, int high_score);
@@ -96,10 +97,8 @@ void MultiplayerGameState::Draw()
 
 /// <summary>
 /// Perframe logic while the client is ingame
-/// Modified by: Ben Mc Keever
+/// Modified by: Ben Mc Keever And Kaylon Riordan with help from Claude
 /// </summary>
-/// <param name="dt">Deltatime</param>
-/// <returns>Whether loop succesfully completed</returns>
 bool MultiplayerGameState::Update(sf::Time dt)
 {
     if (m_connected) // (Copilot Comment) Connected branch — run the game as normal, processing server packets and
@@ -207,6 +206,7 @@ bool MultiplayerGameState::Update(sf::Time dt)
                 state.x = static_cast<uint16_t>(aircraft->getPosition().x);
                 state.y = static_cast<uint16_t>(aircraft->getPosition().y);
                 state.hitpoints = static_cast<uint8_t>(aircraft->GetHitPoints());
+                // (Kaylon's Claude) multiplyrotation down to 255 points so it only uses 1 byte over the network
                 state.turret_rotation = static_cast<uint8_t>(aircraft->GetTurret()->getRotation().asDegrees() / 360.f * 255.f);
                 state.hull_rotation = static_cast<uint8_t>(aircraft->getRotation().asDegrees() / 360.f * 255.f);
 
@@ -407,7 +407,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
     }
     break;
 
-    // (Kaylon) Add Player details
+    // (Kaylon's Claude) Add Player details
     case Server::PacketType::kPlayerConnect:
     {
         uint8_t aircraft_identifier;
@@ -552,6 +552,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
             {
                 float blend = 1.f - std::pow(0.5f, dt.asSeconds() * 30.f);
                 aircraft->setPosition(aircraft->getPosition() + (sf::Vector2f(state.x, state.y) - aircraft->getPosition()) * blend);
+                // (Kaylon's Claude) multiplyrotation down to 255 points so it only uses 1 byte over the network
                 aircraft->setRotation(sf::degrees((static_cast<float>(state.hull_rotation) / 255.f) * 360.f));
                 aircraft->GetTurret()->setRotation(sf::degrees((static_cast<float>(state.turret_rotation) / 255.f) * 360.f));
             }
@@ -561,7 +562,7 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
     // (Ben & Kaylon's Claude) Begin returning to lobby after win condition met
     case Server::PacketType::kReturnToLobby :
     {
-        // (Kaylon) Check and update high score
+        // (Kaylon's Claude) Check and update high score
         int current_score = GetContext().player_details->m_score;
         int high_score = LoadHighScore();
 
@@ -571,10 +572,9 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
             std::cout << "New high score: " << current_score << "\n";
         }
 
-        // (Ben) Signify returning to lobby to prevent sending kQuit packet onDestroy
+        // (Kaylon's Claude) Signify returning to lobby to prevent sending kQuit packet onDestroy
         m_returning_to_lobby = true;
-
-		RequestStackClear(); // (Ben) Pop the multiplayer game state & pause state, not just the pause state
+		RequestStackClear(); // (Kaylon's Claude) Pop the multiplayer game state & pause state, not just the pause state
 		RequestStackPush(StateID::kRejoinLobby);
     }
     break;

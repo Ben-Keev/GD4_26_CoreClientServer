@@ -40,7 +40,7 @@ namespace Client
 		kStateUpdate, // (Ben) Uses struct to update clients on movements of tanks
 		kGameEvent, // (Ben) No longer for explosions. Send X and Y position with an ID. Used for wall destruction
 		kQuit,
-		kPlayerDetails, // (Kaylon)
+		kPlayerDetails, // (Kaylon) Sent to share player's names and scores across the network
 		kHeartbeat, // (Ben) Sent to prevent timeout
 		kVoteSkipCountdown // (Ben) Bool indicates whether a player wants to skip
 	};
@@ -75,6 +75,10 @@ namespace GameActions
 	};
 }
 
+/// <summary>
+/// Modified: Kaylon
+/// Changed the position vatialbes to int 16 and rotation variables to int 8, together saving 8 bytes per packet
+/// </summary>
 namespace PacketStructs
 {
 	// (Ben's Claude) A struct keeps state updates consistent and reduces scope for error

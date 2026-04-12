@@ -7,7 +7,7 @@
 #include <SFML/Network/IpAddress.hpp>
 #include <fstream>
 
-// (Kaylon)
+// (Kaylon's Claude) Initialize file reading and writing methods from Menu State
 std::string LoadPlayerName();
 int LoadHighScore();
 void SaveDetails(const std::string& name, int high_score);
@@ -15,6 +15,7 @@ void SaveDetails(const std::string& name, int high_score);
 /// <summary>
 /// Read IP Address from file
 /// Modified: Ben (Moved from multiplayer_gamestate.cpp)
+/// Modified: Kaylon, Added background image
 /// </summary>
 sf::IpAddress GetAddressFromFile()
 {
@@ -41,6 +42,7 @@ sf::IpAddress GetAddressFromFile()
 /// <summary>
 /// Lobby state between menu and multiplayer game state
 /// Authored: Ben Mc Keever
+/// /// Modified: Kaylon, Added background image
 /// </summary>
 /// <param name="firstTime">Joining the lobby for the first time from the meny, or rejoining lobby from a game</param>
 LobbyState::LobbyState(StateStack& stack, Context context, bool firstTime)
@@ -392,6 +394,10 @@ void LobbyState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 			m_ids_players.push_back({ id, name, score, high_score }); // update struct to include score
 		}
 
+		/// <summary>
+		/// Modified: Kaylon's Claude
+		/// Update to display Player's name, their score from last match, and their all time high score
+		/// </summary>
 		std::string list = "Players:\n";
 		for (auto& p : m_ids_players)
 		{

@@ -23,7 +23,8 @@ TextureID ToTextureID(TankType type)
 
 /// <summary>
 /// Formerly Aircraft.cpp
-/// Modified: Ben with assistance of Claude, Kaylon
+/// Modified: Ben with assistance of Claude, 
+/// Kaylon: Fix eplosion size and frames to amtch sprite
 /// </summary>
 Tank::Tank(TankType type, const TextureHolder& textures, const FontHolder& fonts, uint8_t identifier, PlayerDetails* details)
 	: Entity(Table[static_cast<int>(type)].m_hitpoints)

@@ -7,6 +7,8 @@
 /// <summary>
 /// Add mouse support
 /// Modified: Ben's Claude
+/// Modified: Kaylon Riordan D00255039
+/// Swapped to new texture and Increased font size to match
 /// </summary>
 gui::Button::Button(State::Context context)
     : m_sprite(context.textures->Get(TextureID::kButtons))

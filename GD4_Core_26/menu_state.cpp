@@ -15,6 +15,7 @@ std::string LoadPlayerName()
     std::string name;
     if (input_file >> name)
     {
+        // (Kaylon's Claude) Clamp to 5 characters regardless of what's in the file
         if (name.size() > 5)
             name = name.substr(0, 5);
         return name;
@@ -52,7 +53,11 @@ void SaveDetails(const std::string& name, int high_score)
 }
 
 /// <summary>
-/// Modified: Ben, Kaylon with assistance of Claude
+/// Modified: Ben with assistance of Claude
+/// Modified: Kaylon Riordan D00255039
+/// Updated button and text, size and positions to fit new texture
+/// Modified: Kaylon' Riordan D00255039's Claude
+/// Added Name Text Input Box
 /// </summary>
 MenuState::MenuState(StateStack& stack, Context context) 
     : State(stack, context)

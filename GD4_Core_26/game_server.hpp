@@ -38,7 +38,8 @@ private:
 		int m_high_score = 0;
 	};
 
-	// (Ben & Kaylon) Add extra parameters
+	// Ben Add extra parameters
+	// Kaylon Add name parameter and reduce position to an int 16
 	struct AircraftInfo
 	{
 		sf::Vector2<uint16_t> m_position;

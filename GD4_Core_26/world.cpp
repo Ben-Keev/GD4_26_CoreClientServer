@@ -211,6 +211,8 @@ void World::LoadTextures()
 /// <summary>
 /// Modified: Ben
 /// Tanks are no longer spawned in here.
+/// Modified: kaylon
+/// Add back missing aprticle code
 /// </summary>
 void World::BuildScene()
 {
@@ -610,7 +612,6 @@ void World::HandleCollisions()
 			two.Destroy();
 		}
 		// Handle projectile/tank collision
-		// If its the player's own bullet then only deal damage if the bullet has already bounced once, stops bullet imediately killing player as it can spawn inside the players bounding box depending on rotation
 		else if (MatchesCategories(pair, ReceiverCategories::kTank, ReceiverCategories::kProjectile))
 		{
 			auto& tank = static_cast<Tank&>(*pair.first);
@@ -620,13 +621,15 @@ void World::HandleCollisions()
 			if (tank.IsMarkedForRemoval() || projectile.IsMarkedForRemoval())
 				continue;
 
+			// If its the player's own bullet then only deal damage if the bullet has already bounced once, 
+			// stops bullet imediately killing player as it can spawn inside the players bounding box depending on rotation and remove a point
 			if (&tank == &projectile.GetOwner() && projectile.GetBounces() >= 1)
 			{
 				tank.AddPoints(-1);
 				tank.Damage(projectile.GetDamage());
 				projectile.Destroy();
 			}
-			// Claude
+			// If its an enemy tank give the bullets owner a point as long as they are still alive
 			else if (&tank != &projectile.GetOwner())
 			{
 				if (!projectile.GetOwner().IsMarkedForRemoval())

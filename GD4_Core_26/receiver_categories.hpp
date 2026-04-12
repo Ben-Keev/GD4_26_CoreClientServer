@@ -6,6 +6,7 @@
 /// Modified: Kaylon Riordan D00255039
 /// Added categories for turrets, walls, and projectiles
 /// Reordered to group tanks, turrets, and projectiles together
+/// Removed refrences to specific colours instead using genral variables
 /// </summary>
 
 

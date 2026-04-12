@@ -156,6 +156,10 @@ unsigned int SceneNode::GetCategory() const
 	return static_cast<unsigned int>(m_default_category);
 }
 
+/// <summary>
+/// Authored: Kaylon Riordan D00255039 Modified: Ben
+/// Dont create a collision pair if both objects are walls, as this is a useles pair that lags the game severly
+/// </summary>
 void SceneNode::CheckNodeCollision(SceneNode& node, std::set<Pair>& collision_pairs)
 {
 	unsigned int category1 = GetCategory();

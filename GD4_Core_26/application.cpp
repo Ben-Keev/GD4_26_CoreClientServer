@@ -8,13 +8,18 @@
 #include "multiplayer_gamestate.hpp"
 #include "lobby_state.hpp"
 
+
+/// <summary>
+/// Modified: Kaylon Riordan D00255039
+/// Added player details, changed to new font, added new texture files
+/// </summary>
 Application::Application()
 	: m_window(sf::VideoMode({ 1792, 896 }), "States", sf::Style::Close)
 	, m_key_binding(1)
 	, m_key_binding_2(2)
 	, m_player_details
-		({ "Ben Benim"
-		, sf::Color::Cyan
+		({ "Benim"
+		, sf::Color::White
 		, 0 })
 	, m_stack(State::Context(m_window, m_textures, m_fonts, m_music, m_sound, m_key_binding, m_socket, m_player_details))
 {

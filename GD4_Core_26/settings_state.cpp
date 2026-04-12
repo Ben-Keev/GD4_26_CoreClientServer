@@ -5,7 +5,9 @@
 
 /// <summary>
 /// Remove 2nd local player bindings
-/// Modified: Ben with assistance of Claude
+/// Modified: Ben and Kaylon with assistance of Claude
+/// Modified: Kaylon Riordan D00255039
+/// Fix button and text positions to fit with new texture
 /// </summary>
 SettingsState::SettingsState(StateStack& stack, Context context)
     : State(stack, context)
@@ -90,6 +92,10 @@ void SettingsState::UpdateLabels()
     }
 }
 
+/// <summary>
+/// Modified: Kaylon Riordan D00255039
+/// Changed size and position to fit new buttons
+/// </summary>
 void SettingsState::AddButtonLabel(std::size_t index, std::size_t x, std::size_t y, const std::string& text, Context context)
 {
     index += static_cast<int>(Action::kActionCount) * x;
