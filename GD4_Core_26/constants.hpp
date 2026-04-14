@@ -9,7 +9,7 @@ constexpr auto kPlayerSpeed = 100.f;
 constexpr auto kTimePerFrame = 1.f / 60.f;
 constexpr auto kGameOverToMenuPause = 6;
 constexpr int kMaxPacketSize = 1300;
-constexpr int kMaxPlayers = 15;
+constexpr int kMaxPlayers = 2;
 
 // (Ben) How long to wait on the lobby
 constexpr uint8_t kLobbyCountdown = 15;
