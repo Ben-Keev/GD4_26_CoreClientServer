@@ -31,6 +31,9 @@ GameServer::GameServer(sf::Vector2f battlefield_size)
 	, m_lobby_active(true)                            // Whether the lobby is active or not
 	, m_lobby_countdown(sf::seconds(kLobbyCountdown)) // Countdown for game start
 	, m_total_skip_countdown(0)                       // Number of "skip countdown" votes received from clients
+    , m_post_game_delay_active(false)
+    , m_post_game_delay_timer(sf::Time::Zero)
+    , m_game_has_had_multiple_players(false)
 {
     // Non-blocking so accept() returns immediately when no client is pending
     m_listener_socket.setBlocking(false);
@@ -199,8 +202,16 @@ void GameServer::Tick()
         }
     }
 
+    // (Kaylon's Claude) Tick the post game delay before allowing countdown to start
+    if (m_post_game_delay_active)
+    {
+        m_post_game_delay_timer += sf::seconds(kTickRate);
+        if (m_post_game_delay_timer >= sf::seconds(3.f))
+            m_post_game_delay_active = false;
+    }
+
     // (Ben) The countdown may start on the lobby screen
-    if (m_lobby_active && m_connected_players >= 2)
+    if (m_lobby_active && m_connected_players >= 2 && !m_post_game_delay_active)
     {
         // (Ben's Claude) Decrease countdown by tickrate
         m_lobby_countdown -= sf::seconds(kTickRate);
@@ -261,7 +272,10 @@ void GameServer::Tick()
         // Keep track of how many are alive. Dead tanks are removed from this.
         std::size_t alive = m_aircraft_info.size();
 
-		//std::cout << "The amount alive: " << std::to_string(alive) << std::endl;
+        // (Kaylon's Claude) Track when multiple players have been alive to prevent
+        // the win condition firing before the match has actually started
+        if (alive >= 2)
+            m_game_has_had_multiple_players = true;
 
         // (Ben) "Win Condition". Game ends when there's only one tank left.
         if (alive <= 1)
@@ -721,9 +735,14 @@ void GameServer::ResetGameState()
 {
     m_lobby_active = true;
     m_game_started = false;
+    m_game_has_had_multiple_players = false;
     m_aircraft_info.clear();
     m_lobby_countdown = sf::seconds(kLobbyCountdown);
     m_total_skip_countdown = 0;
+
+    // (Kaylon's Claude) Prevent countdown starting before clients have rejoined lobby
+    m_post_game_delay_active = true;
+    m_post_game_delay_timer = sf::Time::Zero;
 
     while (!m_available_ids.empty())
         m_available_ids.pop();

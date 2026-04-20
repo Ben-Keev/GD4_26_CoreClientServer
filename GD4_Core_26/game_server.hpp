@@ -102,5 +102,10 @@ private:
 	bool m_game_started;
 
 	gui::Container m_gui_container;
+
+	bool m_post_game_delay_active;
+	sf::Time m_post_game_delay_timer;
+
+	bool m_game_has_had_multiple_players;
 };
 
