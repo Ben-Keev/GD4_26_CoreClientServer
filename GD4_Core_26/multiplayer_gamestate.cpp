@@ -25,7 +25,7 @@ MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context)
     , m_active_state(true)         // Enabled/Disabled depending on if in pause menu
     , m_has_focus(true)            // Whether the window is focused
     , m_game_started(false)        // Exited lobby state and in game
-	, m_client_timeout(sf::seconds(1.f))        // If no packet received for 1 second, assume connection lost and return to menu
+	, m_client_timeout(sf::seconds(5.f))        // If no packet received for 5 second, assume connection lost and return to menu
     , m_time_since_last_packet(sf::seconds(0.f))
     , m_broadcast_text(context.fonts->Get(FontID::kMain))
     , m_failed_connection_text(context.fonts->Get(FontID::kMain))

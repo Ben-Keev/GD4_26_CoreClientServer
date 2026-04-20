@@ -59,7 +59,7 @@ LobbyState::LobbyState(StateStack& stack, Context context, bool firstTime)
 	, m_connected(false)
 	, m_connected_players(0)					// Tally how many are connected
 	, m_heartbeat_timer(sf::Time::Zero)			// Track time since the last heartbeat was sent
-	, m_client_timeout(sf::seconds(1.f))        // Disconnect after 1s with no packet from server
+	, m_client_timeout(sf::seconds(5.f))        // Disconnect after 5s with no packet from server
 	, m_time_since_last_packet(sf::seconds(0.f))// Accumulator for the above timeout
 {
 	// (Ben) Borrowed from Multiplayer Gamestate. Broadcast messages appear centred near the top of the screen
