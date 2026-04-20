@@ -7,6 +7,7 @@
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Network/TcpSocket.hpp>
+#include <functional>
 #include <map>
 
 struct PlayerDetails;
@@ -33,6 +34,15 @@ public:
 
 	void PushCombinedMoveCommand(CommandQueue& commands, sf::Vector2f velocity);
 
+	// (Kaylon's Claude) Stores the authoritative fire position and turret rotation
+	// set by the tank just before firing, used to sync bullet spawn across clients
+	void SetFireData(sf::Vector2f position, float rotation)
+	{
+		m_fire_position = position;
+		m_fire_rotation = rotation;
+	}
+	std::function<void(sf::Vector2f, float)> m_on_remote_fire;
+
 private:
 	void InitialiseActions();
 
@@ -43,5 +53,8 @@ private:
 	uint8_t m_identifier;
 	sf::TcpSocket* m_socket;
 	sf::RenderWindow* m_window;
+
+	sf::Vector2f m_fire_position{};
+	float m_fire_rotation = 0.f;
 };
 

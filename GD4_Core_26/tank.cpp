@@ -152,40 +152,44 @@ void Tank::CreateBullet(SceneNode& node, const TextureHolder& textures)
 
 /// <summary>
 /// Add an ID to each projectile. Change offset of projectiles with change of sprite orientation
-/// CA1 Modified: Ben
+/// CA1 Modified: Ben, Kaylon, Claude
 /// </summary>
 void Tank::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset, float y_offset, const TextureHolder& textures)
 {
-	// (Ben's Claude) - Create a projectile id
-	// The top byte is the owner's id and the bottom is the shot number e.g client 1's third shot is 0x0103
 	uint16_t projectile_id = (static_cast<uint16_t>(m_identifier) << 8) | (m_shot_counter & 0xFF);
-
-	// (Ben's Claude) Tally how many shots were made.
 	++m_shot_counter;
 
-	// Initalise projectile
 	std::unique_ptr<Projectile> projectile(new Projectile(type, textures, m_colour, this, projectile_id));
 
-	// Convert to radians
-	float radians = (m_turret->GetWorldRotation()).asRadians();
+	// (Kaylon's Claude) Use authoritative spawn data if set by a remote fire packet,
+	// otherwise fall back to local turret position
+	sf::Vector2f spawnPos;
+	sf::Angle spawnRot;
 
-	// Create the unit vector pointing in the angle of our direction
-	// https://gamedev.stackexchange.com/questions/117583/how-do-i-get-a-vector-from-an-angle
-	sf::Vector2f direction(
-		std::cos(radians),
-		std::sin(radians)
-	);
+	if (m_has_spawn_override)
+	{
+		float radians = sf::degrees(m_spawn_override_rot).asRadians();
+		sf::Vector2f direction(std::cos(radians), std::sin(radians));
+		spawnPos = m_spawn_override_pos + (direction * 25.0f);
+		spawnRot = sf::degrees(m_spawn_override_rot);
+		m_has_spawn_override = false; // consume it
+	}
+	else
+	{
+		float radians = m_turret->GetWorldRotation().asRadians();
+		sf::Vector2f direction(std::cos(radians), std::sin(radians));
+		spawnPos = GetWorldPosition() + (direction * 25.0f);
+		spawnRot = m_turret->GetWorldRotation();
+	}
 
-	projectile->setPosition(GetWorldPosition()  + (direction * 25.0f));
-	projectile->setRotation(m_turret->GetWorldRotation());
-	projectile->SetVelocity(direction * projectile->GetMaxSpeed());
+	projectile->setPosition(spawnPos);
+	projectile->setRotation(spawnRot);
+	sf::Vector2f dir(std::cos(spawnRot.asRadians()), std::sin(spawnRot.asRadians()));
+	projectile->SetVelocity(dir * projectile->GetMaxSpeed());
 
 	// (Ben's Claude) notify callback to inform world.cpp of the projectile
 	if (m_on_projectile_fired)
 		m_on_projectile_fired(projectile.get());
-
-	//std::cout << "Just created projectile, GetIdentifier()=" << std::to_string(projectile->GetIdentifier())
-	//	<< " projectile_id was=" << std::to_string(projectile_id) << std::endl;
 
 	node.AttachChild(std::move(projectile));
 }
@@ -268,7 +272,7 @@ void Tank::UpdateCurrent(sf::Time dt, CommandQueue & commands)
 
 /// <summary>
 /// Remove isAllied check. Not relevant for our game.
-/// Modified: Ben
+/// Modified: Ben, Kaylon, Claude
 /// </summary>
 void Tank::CheckProjectileLaunch(sf::Time dt, CommandQueue & commands)
 {
@@ -277,6 +281,8 @@ void Tank::CheckProjectileLaunch(sf::Time dt, CommandQueue & commands)
 		// (Ben) Alternate between formerly red vs blue gunfire sfx
 		SoundEffect soundEffect = (Utility::RandomInt(2) == 0) ? SoundEffect::kGunfire1 : SoundEffect::kGunfire2;
 		PlayLocalSound(commands, soundEffect);
+		if (m_on_fire)
+			m_on_fire(GetWorldPosition(), m_turret->GetWorldRotation().asDegrees());
 		commands.Push(m_fire_command);
 		m_fire_countdown += Table[static_cast<int>(m_type)].m_fire_interval / (m_fire_rate + 1.f);
 		m_is_firing = false;

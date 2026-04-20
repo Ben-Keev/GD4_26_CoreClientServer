@@ -42,6 +42,21 @@ public:
 	void PlayLocalSound(CommandQueue& commands, SoundEffect effect);
 
 	std::function<void(Projectile*)> m_on_projectile_fired;
+	std::function<void(sf::Vector2f, float)> m_on_fire;
+
+	/// <summary>
+	///  Modified: Kaylon's Claude, overide bullets spawn data with data sent by the player that spawned it.
+	/// </summary>
+	void SetSpawnOverride(sf::Vector2f pos, float rot)
+	{
+		m_spawn_override_pos = pos;
+		m_spawn_override_rot = rot;
+		m_has_spawn_override = true;
+	}
+
+	sf::Vector2f m_spawn_override_pos{};
+	float m_spawn_override_rot = 0.f;
+	bool m_has_spawn_override = false;
 
 private:
 	virtual void DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const;

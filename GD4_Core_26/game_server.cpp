@@ -93,15 +93,23 @@ void GameServer::NotifyPlayerRealtimeChange(uint8_t aircraft_identifier, uint8_t
 }
 
 /// <summary>
-/// Unmodified
+/// Modified: Kaylon's Claude Update position and roataion when firing for better bullet sync
 /// </summary>
-void GameServer::NotifyPlayerEvent(uint8_t aircraft_identifier, uint8_t action)
+void GameServer::NotifyPlayerEvent(uint8_t aircraft_identifier, uint8_t action, 
+    sf::Packet& original_packet)
 {
     sf::Packet packet;
-    std::cout << "Server: Notify Player Event" << +aircraft_identifier << +action << std::endl;
     packet << static_cast<uint8_t>(Server::PacketType::kPlayerEvent);
-    packet << aircraft_identifier;  
-    packet << action;               
+    packet << aircraft_identifier;
+    packet << action;
+
+    // If there's extra data (fire position/rotation), relay it verbatim
+    if (!original_packet.endOfPacket())
+    {
+        float px, py, rot;
+        original_packet >> px >> py >> rot;
+        packet << px << py << rot;
+    }
     SendToAll(packet);
 }
 
@@ -367,13 +375,13 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
 	}
     break;
 
-    // Unmodified
+    // Moddified: Kaylon's Claude
     case Client::PacketType::kPlayerEvent:
     {
         uint8_t aircraft_identifier;
         uint8_t action;
         packet >> aircraft_identifier >> action;
-        NotifyPlayerEvent(aircraft_identifier, action);
+        NotifyPlayerEvent(aircraft_identifier, action, packet); // pass packet remainder
     }
     break;
 

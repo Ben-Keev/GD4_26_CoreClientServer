@@ -125,7 +125,8 @@ Command Player::AnalogueAiming(const sf::Vector2f& mousePos)
 }
 
 /// <summary>
-/// Unmodified
+/// Modified: Kaylon with Claude
+/// Update projetile firing paket to include position and roation data
 /// </summary>
 void Player::HandleEvent(const sf::Event& event, CommandQueue& command_queue)
 {
@@ -145,6 +146,13 @@ void Player::HandleEvent(const sf::Event& event, CommandQueue& command_queue)
                 packet << static_cast<uint8_t>(Client::PacketType::kPlayerEvent);
                 packet << m_identifier;
                 packet << static_cast<uint8_t>(action);
+
+                // If firing, append the authoritative spawn position and turret rotation
+                if (action == Action::kBulletFire)
+                {
+                    // Pass the tank's world position and turret rotation 
+                    packet << m_fire_position.x << m_fire_position.y << m_fire_rotation;
+                }
                 m_socket->send(packet);
             }
             // Otherwise execute locally (single player)
@@ -311,10 +319,13 @@ void Player::PushCombinedMoveCommand(CommandQueue& commands, sf::Vector2f veloci
 }
 
 /// <summary>
-/// Unmodified
+/// Modified: Kaylon's Claude
 /// </summary>
 void Player::HandleNetworkEvent(Action action, CommandQueue& commands)
 {
+    if (action == Action::kBulletFire && m_on_remote_fire)
+        m_on_remote_fire(m_fire_position, m_fire_rotation);
+
     commands.Push(m_action_binding[action]);
 }
 

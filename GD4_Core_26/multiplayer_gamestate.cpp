@@ -367,52 +367,44 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
         }
     }
     break;
-    // (Ben & Kaylon with assistance from Claude) Spawn the local player
+    // (Kaylon's Claude) Spawn the local player
     case Server::PacketType::kSpawnSelf:
     {
         GetContext().player_details->m_score = 0;
 
-        // Receive the identifier and spawn position
         uint8_t aircraft_identifier;
-
         uint16_t px, py;
         packet >> aircraft_identifier >> px >> py;
         sf::Vector2f aircraft_position(static_cast<float>(px), static_cast<float>(py));
 
-        // Log for clarity
-        //std::cout << "Client kSpawnSelf " << +aircraft_identifier << std::endl;
-
-        // Create a player with keys bound to the local machine
         m_players[aircraft_identifier].reset(
             new Player(GetContext().socket, aircraft_identifier, GetContext().keys, GetContext().window));
 
-        // Spawn the aircraft with the local player details. Spawn position passed here is temporary.
+        // (Kaylon's Claude) Local player uses their own player_details, not remote
         Tank* aircraft = m_world.AddAircraft(
-            aircraft_identifier, 
+            aircraft_identifier,
             GetContext().player_details,
-            { 512, 288 }
-        );
-
-        // Set the aircraft to the correct spawn position for this player
+            { 512, 288 });
         aircraft->setPosition(aircraft_position);
 
-        // (Ben) Remember this identifier to find the local player later
-		m_local_player_identifier = aircraft_identifier;
+        // (Kaylon's Claude) Hook up on_fire so the tank pushes its authoritative position
+        // to the player before the fire packet is sent
+        aircraft->m_on_fire = [this, aircraft_identifier](sf::Vector2f pos, float rot)
+            {
+                m_players[aircraft_identifier]->SetFireData(pos, rot);
+            };
 
-        // (Ben) Store this identifier in world as well
-		m_world.SetLocalPlayerIdentifier(aircraft_identifier);
-
-        // (Ben, suggested by Claude) Signify that the game is started
+        m_local_player_identifier = aircraft_identifier;
+        m_world.SetLocalPlayerIdentifier(aircraft_identifier);
         m_game_started = true;
     }
     break;
 
-    // (Kaylon's Claude) Add Player details
+    // (Kaylon's Claude) Add Player detials
     case Server::PacketType::kPlayerConnect:
     {
         uint8_t aircraft_identifier;
         std::string name;
-
         uint16_t px, py;
         packet >> aircraft_identifier >> px >> py >> name;
         sf::Vector2f aircraft_position(static_cast<float>(px), static_cast<float>(py));
@@ -428,6 +420,12 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
             &m_remote_player_details[aircraft_identifier],
             { 512, 288 });
         aircraft->setPosition(aircraft_position);
+
+        // (Kaylon's Claude) Hook up remote fire callback so bullet spawns at authoritative position
+        m_players[aircraft_identifier]->m_on_remote_fire = [aircraft](sf::Vector2f pos, float rot)
+            {
+                aircraft->SetSpawnOverride(pos, rot);
+            };
     }
     break;
 
@@ -493,24 +491,35 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
 
             // (Ben) Set turret rotation to received value. Convert to degrees.
             aircraft->GetTurret()->setRotation(sf::degrees(turret_rotation));
+
+            // (Kaylon's Claude) Hook up remote fire callback so bullet spawns at authoritative position
+            m_players[aircraft_identifier]->m_on_remote_fire = [aircraft](sf::Vector2f pos, float rot)
+                {
+                    aircraft->SetSpawnOverride(pos, rot);
+                };
         }
     }
     break;
 
-    // Unmodified
+    // Modiffied: Kaylon's Claude
     case Server::PacketType::kPlayerEvent:
     {
         uint8_t aircraft_identifier;
         uint8_t action;
         packet >> aircraft_identifier >> action;
-        //std::cout << "Player Event" << aircraft_identifier << std::endl;
 
         auto itr = m_players.find(aircraft_identifier);
         if (itr != m_players.end())
         {
-            std::cout << "Handling Network Event" << std::endl;
-            itr->second->HandleNetworkEvent(
-                static_cast<Action>(action), m_world.GetCommandQueue());
+            // If it's a fire event from a remote player, set their authoritative fire data
+            if (static_cast<Action>(action) == Action::kBulletFire
+                && aircraft_identifier != m_local_player_identifier)
+            {
+                float px, py, rot;
+                packet >> px >> py >> rot;
+                itr->second->SetFireData(sf::Vector2f(px, py), rot);
+            }
+            itr->second->HandleNetworkEvent(static_cast<Action>(action), m_world.GetCommandQueue());
         }
     }
     break;
