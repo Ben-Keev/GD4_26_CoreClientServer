@@ -368,9 +368,14 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
         detected_timeout = true;
     }
     break;
-    // (Ben) Tally how many clients want to skip the countdown
+    // (Ben, Kaylon, Claude) Tally how many clients want to skip the countdown
     case Client::PacketType::kVoteSkipCountdown:
     {
+        // (Kaylon's Claude) Ignore skip votes during post game delay to prevent
+        // countdown being skipped before the match has properly reset
+        if (m_post_game_delay_active)
+            break;
+
         bool wants_to_skip;
         packet >> wants_to_skip;
         if (wants_to_skip)
@@ -384,12 +389,12 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
                 m_lobby_countdown = sf::Time::Zero;
             }
         }
-        else 
+        else
         {
             BroadcastMessage(std::to_string(m_total_skip_countdown) + " vote(s) to start! (--)");
             m_total_skip_countdown--;
         }
-	}
+    }
     break;
 
     // Unmodified
