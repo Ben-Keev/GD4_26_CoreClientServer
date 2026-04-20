@@ -27,7 +27,6 @@ GameServer::GameServer(sf::Vector2f battlefield_size)
     , m_world_height(battlefield_size.y)              // Scrolling world height in pixels
     , m_battlefield_rect(sf::Vector2f(0.f, 0.f), battlefield_size) // Rect size of battlefield
     , m_peers(1)                                      // Start with capacity for 1 peer
-    , m_aircraft_identifier_counter(1)                // IDs begin at 1
     , m_waiting_thread_end(false)                     // Flag that tells ExecutionThread to quit
 	, m_lobby_active(true)                            // Whether the lobby is active or not
 	, m_lobby_countdown(sf::seconds(kLobbyCountdown)) // Countdown for game start
@@ -38,6 +37,12 @@ GameServer::GameServer(sf::Vector2f battlefield_size)
 
     // Allocate the first (empty) peer slot
     m_peers[0].reset(new RemotePeer);
+
+    // (Kaylon's Claude) Populate available IDs in reverse so ID 1 is popped first
+    for (int i = m_max_connected_players; i >= 1; --i)
+    {
+        m_available_ids.push(static_cast<uint8_t>(i));
+    }
 }
 
 /// <summary>
@@ -448,22 +453,31 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
 
 /// <summary>
 /// Handle incoming connections
-/// Modified: Ben
+/// Modified: Ben, Kaylon using Claude
 /// </summary>
 void GameServer::HandleIncomingConnections()
 {
     // (Ben) Refuse connections while in game
     if (!m_listening_state || !m_lobby_active)
-        return; 
+        return;
+
+    // (Claude AI) Reject if no IDs available — server is full
+    if (m_available_ids.empty())
+    {
+        std::cout << "[Server] No available IDs, rejecting connection\n";
+        return;
+    }
 
     if (m_listener_socket.accept(m_peers[m_connected_players]->m_socket) == sf::TcpListener::Status::Done)
     {
-        //std::cout << "[Server] New connection accepted. Connected players before: " << std::to_string(m_connected_players) << std::endl;
+        // (Claude AI) Pop next available ID from stack
+        uint8_t new_id = m_available_ids.top();
+        m_available_ids.pop();
 
-        m_aircraft_info[m_aircraft_identifier_counter].m_position = SpawnPositions[m_connected_players];
-        m_aircraft_info[m_aircraft_identifier_counter].m_hitpoints = 10;
+        m_aircraft_info[new_id].m_position = SpawnPositions[m_connected_players];
+        m_aircraft_info[new_id].m_hitpoints = 10;
 
-        m_peers[m_connected_players]->m_aircraft_identifiers.emplace_back(m_aircraft_identifier_counter);
+        m_peers[m_connected_players]->m_aircraft_identifiers.emplace_back(new_id);
         m_peers[m_connected_players]->m_ready = true;
         m_peers[m_connected_players]->m_last_packet_time = Now();
 
@@ -478,10 +492,8 @@ void GameServer::HandleIncomingConnections()
         else
             m_peers.emplace_back(PeerPtr(new RemotePeer()));
 
-        m_aircraft_identifier_counter++;
-
         // (Ben) Update player list for everyone
-		SendPlayerList();
+        SendPlayerList();
     }
 }
 
@@ -532,10 +544,12 @@ void GameServer::SendLobbyPacket(bool connected)
 }
 
 /// <summary>
-/// Modified: Ben
+/// Modified: Ben, Kaylon, Claude
 /// </summary>
 void GameServer::HandleDisconnections()
 {
+    bool needs_new_slot = false;
+
     for (auto itr = m_peers.begin(); itr != m_peers.end();)
     {
         if ((*itr)->m_timed_out)
@@ -550,33 +564,35 @@ void GameServer::HandleDisconnections()
 
                 // Remove the aircraft from the server's authoritative state
                 m_aircraft_info.erase(identifier);
+                m_available_ids.push(identifier); // return ID to pool
             }
 
             m_connected_players--;
+            itr = m_peers.erase(itr);  // safe, no realloc here
 
-            // Erase the peer and get a valid iterator to the next element
-            itr = m_peers.erase(itr);
-
-            // If there is now room for more players, start accepting connections again
             if (m_connected_players < m_max_connected_players)
-            {
-                m_peers.emplace_back(PeerPtr(new RemotePeer()));
-                SetListening(true);
-            }
+                needs_new_slot = true;  // defer the emplace_back
 
             BroadcastMessage("A player has disconnected");
 
             // Update lobby to stop displaying disconnected player and reset countdown
-            if(m_lobby_active)
+            if (m_lobby_active)
             {
                 SendLobbyPacket(false); // Update lobby countdown and player count for remaining clients
                 SendPlayerList(); // Update the player list for all clients in the lobby
-			}
+            }
         }
         else
         {
             ++itr;
         }
+    }
+
+    // Safe to reallocate now that we're out of the loop
+    if (needs_new_slot)
+    {
+        m_peers.emplace_back(PeerPtr(new RemotePeer()));
+        SetListening(true);
     }
 }
 
@@ -688,27 +704,33 @@ GameServer::RemotePeer::RemotePeer()
 /// <summary>
 /// Reset all variables to default. Called on transition to lobby
 /// Authored: Ben with assistance of Claude
+/// Modified: Kaylon with assistance of Claude
 /// </summary>
 void GameServer::ResetGameState()
 {
     m_lobby_active = true;
     m_game_started = false;
     m_aircraft_info.clear();
-    m_aircraft_identifier_counter = 1;
     m_lobby_countdown = sf::seconds(kLobbyCountdown);
     m_total_skip_countdown = 0;
+
+    while (!m_available_ids.empty())
+        m_available_ids.pop();
+    for (int i = m_max_connected_players; i >= 1; --i)
+        m_available_ids.push(static_cast<uint8_t>(i));
 
     for (std::size_t i = 0; i < m_connected_players; ++i)
     {
         if (m_peers[i]->m_ready)
         {
+            uint8_t new_id = m_available_ids.top();  // Pop next available ID
+            m_available_ids.pop();
+
             m_peers[i]->m_aircraft_identifiers.clear();
-            m_peers[i]->m_aircraft_identifiers.emplace_back(m_aircraft_identifier_counter);
+            m_peers[i]->m_aircraft_identifiers.emplace_back(new_id);
 
-            m_aircraft_info[m_aircraft_identifier_counter].m_position = SpawnPositions[i];
-            m_aircraft_info[m_aircraft_identifier_counter].m_hitpoints = 10;
-
-            m_aircraft_identifier_counter++;
+            m_aircraft_info[new_id].m_position = SpawnPositions[i];
+            m_aircraft_info[new_id].m_hitpoints = 10;
         }
     }
 }

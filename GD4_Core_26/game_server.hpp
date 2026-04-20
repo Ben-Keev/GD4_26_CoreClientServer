@@ -9,6 +9,7 @@
 #include <thread>
 #include <cstdint>
 #include <map>
+#include <stack>
 
 /// <summary>
 /// Server
@@ -91,7 +92,7 @@ private:
 	std::map<uint8_t, AircraftInfo> m_aircraft_info;
 
 	std::vector<PeerPtr> m_peers;
-	uint8_t m_aircraft_identifier_counter;
+	std::stack<uint8_t> m_available_ids;
 	bool m_waiting_thread_end;
 
 	sf::Time m_heartbeat_timer;
