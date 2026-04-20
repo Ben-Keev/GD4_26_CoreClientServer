@@ -461,16 +461,28 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
             uint8_t damage;
             packet >> victim_id >> damage;
 
+            // (Kaylon's Claude) Find which peer sent this packet — they are the shooter
+            uint8_t shooter_id = 0;
+            for (std::size_t i = 0; i < m_connected_players; ++i)
+            {
+                if (m_peers[i]->m_socket.getRemoteAddress() == receiving_peer.m_socket.getRemoteAddress())
+                {
+                    if (!m_peers[i]->m_aircraft_identifiers.empty())
+                        shooter_id = m_peers[i]->m_aircraft_identifiers[0];
+                    break;
+                }
+            }
+
             auto itr = m_aircraft_info.find(victim_id);
             if (itr != m_aircraft_info.end() && itr->second.m_hitpoints > 0)
             {
                 itr->second.m_hitpoints -= damage;
 
-                // (Kaylon's Claude) Broadcast authoritative health to all clients
                 sf::Packet hp_packet;
                 hp_packet << static_cast<uint8_t>(Server::PacketType::kHealthUpdate);
-                hp_packet << victim_id;    
+                hp_packet << victim_id;
                 hp_packet << itr->second.m_hitpoints;
+                hp_packet << shooter_id;
                 SendToAll(hp_packet);
             }
         }

@@ -631,7 +631,8 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
     {
         uint8_t victim_id;
         uint8_t hitpoints;
-        packet >> victim_id >> hitpoints;
+        uint8_t shooter_id;
+        packet >> victim_id >> hitpoints >> shooter_id;
 
         Tank* tank = m_world.GetAircraft(victim_id);
         if (tank)
@@ -639,10 +640,22 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
             int diff = tank->GetHitPoints() - static_cast<int>(hitpoints);
             if (diff > 0)
                 tank->Damage(diff);
+        }
 
-            // (Kaylon) Award points to local player if they killed the tank
-            if (victim_id != m_local_player_identifier && hitpoints <= 0)
+        // (Kaylon) Only award points on the shooter's own client to avoid
+        // every client awarding points independently
+        if (shooter_id == m_local_player_identifier)
+        {
+            if (victim_id == m_local_player_identifier)
             {
+                // Shot yourself
+                Tank* local = m_world.GetAircraft(m_local_player_identifier);
+                if (local)
+                    local->AddPoints(-1);
+            }
+            else
+            {
+                // Shot an enemy
                 Tank* local = m_world.GetAircraft(m_local_player_identifier);
                 if (local)
                     local->AddPoints(1);
