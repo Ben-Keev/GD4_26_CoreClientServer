@@ -619,6 +619,20 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
 		m_world.DestroyProjectile(id);  // Destroy projectiles from remote players that collided with the wall
     }
     break;
+    // (Kaylon's Claude) Award bonus points to the last surviving player
+    case Server::PacketType::kAwardBonusPoints:
+    {
+        uint8_t winner_id;
+        uint8_t bonus;
+        packet >> winner_id >> bonus;
+
+        // Only apply locally if it's our tank
+        if (winner_id == m_local_player_identifier)
+        {
+            GetContext().player_details->m_score += bonus;
+        }
+    }
+    break;
     default:
         std::cout << "Unknown packet type: " << +packet_type << "\n";
         break;

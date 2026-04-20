@@ -266,7 +266,21 @@ void GameServer::Tick()
         // (Ben) "Win Condition". Game ends when there's only one tank left.
         if (alive <= 1)
         {
-            //std::cout << "Game over!!" << std::endl;
+
+            // (Kaylon) Award bonus points to the last surviving player
+            // Bonus = ceil(total_players / 5), so 1 for 2-5, 2 for 6-10, 3 for 11-15
+            if (!m_aircraft_info.empty())
+            {
+                uint8_t winner_id = m_aircraft_info.begin()->first;
+                uint8_t bonus = static_cast<uint8_t>(
+                    (m_connected_players + 4) / 5);  // integer ceiling division
+
+                sf::Packet bonus_packet;
+                bonus_packet << static_cast<uint8_t>(Server::PacketType::kAwardBonusPoints);
+                bonus_packet << winner_id;
+                bonus_packet << bonus;
+                SendToAll(bonus_packet);
+            }
 
             // Reset everything before the next game
             ResetGameState();

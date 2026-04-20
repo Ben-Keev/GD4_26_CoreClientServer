@@ -24,7 +24,8 @@ namespace Server
 		kLobbyPing, // (Ben) Heartbeat that communicates countdown to clients
 		kPlayerList, // (Ben & Kaylon) List of all player's usernames to display on lobby
 		kReturnToLobby, // (Ben) Tell clients to return to lobby
-		kWallDestroyed // (Ben) Notifies clients that a wall has been destroyed with X, Y and id to destory wall and projectile.
+		kWallDestroyed, // (Ben) Notifies clients that a wall has been destroyed with X, Y and id to destory wall and projectile.
+		kAwardBonusPoints // (Kaylon's Claude) Awards bonus points to the last surviving player
 	};
 }
 

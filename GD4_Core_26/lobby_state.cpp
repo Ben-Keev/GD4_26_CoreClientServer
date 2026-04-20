@@ -6,6 +6,7 @@
 #include <SFML/Network/Packet.hpp>
 #include <SFML/Network/IpAddress.hpp>
 #include <fstream>
+#include <algorithm>
 
 // (Kaylon's Claude) Initialize file reading and writing methods from Menu State
 std::string LoadPlayerName();
@@ -393,6 +394,13 @@ void LobbyState::HandlePacket(uint8_t packet_type, sf::Packet& packet)
 			packet >> id >> name >> score >> high_score;
 			m_ids_players.push_back({ id, name, score, high_score }); // update struct to include score
 		}
+
+		// (Kaylon's Claude) Sort by last match score, highest first
+		std::sort(m_ids_players.begin(), m_ids_players.end(),
+			[](const PlayerEntry& a, const PlayerEntry& b)
+			{
+				return a.score > b.score;
+			});
 
 		/// <summary>
 		/// Modified: Kaylon's Claude
