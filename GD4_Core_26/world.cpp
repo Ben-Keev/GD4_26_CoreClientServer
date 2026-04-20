@@ -625,17 +625,52 @@ void World::HandleCollisions()
 			// stops bullet imediately killing player as it can spawn inside the players bounding box depending on rotation and remove a point
 			if (&tank == &projectile.GetOwner() && projectile.GetBounces() >= 1)
 			{
-				tank.AddPoints(-1);
-				tank.Damage(projectile.GetDamage());
-				projectile.Destroy();
+				if (m_networked_world)
+				{
+					if (projectile.GetOwner().GetIdentifier() == m_local_player_identifier)
+					{
+						if (m_network_node)
+							m_network_node->NotifyGameAction(
+								GameActions::kProjectileHit,
+								tank.getPosition(),
+								projectile.GetIdentifier(),
+								tank.GetIdentifier(),
+								projectile.GetDamage());
+					}
+					projectile.Destroy();
+				}
+				else
+				{
+					tank.AddPoints(-1);
+					tank.Damage(projectile.GetDamage());
+					projectile.Destroy();
+				}
 			}
 			// If its an enemy tank give the bullets owner a point as long as they are still alive
 			else if (&tank != &projectile.GetOwner())
 			{
-				if (!projectile.GetOwner().IsMarkedForRemoval())
-					projectile.GetOwner().AddPoints(1);
-				tank.Damage(projectile.GetDamage());
-				projectile.Destroy();
+				if (m_networked_world)
+				{
+					// (Kaylon's Claude) Only the projectile owner reports the hit to avoid duplicate damage
+					if (projectile.GetOwner().GetIdentifier() == m_local_player_identifier)
+					{
+						if (m_network_node)
+							m_network_node->NotifyGameAction(
+								GameActions::kProjectileHit,
+								tank.getPosition(),
+								projectile.GetIdentifier(),
+								tank.GetIdentifier(),
+								projectile.GetDamage());
+					}
+					projectile.Destroy();
+				}
+				else
+				{
+					if (!projectile.GetOwner().IsMarkedForRemoval())
+						projectile.GetOwner().AddPoints(1);
+					tank.Damage(projectile.GetDamage());
+					projectile.Destroy();
+				}
 			}
 		}
 		// Handle player/wall collisions

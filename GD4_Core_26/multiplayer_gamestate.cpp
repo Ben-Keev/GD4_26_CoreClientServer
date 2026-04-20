@@ -187,7 +187,14 @@ bool MultiplayerGameState::Update(sf::Time dt)
             packet << static_cast<uint8_t>(game_action.type);
             packet << game_action.position.x;
             packet << game_action.position.y;
-            packet << game_action.identifier;  // (Ben's Claude Code) Pass an identifier with the action
+            packet << game_action.identifier;
+
+            // (Kaylon) Append hit data if this is a projectile hit event
+            if (game_action.type == GameActions::kProjectileHit)
+            {
+                packet << game_action.victim_id;
+                packet << game_action.damage;
+            }
             GetContext().socket->send(packet);
         }
 
@@ -617,6 +624,30 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
         packet >> x >> y >> id;
         m_world.DestroyWallAt(sf::Vector2f(x, y));
 		m_world.DestroyProjectile(id);  // Destroy projectiles from remote players that collided with the wall
+    }
+    break;
+    // (Kaylon) Server has applied a hit, update tank health authoritatively
+    case Server::PacketType::kHealthUpdate:
+    {
+        uint8_t victim_id;
+        uint8_t hitpoints;
+        packet >> victim_id >> hitpoints;
+
+        Tank* tank = m_world.GetAircraft(victim_id);
+        if (tank)
+        {
+            int diff = tank->GetHitPoints() - static_cast<int>(hitpoints);
+            if (diff > 0)
+                tank->Damage(diff);
+
+            // (Kaylon) Award points to local player if they killed the tank
+            if (victim_id != m_local_player_identifier && hitpoints <= 0)
+            {
+                Tank* local = m_world.GetAircraft(m_local_player_identifier);
+                if (local)
+                    local->AddPoints(1);
+            }
+        }
     }
     break;
     // (Kaylon's Claude) Award bonus points to the last surviving player

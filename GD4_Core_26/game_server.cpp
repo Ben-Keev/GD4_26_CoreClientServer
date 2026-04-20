@@ -440,23 +440,39 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
     }
     break;
 
-    // (Ben's Claude)
+    // (Ben & Kaylon, Claude)
     case Client::PacketType::kGameEvent:
     {
-        // (Ben's Claude) Relay Wall destruction to everyone
         uint8_t action;
-        float x, y; // Wall Position
-        uint16_t id; // Projectile ID
+        float x, y;
+        uint16_t id;
         packet >> action >> x >> y >> id;
 
-        // Confirm it's a wall destroyed action
         if (action == GameActions::kWallDestroyed)
         {
-            // Relay to everyone including sender
             sf::Packet relay;
             relay << static_cast<uint8_t>(Server::PacketType::kWallDestroyed);
             relay << x << y << id;
             SendToAll(relay);
+        }
+        else if (action == GameActions::kProjectileHit)
+        {
+            uint8_t victim_id;
+            uint8_t damage;
+            packet >> victim_id >> damage;
+
+            auto itr = m_aircraft_info.find(victim_id);
+            if (itr != m_aircraft_info.end() && itr->second.m_hitpoints > 0)
+            {
+                itr->second.m_hitpoints -= damage;
+
+                // (Kaylon's Claude) Broadcast authoritative health to all clients
+                sf::Packet hp_packet;
+                hp_packet << static_cast<uint8_t>(Server::PacketType::kHealthUpdate);
+                hp_packet << victim_id;    
+                hp_packet << itr->second.m_hitpoints;
+                SendToAll(hp_packet);
+            }
         }
     }
     } // end switch

@@ -15,6 +15,11 @@ void NetworkNode::NotifyGameAction(GameActions::Type type, sf::Vector2f position
 	m_pending_actions.push(GameActions::Action(type, position));
 }
 
+void NetworkNode::NotifyGameAction(GameActions::Type type, sf::Vector2f position, uint16_t identifier, uint8_t victim_id, uint8_t damage)
+{
+	m_pending_actions.push(GameActions::Action(type, position, identifier, victim_id, damage));
+}
+
 bool NetworkNode::PollGameAction(GameActions::Action& out)
 {
 	if (m_pending_actions.empty())

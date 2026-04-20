@@ -25,6 +25,8 @@ namespace Server
 		kPlayerList, // (Ben & Kaylon) List of all player's usernames to display on lobby
 		kReturnToLobby, // (Ben) Tell clients to return to lobby
 		kWallDestroyed, // (Ben) Notifies clients that a wall has been destroyed with X, Y and id to destory wall and projectile.
+		kHealthUpdate, // (Kaylon's Claude) Server broadcasts authoritative health after a hit
+		kResetSkipVote, // (Kaylon's Claude) Tells clients to reset their skip vote state after post game delay
 		kAwardBonusPoints // (Kaylon's Claude) Awards bonus points to the last surviving player
 	};
 }
@@ -55,24 +57,26 @@ namespace GameActions
 	enum Type
 	{
 		kEnemyExplode, // Unmodified
-		kWallDestroyed // (Ben's Claude) send wall destructions as an event to the server to give authority.
+		kWallDestroyed, // (Ben's Claude) send wall destructions as an event to the server to give authority.
+		kProjectileHit // (Kaylon's Claude) A bullet hit a tank
 	};
 
 	struct Action
 	{
 		Action() = default;
-		Action(Type type, sf::Vector2f position) :type(type), position(position)
-		{
+		Action(Type type, sf::Vector2f position)
+			: type(type), position(position) {}
+		Action(Type type, sf::Vector2f position, uint16_t identifier)
+			: type(type), position(position), identifier(identifier) {}
+		Action(Type type, sf::Vector2f position, uint16_t identifier, uint8_t victim, uint8_t dmg)
+			: type(type), position(position), identifier(identifier), victim_id(victim), damage(dmg) {}
 
-		}
-
-		Action(Type type, sf::Vector2f position, uint16_t identifier) :type(type), position(position), identifier(identifier)
-		{
-		}
 
 		Type type;
 		sf::Vector2f position;
-		uint16_t identifier; // (Ben) An identifier which can carry extra information if needed.
+		uint16_t identifier;	// (Ben) An identifier which can carry extra information if needed.
+		uint8_t victim_id = 0;	// (Kaylon's Claude) ID of the tank that was hit
+		uint8_t damage = 0;		// (Kaylon Claude) Damage to apply
 	};
 }
 
