@@ -266,15 +266,11 @@ void GameServer::Tick()
         // (Ben) "Win Condition". Game ends when there's only one tank left.
         if (alive <= 1)
         {
-
-            // (Kaylon) Award bonus points to the last surviving player
-            // Bonus = ceil(total_players / 5), so 1 for 2-5, 2 for 6-10, 3 for 11-15
+            // (Kaylon's Claude) Award bonus points to the last surviving player
             if (!m_aircraft_info.empty())
             {
                 uint8_t winner_id = m_aircraft_info.begin()->first;
-                uint8_t bonus = static_cast<uint8_t>(
-                    (m_connected_players + 4) / 5);  // integer ceiling division
-
+                uint8_t bonus = static_cast<uint8_t>((m_connected_players + 4) / 5);
                 sf::Packet bonus_packet;
                 bonus_packet << static_cast<uint8_t>(Server::PacketType::kAwardBonusPoints);
                 bonus_packet << winner_id;
@@ -282,13 +278,14 @@ void GameServer::Tick()
                 SendToAll(bonus_packet);
             }
 
-            // Reset everything before the next game
-            ResetGameState();
-            
-            // Tell each client to leave
+            // (Kaylon's Claude) Tell clients to return BEFORE resetting state so they
+            // aren't kicked by stale ID reassignment or a kQuit from OnDestroy
             sf::Packet return_packet;
             return_packet << static_cast<uint8_t>(Server::PacketType::kReturnToLobby);
             SendToAll(return_packet);
+
+            // Reset after clients have been told to leave
+            ResetGameState();
 
             // Send up to date information
             SendLobbyPacket(true);

@@ -626,11 +626,14 @@ void MultiplayerGameState::HandlePacket(uint8_t packet_type, sf::Packet& packet,
         uint8_t bonus;
         packet >> winner_id >> bonus;
 
-        // Only apply locally if it's our tank
         if (winner_id == m_local_player_identifier)
         {
             GetContext().player_details->m_score += bonus;
         }
+
+        // (Kaylon's Claude) Signal that we're returning to lobby so OnDestroy
+        // doesn't send kQuit when the stack clears on kReturnToLobby
+        m_returning_to_lobby = true;
     }
     break;
     default:
